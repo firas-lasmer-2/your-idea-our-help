@@ -174,11 +174,11 @@ const WebsiteBuilder = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Blocages</p>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("website.blockages", "Blocages")}</p>
                       {publishReadiness.blockers.length === 0 ? (
                         <div className="flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-sm text-primary">
                           <CheckCircle2 className="h-4 w-4" />
-                          <span>Aucun blocage détecté.</span>
+                          <span>{t("website.noBlockers", "Aucun blocage détecté.")}</span>
                         </div>
                       ) : (
                         <ul className="space-y-2 text-sm text-muted-foreground">
