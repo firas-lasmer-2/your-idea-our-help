@@ -428,12 +428,12 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
-              <Label>Nom du profil public</Label>
-              <Input value={siteName} onChange={(event) => setSiteName(event.target.value)} placeholder="Ahmed Ben Ali, Profil Chauffeur, Mon Portfolio..." />
+              <Label>{t("websiteWizard.profileName", "Nom du profil public")}</Label>
+              <Input value={siteName} onChange={(event) => setSiteName(event.target.value)} placeholder={t("websiteWizard.profileNamePlaceholder", "Ahmed Ben Ali, Profil Chauffeur, Mon Portfolio...")} />
             </div>
             <div className="space-y-2">
-              <Label>Poste ciblé</Label>
-              <Input value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder="Chauffeur poids lourd, Développeur frontend..." />
+              <Label>{t("websiteWizard.targetJob", "Poste ciblé")}</Label>
+              <Input value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder={t("websiteWizard.targetJobPlaceholder", "Chauffeur poids lourd, Développeur frontend...")} />
             </div>
             <div className="space-y-2">
               <Label>Secteur</Label>
