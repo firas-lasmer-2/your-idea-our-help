@@ -489,6 +489,16 @@ const Dashboard = () => {
           </div>
         )}
       </main>
+
+      <ResumeImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImportSuccess={(resumeData) => {
+          // Store imported data in sessionStorage so resume builder can pick it up
+          sessionStorage.setItem("importedResumeData", JSON.stringify(resumeData));
+          navigate("/resume/new?imported=1");
+        }}
+      />
     </div>
   );
 };
