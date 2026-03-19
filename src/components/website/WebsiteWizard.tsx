@@ -436,7 +436,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
               <Input value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder={t("websiteWizard.targetJobPlaceholder", "Chauffeur poids lourd, Développeur frontend...")} />
             </div>
             <div className="space-y-2">
-              <Label>Secteur</Label>
+              <Label>{t("websiteWizard.sector", "Secteur")}</Label>
               <Select value={candidateTrack} onValueChange={(value) => setCandidateTrack(value as JobField)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
