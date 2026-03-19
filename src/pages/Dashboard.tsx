@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import FeedbackCard from "@/components/dashboard/FeedbackCard";
+import WelcomeHero from "@/components/dashboard/WelcomeHero";
 import ResumeImportDialog from "@/components/resume/ResumeImportDialog";
 import { useTranslation } from "react-i18next";
 import {
