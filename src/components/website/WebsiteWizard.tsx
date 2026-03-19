@@ -352,7 +352,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
         profile,
       });
     } catch (error) {
-      toast({ title: "Erreur", description: "Échec de la génération du profil public.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("website.generateFailed", "Échec de la génération du profil public."), variant: "destructive" });
     }
 
     setGenerating(false);
