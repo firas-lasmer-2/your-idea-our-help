@@ -109,9 +109,9 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null);
   const recommended = getRecommendedResumeTemplate({
-    targetCountry: data.targetCountry,
-    jobField: data.jobField,
-    experienceLevel: data.experienceLevel,
+    targetCountry: data.targetCountry as any,
+    jobField: data.jobField as any,
+    experienceLevel: data.experienceLevel as any,
     jobTitle: data.jobTitle || data.jobTarget,
   });
   const previewData = data.personalInfo.firstName || data.personalInfo.lastName || data.summary || data.experience.length > 0
