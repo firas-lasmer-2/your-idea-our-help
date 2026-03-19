@@ -251,7 +251,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       });
 
       if (error || result?.error) {
-        toast({ title: "Erreur IA", description: result?.error || "Impossible de générer le contenu.", variant: "destructive" });
+        toast({ title: t("website.aiError", "Erreur IA"), description: result?.error || t("website.generateError", "Impossible de générer le contenu."), variant: "destructive" });
         setGenerating(false);
         return;
       }
