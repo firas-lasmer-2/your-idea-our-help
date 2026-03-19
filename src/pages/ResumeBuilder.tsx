@@ -17,6 +17,8 @@ import StepPreview from "@/components/resume/steps/StepPreview";
 import OnboardingTour from "@/components/resume/OnboardingTour";
 import SmartWizard from "@/components/resume/SmartWizard";
 import ResumePreview from "@/components/resume/ResumePreview";
+import AiChatAssistant from "@/components/resume/AiChatAssistant";
+import SectionSuggestions from "@/components/resume/SectionSuggestions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { trackProductEvent } from "@/lib/product-events";
 import { getResumeReadiness } from "@/lib/resume-readiness";
