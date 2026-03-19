@@ -456,7 +456,17 @@
     "noCvDesc": "Créez votre premier CV professionnel en quelques minutes avec l'aide de l'IA.",
     "noSiteYet": "Pas encore de profil public",
     "noSiteDesc": "Créez un profil public pour partager votre candidature en un seul lien. L'IA génère le contenu à partir de votre CV.",
-    "continueEditing": "Continuer"
+    "continueEditing": "Continuer",
+    "welcomeNewUser": "Bienvenue, {{name}} ! 🎉",
+    "welcomeNewUserDesc": "Construisez votre premier CV professionnel en quelques minutes. Notre IA vous accompagne à chaque étape.",
+    "createFromScratch": "Créer un CV de zéro",
+    "createFromScratchDesc": "L'assistant intelligent vous guide étape par étape",
+    "importExisting": "Importer un PDF existant",
+    "importExistingDesc": "L'IA extrait vos infos et améliore votre CV",
+    "startNow": "Commencer",
+    "importNow": "Importer",
+    "orCreateProfile": "Ou commencez par",
+    "aPublicProfile": "un profil public"
   },
   "resume": {
     "personalInfo": "Informations personnelles",
