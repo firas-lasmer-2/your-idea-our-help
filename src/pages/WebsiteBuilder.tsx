@@ -285,11 +285,11 @@ const WebsiteBuilder = () => {
               <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Publication bloquée tant que les éléments essentiels ne sont pas prêts</p>
-                    <p className="text-xs text-muted-foreground">
-                      {publishReadiness.enabledSectionCount} section{publishReadiness.enabledSectionCount > 1 ? "s" : ""} active{publishReadiness.enabledSectionCount > 1 ? "s" : ""}
-                      {" "}et {publishReadiness.blockers.length} blocage{publishReadiness.blockers.length > 1 ? "s" : ""} détecté{publishReadiness.blockers.length > 1 ? "s" : ""}.
-                    </p>
+                <p className="text-sm font-semibold text-foreground">{t("website.publishBlocked", "Publication bloquée tant que les éléments essentiels ne sont pas prêts")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {publishReadiness.enabledSectionCount} section{publishReadiness.enabledSectionCount > 1 ? "s" : ""} {t("website.active", "active")}{publishReadiness.enabledSectionCount > 1 ? "s" : ""}
+                  {" "}{t("website.and", "et")} {publishReadiness.blockers.length} {t("website.blockageDetected", "blocage")}{publishReadiness.blockers.length > 1 ? "s" : ""} {t("website.detected", "détecté")}{publishReadiness.blockers.length > 1 ? "s" : ""}.
+                </p>
                   </div>
                   <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-1 text-xs text-destructive">
                     <AlertTriangle className="h-3.5 w-3.5" />
