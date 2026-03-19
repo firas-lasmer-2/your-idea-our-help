@@ -145,6 +145,7 @@ const Dashboard = () => {
   const planLabel = getPlanLabel(entitlement?.plan_key);
   const hasCompletedCv = resumes.some((r: any) => getResumeCompletionPercent(r) >= 80);
   const hasNoWebsite = websites.length === 0;
+  const isFirstTimeUser = resumes.length === 0 && websites.length === 0;
 
   const handleUpgradeClick = async () => {
     await trackProductEvent("upgrade_clicked", {
