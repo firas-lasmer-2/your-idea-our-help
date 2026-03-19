@@ -498,6 +498,7 @@ const Dashboard = () => {
               })}
             </div>
           )}
+        </div>
 
         {user?.id && (
           <div className="mt-8">
