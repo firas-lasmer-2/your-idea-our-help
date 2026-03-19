@@ -449,7 +449,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Pays cible</Label>
+              <Label>{t("websiteWizard.targetCountry", "Pays cible")}</Label>
               <Select value={targetCountry} onValueChange={(value) => setTargetCountry(value as TargetCountry)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
