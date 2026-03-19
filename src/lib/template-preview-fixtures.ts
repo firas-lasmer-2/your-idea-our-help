@@ -5,7 +5,7 @@ import { defaultCustomization, type ResumeCustomization, type ResumeData } from 
 import { defaultGlobalSettings, type WebsiteGlobalSettings } from "@/types/website";
 import type { ResumeTemplateId, WebsiteTemplateId } from "@/lib/template-recommendations";
 
-export const RESUME_TEMPLATE_IDS: ResumeTemplateId[] = ["essentiel", "horizon", "trajectoire", "direction", "signature"];
+export const RESUME_TEMPLATE_IDS: ResumeTemplateId[] = ["essentiel", "horizon", "trajectoire", "direction", "signature", "academique", "medical", "technique"];
 export const WEBSITE_TEMPLATE_IDS: WebsiteTemplateId[] = ["profile-clean", "route-pro", "executive-profile", "casefile", "showcase"];
 
 const resumeFixtures: Record<ResumeTemplateId, { title: string; data: ResumeData; customization: ResumeCustomization }> = {
