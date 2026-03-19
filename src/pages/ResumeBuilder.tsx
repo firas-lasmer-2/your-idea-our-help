@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, ArrowLeft, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { FileText, ArrowLeft, ArrowRight, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useResume } from "@/hooks/use-resume";
 import { getCountryStandard, getJobCategory, isSimplifiedMode, getVisibleSteps, type TargetCountry, type JobField, type ExperienceLevel } from "@/lib/country-standards";
@@ -16,6 +16,8 @@ import StepCustomization from "@/components/resume/steps/StepCustomization";
 import StepPreview from "@/components/resume/steps/StepPreview";
 import OnboardingTour from "@/components/resume/OnboardingTour";
 import SmartWizard from "@/components/resume/SmartWizard";
+import ResumePreview from "@/components/resume/ResumePreview";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { trackProductEvent } from "@/lib/product-events";
 import { getResumeReadiness } from "@/lib/resume-readiness";
 
