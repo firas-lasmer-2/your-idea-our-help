@@ -236,7 +236,8 @@
     "step4Desc": "تحقق من نقاط توافق ATS، أنشئ رسالة تحفيز، وحمّل بصيغة PDF.",
     "skip": "تخطي",
     "next": "التالي",
-    "letsGo": "هيا بنا!"
+    "letsGo": "هيا بنا!",
+    "stepOf": "خطوة {{current}} / {{total}}"
   },
   "website": {
     "newSite": "موقع جديد",
@@ -455,7 +456,17 @@
     "noCvDesc": "أنشئ أول سيرة ذاتية احترافية في دقائق بمساعدة الذكاء الاصطناعي.",
     "noSiteYet": "لا يوجد ملف عام بعد",
     "noSiteDesc": "أنشئ ملفاً عاماً لمشاركة ترشّحك برابط واحد. الذكاء الاصطناعي ينشئ المحتوى من سيرتك الذاتية.",
-    "continueEditing": "متابعة"
+    "continueEditing": "متابعة",
+    "welcomeNewUser": "أهلاً، {{name}} ! 🎉",
+    "welcomeNewUserDesc": "أنشئ أول سيرة ذاتية احترافية في دقائق. ذكاؤنا الاصطناعي يرافقك في كل خطوة.",
+    "createFromScratch": "إنشاء سيرة ذاتية من الصفر",
+    "createFromScratchDesc": "المساعد الذكي يرشدك خطوة بخطوة",
+    "importExisting": "استيراد PDF موجود",
+    "importExistingDesc": "الذكاء الاصطناعي يستخرج معلوماتك ويحسّن سيرتك الذاتية",
+    "startNow": "ابدأ",
+    "importNow": "استيراد",
+    "orCreateProfile": "أو ابدأ بـ",
+    "aPublicProfile": "ملف عام"
   },
   "resume": {
     "personalInfo": "المعلومات الشخصية",

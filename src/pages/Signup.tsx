@@ -58,7 +58,8 @@ const Signup = () => {
         data: { method: "email", hasSession: Boolean(data?.session) },
       });
       toast({ title: t("auth.accountCreated"), description: t("auth.welcome") });
-      navigate("/dashboard");
+      // Redirect new users to dashboard where WelcomeHero will guide them
+      navigate("/dashboard?welcome=1");
     }
   };
 
@@ -66,7 +67,7 @@ const Signup = () => {
     await trackProductEvent("signup_started", { data: { method: "google" } });
     const { error } = await auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}/dashboard?welcome=1` },
     });
     if (error) {
       toast({ title: t("common.error"), description: error.message, variant: "destructive" });
