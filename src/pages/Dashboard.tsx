@@ -183,63 +183,75 @@ const Dashboard = () => {
       </header>
 
       <main className="container py-8">
-        {/* Welcome + Quick Actions Hero */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">{t("dashboard.hello", { name: displayName })}</h1>
-          <p className="mt-1 text-muted-foreground">{t("dashboard.whatCreate")}</p>
-        </div>
+        {/* First-time user: show WelcomeHero */}
+        {isFirstTimeUser ? (
+          <WelcomeHero
+            displayName={displayName}
+            onCreateCv={() => navigate("/resume/new")}
+            onImportCv={() => setImportOpen(true)}
+            onCreateProfile={() => navigate("/website/new")}
+          />
+        ) : (
+          <>
+            {/* Welcome + Quick Actions Hero */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-foreground">{t("dashboard.hello", { name: displayName })}</h1>
+              <p className="mt-1 text-muted-foreground">{t("dashboard.whatCreate")}</p>
+            </div>
 
-        {/* Quick actions - most prominent */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => navigate("/resume/new")}>
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground text-sm">{t("dashboard.newCv")}</h3>
-                <p className="text-xs text-muted-foreground">{t("dashboard.newCvDesc")}</p>
-              </div>
-              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
-            </CardContent>
-          </Card>
-          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30 border-dashed" onClick={() => navigate("/resume/new?express=1")}>
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 transition-colors group-hover:bg-amber-500/20">
-                <span className="text-xl">⚡</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground text-sm">{t("dashboard.expressCv")}</h3>
-                <p className="text-xs text-muted-foreground">{t("dashboard.expressCvDesc")}</p>
-              </div>
-              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 transition-colors shrink-0" />
-            </CardContent>
-          </Card>
-          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => setImportOpen(true)}>
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-secondary/80">
-                <Upload className="h-6 w-6 text-foreground" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground text-sm">{t("dashboard.importCv", "Importer un CV")}</h3>
-                <p className="text-xs text-muted-foreground">{t("dashboard.importCvDesc", "PDF existant → extraction IA")}</p>
-              </div>
-              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
-            </CardContent>
-          </Card>
-          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-accent/30" onClick={() => navigate("/website/new")}>
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10 transition-colors group-hover:bg-accent/20">
-                <Globe className="h-6 w-6 text-accent" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground text-sm">{t("dashboard.newProfile")}</h3>
-                <p className="text-xs text-muted-foreground">{t("dashboard.newProfileDesc")}</p>
-              </div>
-              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />
-            </CardContent>
-          </Card>
-        </div>
+            {/* Quick actions - most prominent */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+              <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => navigate("/resume/new")}>
+                <CardContent className="flex items-center gap-4 p-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
+                    <FileText className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground text-sm">{t("dashboard.newCv")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("dashboard.newCvDesc")}</p>
+                  </div>
+                  <Plus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                </CardContent>
+              </Card>
+              <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30 border-dashed" onClick={() => navigate("/resume/new?express=1")}>
+                <CardContent className="flex items-center gap-4 p-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10 transition-colors group-hover:bg-accent/20">
+                    <span className="text-xl">⚡</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground text-sm">{t("dashboard.expressCv")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("dashboard.expressCvDesc")}</p>
+                  </div>
+                  <Plus className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />
+                </CardContent>
+              </Card>
+              <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => setImportOpen(true)}>
+                <CardContent className="flex items-center gap-4 p-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-secondary/80">
+                    <Upload className="h-6 w-6 text-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground text-sm">{t("dashboard.importCv")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("dashboard.importCvDesc")}</p>
+                  </div>
+                  <Plus className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+                </CardContent>
+              </Card>
+              <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-accent/30" onClick={() => navigate("/website/new")}>
+                <CardContent className="flex items-center gap-4 p-5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10 transition-colors group-hover:bg-accent/20">
+                    <Globe className="h-6 w-6 text-accent" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground text-sm">{t("dashboard.newProfile")}</h3>
+                    <p className="text-xs text-muted-foreground">{t("dashboard.newProfileDesc")}</p>
+                  </div>
+                  <Plus className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
 
         {/* Post-CV nudge: after first complete CV, prompt to create website */}
         {hasCompletedCv && hasNoWebsite && (
