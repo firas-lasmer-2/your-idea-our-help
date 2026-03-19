@@ -138,16 +138,16 @@ const WebsiteBuilder = () => {
             <div className="flex items-center gap-2">
               {saving ? (
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Loader2 className="h-3 w-3 animate-spin" /> Sauvegarde...
+                  <Loader2 className="h-3 w-3 animate-spin" /> {t("website.saving", "Sauvegarde...")}
                 </span>
               ) : saveError ? (
-                <span className="text-xs text-destructive">Erreur de sauvegarde</span>
+                <span className="text-xs text-destructive">{t("website.saveError", "Erreur de sauvegarde")}</span>
               ) : lastSavedAt ? (
                 <span className="text-xs text-muted-foreground">
-                  Sauvegarde {new Date(lastSavedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                  {t("website.savedAt", "Sauvegarde")} {new Date(lastSavedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                 </span>
               ) : (
-                <span className="text-xs text-muted-foreground">Pret a sauvegarder</span>
+                <span className="text-xs text-muted-foreground">{t("website.readyToSave", "Prêt à sauvegarder")}</span>
               )}
 
               <Popover>
