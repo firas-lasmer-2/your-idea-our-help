@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Download, Save, Sparkles, Loader2, FileText, Target, CheckCircle, AlertCircle, ChevronDown, MessageCircle } from "lucide-react";
+import { Download, Save, Sparkles, Loader2, FileText, Target, CheckCircle, AlertCircle, ChevronDown, MessageCircle, Globe, Linkedin, ArrowRight } from "lucide-react";
 import { ResumeData, ResumeCustomization } from "@/types/resume";
 import ResumePreview from "@/components/resume/ResumePreview";
 import ATSScoreGauge from "@/components/resume/ATSScoreGauge";
@@ -15,6 +16,7 @@ import { useResumeAi } from "@/hooks/use-resume-ai";
 import { fireConfetti } from "@/hooks/use-confetti";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { getGrowthState, getRemainingAllowance } from "@/lib/growth";
 import { incrementUsageCounter, loadGrowthState, trackProductEvent } from "@/lib/product-events";
@@ -38,9 +40,12 @@ interface Props {
 }
 
 const StepPreview = ({ data, customization, template, saving, completionPercent, exportBlockers, onSave, onUpdateData }: Props) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { generateSummary } = useResumeAi();
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
   const celebratedRef = useRef(false);
   const resumeRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -70,8 +75,8 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
   const handleDownloadPDF = async () => {
     if (exportBlockers.length > 0) {
       toast({
-        title: "Export bloqué",
-        description: "Complétez les éléments manquants avant de télécharger votre CV.",
+        title: t("preview.exportBlocked", "Export bloqué"),
+        description: t("preview.completeFirst", "Complétez les éléments manquants avant de télécharger votre CV."),
         variant: "destructive",
       });
       return;
@@ -92,8 +97,8 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
             },
           });
           toast({
-            title: "Limite atteinte",
-            description: "Vous avez atteint votre quota PDF actuel. Passez au plan superieur pour continuer.",
+            title: t("preview.limitReached", "Limite atteinte"),
+            description: t("preview.limitDesc", "Vous avez atteint votre quota PDF actuel. Passez au plan supérieur pour continuer."),
             variant: "destructive",
           });
           setDownloading(false);
@@ -118,21 +123,19 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
         .save();
       await incrementUsageCounter("pdf_downloads_count");
       await trackProductEvent("resume_downloaded", {
-        data: {
-          template,
-          hasSummary: Boolean(data.summary),
-        },
+        data: { template, hasSummary: Boolean(data.summary) },
       });
+      setDownloaded(true);
     } catch (e) {
       console.error("PDF download error:", e);
-      toast({ title: "Erreur", description: "Le PDF n'a pas pu etre genere.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("preview.pdfError", "Le PDF n'a pas pu être généré."), variant: "destructive" });
     }
     setDownloading(false);
   };
 
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
-      toast({ title: "Erreur", description: "Veuillez coller une description de poste.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("preview.pasteJob", "Veuillez coller une description de poste."), variant: "destructive" });
       return;
     }
     setAnalyzing(true);
@@ -145,7 +148,7 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
       });
 
       if (error || result?.error) {
-        toast({ title: "Erreur", description: result?.error || "Erreur d'analyse.", variant: "destructive" });
+        toast({ title: t("common.error"), description: result?.error || t("preview.analysisError", "Erreur d'analyse."), variant: "destructive" });
         return;
       }
 
@@ -153,10 +156,10 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
         const parsed = typeof result.result === "string" ? JSON.parse(result.result) : result.result;
         setMatchResult(parsed);
       } catch {
-        toast({ title: "Erreur", description: "Réponse IA invalide.", variant: "destructive" });
+        toast({ title: t("common.error"), description: t("preview.invalidAi", "Réponse IA invalide."), variant: "destructive" });
       }
     } catch {
-      toast({ title: "Erreur", description: "Erreur de connexion.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("preview.connectionError", "Erreur de connexion."), variant: "destructive" });
     } finally {
       setAnalyzing(false);
     }
@@ -169,29 +172,36 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
         c.id === "tech" ? { ...c, skills: [...c.skills, skill] } : c
       );
       onUpdateData({ skillCategories: updatedCategories });
-      toast({ title: "Compétence ajoutée", description: `"${skill}" a été ajouté à vos compétences techniques.` });
+      toast({ title: t("preview.skillAdded", "Compétence ajoutée"), description: `"${skill}" ${t("preview.skillAddedDesc", "a été ajouté à vos compétences techniques.")}` });
     }
   };
+
+  const shareUrl = window.location.origin;
+  const userName = [data.personalInfo.firstName, data.personalInfo.lastName].filter(Boolean).join(" ");
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Aperçu de votre CV</h2>
+          <h2 className="text-2xl font-bold text-foreground">{t("preview.title", "Aperçu de votre CV")}</h2>
           <p className="mt-1 text-muted-foreground">
-            Vérifiez votre CV avant de le télécharger.
+            {t("preview.subtitle", "Vérifiez votre CV avant de le télécharger.")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={onSave} disabled={saving} className="gap-2">
             <Save className="h-4 w-4" />
-            {saving ? "Sauvegarde..." : "Sauvegarder"}
+            {saving ? t("resume.saving") : t("common.save")}
           </Button>
           <Button
             variant="outline"
             className="gap-2 text-primary border-primary/20 hover:bg-primary/5 hover:text-primary"
             onClick={() => {
-              const text = encodeURIComponent(`Découvrez mon CV créé avec Resume Builder ! 📄`);
+              const text = encodeURIComponent(
+                userName
+                  ? `${t("preview.whatsappMsg", "Découvrez mon CV créé avec Resume Builder !")} — ${userName} 📄\n${shareUrl}`
+                  : `${t("preview.whatsappMsg", "Découvrez mon CV créé avec Resume Builder !")} 📄\n${shareUrl}`
+              );
               window.open(`https://wa.me/?text=${text}`, "_blank");
             }}
           >
@@ -200,7 +210,7 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
           </Button>
           <Button className="gap-2" onClick={handleDownloadPDF} disabled={downloading || exportBlockers.length > 0}>
             {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            {downloading ? "Génération..." : exportBlockers.length > 0 ? "Compléter avant export" : "Télécharger PDF"}
+            {downloading ? t("preview.generating", "Génération...") : exportBlockers.length > 0 ? t("preview.completeBeforeExport", "Compléter avant export") : t("preview.downloadPdf", "Télécharger PDF")}
           </Button>
         </div>
       </div>
@@ -210,13 +220,13 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="font-semibold text-foreground">Finalisez votre CV avant export</p>
+                <p className="font-semibold text-foreground">{t("preview.finalize", "Finalisez votre CV avant export")}</p>
                 <p className="text-sm text-muted-foreground">
-                  Progression actuelle : {completionPercent}% des étapes obligatoires complétées.
+                  {t("preview.currentProgress", "Progression actuelle")} : {completionPercent}%
                 </p>
               </div>
               <Badge variant="destructive">
-                {exportBlockers.length} blocage{exportBlockers.length > 1 ? "s" : ""}
+                {exportBlockers.length} {t("preview.blockers", "blocage(s)")}
               </Badge>
             </div>
             <ul className="space-y-1 text-sm text-muted-foreground">
@@ -231,14 +241,14 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
         </Card>
       )}
 
-      {/* ATS Score */}
+      {/* ATS Score - compact */}
       <ATSScoreGauge data={data} autoAnalyze={exportBlockers.length === 0} />
 
       {/* Professional Summary */}
       <Card className="border p-5">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold">Résumé professionnel</Label>
+            <Label className="text-base font-semibold">{t("preview.summary", "Résumé professionnel")}</Label>
             <Button
               variant="outline"
               size="sm"
@@ -251,11 +261,11 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
               ) : (
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
               )}
-              {generatingSummary ? "Génération..." : "Générer avec l'IA"}
+              {generatingSummary ? t("preview.generatingAi", "Génération...") : t("preview.generateWithAi", "Générer avec l'IA")}
             </Button>
           </div>
           <Textarea
-            placeholder="Écrivez un court résumé professionnel ou laissez l'IA le générer..."
+            placeholder={t("preview.summaryPlaceholder", "Écrivez un court résumé professionnel ou laissez l'IA le générer...")}
             value={data.summary}
             onChange={(e) => onUpdateData({ summary: e.target.value })}
             rows={3}
@@ -263,11 +273,52 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
           />
           {!data.summary && (
             <p className="text-xs text-muted-foreground">
-              💡 Cliquez sur « Générer avec l'IA » pour créer un résumé basé sur vos informations.
+              💡 {t("preview.summaryHint", "Cliquez sur « Générer avec l'IA » pour créer un résumé basé sur vos informations.")}
             </p>
           )}
         </div>
       </Card>
+
+      {/* Post-download: What's next? */}
+      {downloaded && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="border-primary/20 bg-primary/5 p-5">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-foreground">{t("preview.congrats", "Bravo ! Votre CV est prêt 🎉")}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">{t("preview.whatsNext", "Et maintenant ?")}</p>
+              <div className="grid gap-2 sm:grid-cols-3">
+                <Button variant="outline" className="gap-2 justify-start h-auto py-3" onClick={() => navigate("/website/new")}>
+                  <Globe className="h-4 w-4 text-accent shrink-0" />
+                  <div className="text-left">
+                    <p className="text-xs font-medium">{t("preview.createProfile", "Créer un profil public")}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("preview.createProfileDesc", "Partagez votre candidature en un lien")}</p>
+                  </div>
+                </Button>
+                <Button variant="outline" className="gap-2 justify-start h-auto py-3" onClick={() => setMatchOpen(true)}>
+                  <Target className="h-4 w-4 text-primary shrink-0" />
+                  <div className="text-left">
+                    <p className="text-xs font-medium">{t("preview.matchJob", "Matcher avec une offre")}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("preview.matchJobDesc", "Comparez avec une description de poste")}</p>
+                  </div>
+                </Button>
+                <Button variant="outline" className="gap-2 justify-start h-auto py-3" onClick={() => {
+                  const url = encodeURIComponent(shareUrl);
+                  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, "_blank");
+                }}>
+                  <Linkedin className="h-4 w-4 text-[#0A66C2] shrink-0" />
+                  <div className="text-left">
+                    <p className="text-xs font-medium">{t("preview.shareLinkedin", "Partager sur LinkedIn")}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("preview.shareLinkedinDesc", "Montrez votre nouveau CV")}</p>
+                  </div>
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Job Matching — Optional Collapsible */}
       <Collapsible open={matchOpen} onOpenChange={setMatchOpen}>
@@ -278,8 +329,8 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
                 <Target className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-foreground">Matching offre d'emploi</h3>
-                <p className="text-xs text-muted-foreground">Optionnel — Collez une offre pour voir votre score de correspondance</p>
+                <h3 className="font-semibold text-foreground">{t("preview.jobMatching", "Matching offre d'emploi")}</h3>
+                <p className="text-xs text-muted-foreground">{t("preview.jobMatchingDesc", "Optionnel — Collez une offre pour voir votre score de correspondance")}</p>
               </div>
               <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${matchOpen ? "rotate-180" : ""}`} />
             </button>
@@ -287,9 +338,9 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
           <CollapsibleContent>
             <div className="px-5 pb-5 space-y-4">
               <div className="space-y-2">
-                <Label className="text-sm">Description du poste</Label>
+                <Label className="text-sm">{t("preview.jobDescLabel", "Description du poste")}</Label>
                 <Textarea
-                  placeholder="Collez ici la description de l'offre d'emploi..."
+                  placeholder={t("preview.jobDescPlaceholder", "Collez ici la description de l'offre d'emploi...")}
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   rows={4}
@@ -304,7 +355,7 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
                 size="sm"
               >
                 {analyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                {analyzing ? "Analyse en cours..." : "Analyser la correspondance"}
+                {analyzing ? t("preview.analyzing", "Analyse en cours...") : t("preview.analyzeMatch", "Analyser la correspondance")}
               </Button>
 
               <AnimatePresence>
@@ -334,13 +385,13 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
                         </span>
                       </div>
                       <div>
-                        <p className="font-semibold text-foreground">Score de correspondance</p>
+                        <p className="font-semibold text-foreground">{t("preview.matchScore", "Score de correspondance")}</p>
                         <p className="text-xs text-muted-foreground">
                           {matchResult.matchScore >= 70
-                            ? "Excellent match ! Votre profil correspond bien."
+                            ? t("preview.excellentMatch", "Excellent match ! Votre profil correspond bien.")
                             : matchResult.matchScore >= 40
-                              ? "Match correct. Ajoutez les compétences manquantes."
-                              : "Match faible. Considérez enrichir votre profil."}
+                              ? t("preview.correctMatch", "Match correct. Ajoutez les compétences manquantes.")
+                              : t("preview.weakMatch", "Match faible. Considérez enrichir votre profil.")}
                         </p>
                       </div>
                     </div>
@@ -349,7 +400,7 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
                       <div className="space-y-2">
                         <div className="flex items-center gap-1.5">
                           <CheckCircle className="h-3.5 w-3.5 text-primary" />
-                          <span className="text-sm font-medium text-foreground">Mots-clés trouvés ({matchResult.matchedKeywords.length})</span>
+                          <span className="text-sm font-medium text-foreground">{t("preview.foundKeywords", "Mots-clés trouvés")} ({matchResult.matchedKeywords.length})</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {matchResult.matchedKeywords.map((kw) => (
@@ -365,7 +416,7 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
                       <div className="space-y-2">
                         <div className="flex items-center gap-1.5">
                           <AlertCircle className="h-3.5 w-3.5 text-accent" />
-                          <span className="text-sm font-medium text-foreground">Mots-clés manquants ({matchResult.missingKeywords.length})</span>
+                          <span className="text-sm font-medium text-foreground">{t("preview.missingKeywords", "Mots-clés manquants")} ({matchResult.missingKeywords.length})</span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {matchResult.missingKeywords.map((kw) => (
@@ -380,14 +431,14 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
                           ))}
                         </div>
                         <p className="text-[11px] text-muted-foreground">
-                          💡 Cliquez sur un mot-clé pour l'ajouter à vos compétences techniques.
+                          💡 {t("preview.clickToAdd", "Cliquez sur un mot-clé pour l'ajouter à vos compétences techniques.")}
                         </p>
                       </div>
                     )}
 
                     {matchResult.suggestions.length > 0 && (
                       <div className="rounded-lg bg-muted/50 p-3 space-y-1.5">
-                        <p className="text-xs font-medium text-foreground">Recommandations :</p>
+                        <p className="text-xs font-medium text-foreground">{t("preview.recommendations", "Recommandations")} :</p>
                         {matchResult.suggestions.map((s, i) => (
                           <p key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
                             <span>→</span> {s}
@@ -406,8 +457,8 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
       {/* Tabs: CV Preview + Cover Letter */}
       <Tabs defaultValue="cv" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="cv" className="gap-2"><FileText className="h-4 w-4" /> Aperçu CV</TabsTrigger>
-          <TabsTrigger value="cover" className="gap-2"><Sparkles className="h-4 w-4" /> Lettre de motivation</TabsTrigger>
+          <TabsTrigger value="cv" className="gap-2"><FileText className="h-4 w-4" /> {t("preview.cvTab", "Aperçu CV")}</TabsTrigger>
+          <TabsTrigger value="cover" className="gap-2"><Sparkles className="h-4 w-4" /> {t("preview.coverTab", "Lettre de motivation")}</TabsTrigger>
         </TabsList>
         <TabsContent value="cv">
           <Card className="border overflow-hidden">
