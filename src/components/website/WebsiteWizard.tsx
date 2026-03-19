@@ -554,10 +554,10 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
 
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep(2)} className="gap-2">
-              <ArrowLeft className="h-4 w-4" /> Retour
+              <ArrowLeft className="h-4 w-4" /> {t("common.back")}
             </Button>
             <Button onClick={() => setStep(4)} disabled={!selectedTemplate || !canContinueDetailsStep} className="gap-2">
-              Suivant <ArrowRight className="h-4 w-4" />
+              {t("websiteWizard.next", "Suivant")} <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
