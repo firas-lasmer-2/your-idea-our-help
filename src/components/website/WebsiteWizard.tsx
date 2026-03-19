@@ -130,6 +130,7 @@ function mapProjectItems(resumeData: ResumeData) {
 }
 
 const WebsiteWizard = ({ onComplete, resumes }: Props) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [purpose, setPurpose] = useState<WebsiteMode | "">("");
   const [selectedTemplate, setSelectedTemplate] = useState<WebsiteTemplate | null>(null);
