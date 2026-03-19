@@ -413,7 +413,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
           </div>
           <div className="flex justify-end">
             <Button onClick={() => setStep(2)} disabled={!purpose} className="gap-2">
-              Suivant <ArrowRight className="h-4 w-4" />
+              {t("websiteWizard.next", "Suivant")} <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
