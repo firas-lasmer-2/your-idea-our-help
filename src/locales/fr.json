@@ -584,11 +584,6 @@
     "open": "Ouvrir",
     "scanQr": "Scannez pour accéder"
   },
-  "website": {
-    "noResumeTip": "Astuce : créez d'abord un CV",
-    "noResumeDesc": "L'IA remplira automatiquement votre profil à partir de votre CV.",
-    "createCvFirst": "Créer un CV"
-  },
   "common": {
     "error": "Erreur",
     "save": "Sauvegarder",
