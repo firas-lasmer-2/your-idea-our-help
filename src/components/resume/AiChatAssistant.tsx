@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageCircle, X, Send, Loader2, Sparkles, Minimize2 } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResumeData } from "@/types/resume";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface Msg {
   role: "user" | "assistant";
@@ -20,31 +21,30 @@ interface Props {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/resume-chat`;
 
-const QUICK_PROMPTS = [
-  { label: "Améliorer mon résumé", prompt: "Comment puis-je améliorer mon résumé professionnel ?" },
-  { label: "Conseils ATS", prompt: "Quels sont les meilleurs conseils pour passer les filtres ATS avec mon profil ?" },
-  { label: "Bullet points", prompt: "Comment rédiger des bullet points percutants pour mes expériences ?" },
-  { label: "Adapter au pays", prompt: "Comment adapter mon CV au pays cible ?" },
-];
-
-const stepLabels: Record<number, string> = {
-  1: "Infos personnelles",
-  2: "Expérience",
-  3: "Formation",
-  4: "Compétences",
-  5: "Sections additionnelles",
-  6: "Modèle",
-  7: "Personnalisation",
-  9: "Aperçu",
-};
-
 const AiChatAssistant = ({ data, currentStep, template }: Props) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const QUICK_PROMPTS = [
+    { label: t("aiChat.improveSummary", "Améliorer mon résumé"), prompt: t("aiChat.improveSummaryPrompt", "Comment puis-je améliorer mon résumé professionnel ?") },
+    { label: t("aiChat.atsTips", "Conseils ATS"), prompt: t("aiChat.atsTipsPrompt", "Quels sont les meilleurs conseils pour passer les filtres ATS avec mon profil ?") },
+    { label: t("aiChat.bulletPoints", "Bullet points"), prompt: t("aiChat.bulletPointsPrompt", "Comment rédiger des bullet points percutants pour mes expériences ?") },
+    { label: t("aiChat.adaptCountry", "Adapter au pays"), prompt: t("aiChat.adaptCountryPrompt", "Comment adapter mon CV au pays cible ?") },
+  ];
+
+  const stepLabels: Record<number, string> = {
+    1: t("steps.personalInfo"),
+    2: t("steps.experience"),
+    3: t("steps.education"),
+    4: t("steps.skills"),
+    5: t("steps.design"),
+    9: t("steps.preview"),
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -56,16 +56,16 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
     targetCountry: data.targetCountry,
     jobField: data.jobField,
     experienceLevel: data.experienceLevel,
-    currentStep: stepLabels[currentStep] || `Étape ${currentStep}`,
+    currentStep: stepLabels[currentStep] || `${t("aiChat.step", "Étape")} ${currentStep}`,
     experienceCount: data.experience.length,
     educationCount: data.education.length,
     skills: data.skillCategories
       .filter((c) => c.skills.length > 0)
       .map((c) => `${c.name}: ${c.skills.join(", ")}`)
-      .join("; ") || "Aucune",
+      .join("; ") || t("aiChat.none", "Aucune"),
     summary: data.summary || "",
     template,
-  }), [data, currentStep, template]);
+  }), [data, currentStep, template, t]);
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -104,14 +104,14 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
 
       if (!resp.ok) {
         const errData = await resp.json().catch(() => null);
-        const errMsg = errData?.error || (resp.status === 429 ? "Trop de requêtes, réessayez." : resp.status === 402 ? "Crédits IA épuisés." : "Erreur du service IA.");
+        const errMsg = errData?.error || (resp.status === 429 ? t("aiChat.tooManyRequests", "Trop de requêtes, réessayez.") : resp.status === 402 ? t("aiChat.creditsExhausted", "Crédits IA épuisés.") : t("aiChat.aiServiceError", "Erreur du service IA."));
         updateAssistant(`⚠️ ${errMsg}`);
         setIsLoading(false);
         return;
       }
 
       if (!resp.body) {
-        updateAssistant("⚠️ Erreur de connexion.");
+        updateAssistant(`⚠️ ${t("aiChat.connectionError", "Erreur de connexion.")}`);
         setIsLoading(false);
         return;
       }
@@ -148,7 +148,6 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
         }
       }
 
-      // Flush remaining
       if (buffer.trim()) {
         for (let raw of buffer.split("\n")) {
           if (!raw) continue;
@@ -164,7 +163,7 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
         }
       }
     } catch {
-      updateAssistant("⚠️ Erreur de connexion. Vérifiez votre connexion internet.");
+      updateAssistant(`⚠️ ${t("aiChat.connectionError", "Erreur de connexion. Vérifiez votre connexion internet.")}`);
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +178,6 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
 
   return (
     <>
-      {/* Floating button */}
       <AnimatePresence>
         {!open && (
           <motion.div
@@ -188,18 +186,13 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
             exit={{ scale: 0, opacity: 0 }}
             className="fixed bottom-6 right-6 z-50"
           >
-            <Button
-              onClick={() => setOpen(true)}
-              className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow"
-              size="icon"
-            >
+            <Button onClick={() => setOpen(true)} className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow" size="icon">
               <Sparkles className="h-6 w-6" />
             </Button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Chat panel */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -210,15 +203,14 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
             className="fixed bottom-6 right-6 z-50 flex w-[380px] max-w-[calc(100vw-2rem)] flex-col rounded-2xl border bg-card shadow-2xl"
             style={{ height: "min(560px, calc(100vh - 6rem))" }}
           >
-            {/* Header */}
             <div className="flex items-center justify-between border-b px-4 py-3">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Assistant CV</p>
-                  <p className="text-[10px] text-muted-foreground">Aide contextuelle IA</p>
+                  <p className="text-sm font-semibold text-foreground">{t("aiChat.title", "Assistant CV")}</p>
+                  <p className="text-[10px] text-muted-foreground">{t("aiChat.subtitle", "Aide contextuelle IA")}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -231,14 +223,13 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
               </div>
             </div>
 
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
               {messages.length === 0 && (
                 <div className="space-y-3">
                   <div className="rounded-xl bg-primary/5 p-3">
-                    <p className="text-xs font-medium text-foreground">👋 Comment puis-je vous aider ?</p>
+                    <p className="text-xs font-medium text-foreground">👋 {t("aiChat.greeting", "Comment puis-je vous aider ?")}</p>
                     <p className="mt-1 text-[11px] text-muted-foreground">
-                      Je connais votre CV en cours. Posez-moi des questions sur la rédaction, les compétences, l'ATS, ou demandez-moi d'écrire du contenu.
+                      {t("aiChat.greetingDesc", "Je connais votre CV en cours. Posez-moi des questions sur la rédaction, les compétences, l'ATS, ou demandez-moi d'écrire du contenu.")}
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-1.5">
@@ -260,9 +251,7 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
                   key={i}
                   className={cn(
                     "max-w-[85%] rounded-xl px-3 py-2 text-sm",
-                    msg.role === "user"
-                      ? "ms-auto bg-primary text-primary-foreground"
-                      : "bg-muted"
+                    msg.role === "user" ? "ms-auto bg-primary text-primary-foreground" : "bg-muted"
                   )}
                 >
                   {msg.role === "assistant" ? (
@@ -278,13 +267,12 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
               {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
                 <div className="flex items-center gap-2 rounded-xl bg-muted px-3 py-2">
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Réflexion...</span>
+                  <span className="text-xs text-muted-foreground">{t("aiChat.thinking", "Réflexion...")}</span>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
             <div className="border-t p-3">
               <div className="flex items-end gap-2">
                 <Textarea
@@ -292,7 +280,7 @@ const AiChatAssistant = ({ data, currentStep, template }: Props) => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Posez une question..."
+                  placeholder={t("aiChat.placeholder", "Posez une question...")}
                   className="min-h-[40px] max-h-[100px] resize-none text-sm"
                   rows={1}
                 />

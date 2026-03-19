@@ -239,7 +239,7 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
               {exportBlockers.map((blocker) => (
                 <li key={blocker} className="flex items-start gap-2">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-                  <span>{blocker}</span>
+                  <span>{t(blocker, blocker)}</span>
                 </li>
               ))}
             </ul>

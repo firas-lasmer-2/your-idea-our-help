@@ -250,9 +250,7 @@ const ResumeBuilder = () => {
       case 2: return <StepExperience data={data} updateData={updateData} />;
       case 3: return <StepEducation data={data} updateData={updateData} />;
       case 4: return <StepSkills data={data} updateData={updateData} />;
-      case 5: return <StepAdditionalSections data={data} updateData={updateData} />;
-      case 6: return <StepTemplate data={data} template={template} setTemplate={setTemplate} />;
-      case 7: return <StepCustomization customization={customization} updateCustomization={updateCustomization} />;
+      case 5: return <StepDesign data={data} updateData={updateData} template={template} setTemplate={setTemplate} customization={customization} updateCustomization={updateCustomization} />;
       case 9: return <StepPreview data={data} customization={customization} template={template} saving={saving} completionPercent={readiness.completionPercent} exportBlockers={readiness.exportBlockers} onSave={() => save()} onUpdateData={updateData} />;
       default: return null;
     }
