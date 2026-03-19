@@ -165,11 +165,11 @@ const WebsiteBuilder = () => {
                 <PopoverContent className="w-96">
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-semibold text-foreground">Checklist de publication</p>
+                      <p className="text-sm font-semibold text-foreground">{t("website.publishChecklist", "Checklist de publication")}</p>
                       <p className="text-xs text-muted-foreground">
                         {publishReadiness.ready
-                          ? "Le site est prêt à être publié."
-                          : "Corrigez les éléments bloquants avant publication."}
+                          ? t("website.readyToPublish", "Le site est prêt à être publié.")
+                          : t("website.fixBeforePublish", "Corrigez les éléments bloquants avant publication.")}
                       </p>
                     </div>
 
