@@ -44,7 +44,7 @@ const TemplatePreviewLab = () => {
       <div className="mx-auto max-w-6xl">
         {content.kind === "resume" ? (
           <div data-visual-root className="mx-auto w-full max-w-[900px] overflow-hidden rounded-2xl border border-slate-300 bg-white p-6 shadow-xl">
-            <ResumePreview data={content.data} customization={content.customization} template={content.template} />
+            <ResumePreview data={(content as any).data} customization={(content as any).customization} template={content.template} />
           </div>
         ) : (
           <div className="flex justify-center">
@@ -53,7 +53,7 @@ const TemplatePreviewLab = () => {
               className="overflow-hidden rounded-[28px] border border-slate-300 bg-white shadow-xl"
               style={{ width: mobile ? "390px" : "1280px", maxWidth: "100%" }}
             >
-              <WebsitePreview sections={content.sections} globalSettings={content.globalSettings} title={content.title} template={content.template} />
+              <WebsitePreview sections={(content as any).sections} globalSettings={(content as any).globalSettings} title={content.title} template={content.template} />
             </div>
           </div>
         )}

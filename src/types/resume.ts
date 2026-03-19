@@ -7,6 +7,8 @@ export interface PersonalInfo {
   linkedIn: string;
   github: string;
   photoUrl: string;
+  militaryService?: string;
+  cin?: string;
 }
 
 export interface Education {

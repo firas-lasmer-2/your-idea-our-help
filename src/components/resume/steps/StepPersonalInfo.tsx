@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResumeData, TUNISIAN_CITIES } from "@/types/resume";
-import { Mail, Phone, MapPin, Linkedin, Github, User, Upload, Loader2, Briefcase } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Github, User, Upload, Loader2, Briefcase, Shield, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getCountryStandard, type TargetCountry } from "@/lib/country-standards";
@@ -203,6 +203,39 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
               <Input id="github" placeholder="github.com/ahmed" className="pl-10" value={data.personalInfo.github} onChange={(e) => update("github", e.target.value)} />
             </div>
           </div>
+        )}
+
+        {/* Tunisian-specific fields */}
+        {(!data.targetCountry || data.targetCountry === "tunisia") && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="militaryService">Service militaire</Label>
+              <div className="relative">
+                <Shield className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Select value={data.personalInfo.militaryService || ""} onValueChange={(v) => update("militaryService", v)}>
+                  <SelectTrigger className="pl-10">
+                    <SelectValue placeholder="Sélectionner le statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="effectue">Effectué</SelectItem>
+                    <SelectItem value="exempte">Exempté</SelectItem>
+                    <SelectItem value="en_cours">En cours</SelectItem>
+                    <SelectItem value="non_applicable">Non applicable</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cin">CIN (optionnel)</Label>
+              <div className="relative">
+                <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input id="cin" placeholder="08XXXXXX" className="pl-10" value={data.personalInfo.cin || ""} onChange={(e) => update("cin", e.target.value)} />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Certains employeurs tunisiens demandent le numéro CIN.
+              </p>
+            </div>
+          </>
         )}
       </div>
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, ArrowLeft, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { FileText, ArrowLeft, ArrowRight, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useResume } from "@/hooks/use-resume";
 import { getCountryStandard, getJobCategory, isSimplifiedMode, getVisibleSteps, type TargetCountry, type JobField, type ExperienceLevel } from "@/lib/country-standards";
@@ -16,6 +16,8 @@ import StepCustomization from "@/components/resume/steps/StepCustomization";
 import StepPreview from "@/components/resume/steps/StepPreview";
 import OnboardingTour from "@/components/resume/OnboardingTour";
 import SmartWizard from "@/components/resume/SmartWizard";
+import ResumePreview from "@/components/resume/ResumePreview";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { trackProductEvent } from "@/lib/product-events";
 import { getResumeReadiness } from "@/lib/resume-readiness";
 
@@ -26,9 +28,11 @@ const ResumeBuilder = () => {
   const resumeId = searchParams.get("id") || undefined;
   const expressMode = searchParams.get("express") === "1";
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [authLoading, setAuthLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(!resumeId);
   const [prefilling, setPrefilling] = useState(false);
+  const [showLivePreview, setShowLivePreview] = useState(true);
   const completionTrackedRef = useRef(false);
 
   const {
@@ -291,7 +295,7 @@ const ResumeBuilder = () => {
       )}
 
       {/* Content */}
-      <main className="container max-w-3xl py-8">
+      <main className={`container py-8 ${!isMobile && showLivePreview && currentStep !== 9 ? "max-w-7xl" : "max-w-3xl"}`}>
         <div className="mb-6 rounded-xl border bg-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -303,6 +307,17 @@ const ResumeBuilder = () => {
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs">
+              {!isMobile && currentStep !== 9 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => setShowLivePreview(!showLivePreview)}
+                >
+                  {showLivePreview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  {showLivePreview ? "Masquer aperçu" : "Aperçu en direct"}
+                </Button>
+              )}
               {currentStepBlocked ? (
                 <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-1 text-destructive">
                   <AlertCircle className="h-3.5 w-3.5" />
@@ -328,24 +343,48 @@ const ResumeBuilder = () => {
           )}
         </div>
 
-        {renderStep()}
+        {/* Split-screen layout for desktop */}
+        <div className={`${!isMobile && showLivePreview && currentStep !== 9 ? "grid grid-cols-2 gap-6" : ""}`}>
+          <div>
+            {renderStep()}
 
-        {/* Navigation */}
-        {!isLastStep && (
-          <div className="mt-8 flex justify-between">
-            <Button
-              variant="outline"
-              onClick={() => prevStep && goToStep(prevStep)}
-              disabled={!prevStep}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" /> Précédent
-            </Button>
-            <Button onClick={() => nextStep && goToStep(nextStep)} disabled={!nextStep || currentStepBlocked} className="gap-2">
-              Suivant <ArrowRight className="h-4 w-4" />
-            </Button>
+            {/* Navigation */}
+            {!isLastStep && (
+              <div className="mt-8 flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => prevStep && goToStep(prevStep)}
+                  disabled={!prevStep}
+                  className="gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Précédent
+                </Button>
+                <Button onClick={() => nextStep && goToStep(nextStep)} disabled={!nextStep || currentStepBlocked} className="gap-2">
+                  Suivant <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Live Preview Panel */}
+          {!isMobile && showLivePreview && currentStep !== 9 && (
+            <div className="sticky top-32 h-fit">
+              <div className="rounded-xl border bg-card overflow-hidden">
+                <div className="border-b px-4 py-2 flex items-center gap-2">
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground">Aperçu en direct</span>
+                </div>
+                <div className="overflow-auto max-h-[calc(100vh-200px)]">
+                  <div className="origin-top-left" style={{ transform: "scale(0.5)", width: "200%", transformOrigin: "top left" }}>
+                    <div className="bg-white p-8">
+                      <ResumePreview data={data} customization={customization} template={template} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
