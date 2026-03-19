@@ -5,12 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { FileText, Globe, Plus, LogOut, Settings, User, Trash2, Edit, MoreHorizontal, Copy, ExternalLink, CheckCircle2, ArrowRight, Upload } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { FileText, Globe, Plus, LogOut, Settings, User, Trash2, Edit, MoreHorizontal, Copy, ExternalLink, CheckCircle2, ArrowRight, Upload, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import FeedbackCard from "@/components/dashboard/FeedbackCard";
 import ResumeImportDialog from "@/components/resume/ResumeImportDialog";
+import { useTranslation } from "react-i18next";
 import {
   buildOnboardingChecklist,
   getChecklistProgress,
@@ -23,19 +25,20 @@ import { ensureGrowthProfile, loadGrowthState, trackProductEvent } from "@/lib/p
 
 const auth = supabase.auth as any;
 
-function timeAgo(dateStr: string): string {
+function timeAgo(dateStr: string, t: (key: string, opts?: any) => string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "à l'instant";
-  if (mins < 60) return `il y a ${mins} min`;
+  if (mins < 1) return t("dashboard.justNow");
+  if (mins < 60) return t("dashboard.minutesAgo", { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `il y a ${hours}h`;
+  if (hours < 24) return t("dashboard.hoursAgo", { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 30) return `il y a ${days}j`;
+  if (days < 30) return t("dashboard.daysAgo", { count: days });
   return new Date(dateStr).toLocaleDateString("fr-FR");
 }
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [resumes, setResumes] = useState<any[]>([]);
@@ -45,6 +48,7 @@ const Dashboard = () => {
   const [editingTitle, setEditingTitle] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [importOpen, setImportOpen] = useState(false);
+  const [checklistOpen, setChecklistOpen] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -87,14 +91,14 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     await auth.signOut();
-    toast({ title: "Déconnecté", description: "À bientôt ! 👋" });
+    toast({ title: t("dashboard.disconnected"), description: t("dashboard.seeYouSoon") });
     navigate("/");
   };
 
   const deleteResume = async (id: string) => {
     await (supabase as any).from("resumes").delete().eq("id", id);
     setResumes((prev) => prev.filter((r) => r.id !== id));
-    toast({ title: "CV supprimé" });
+    toast({ title: t("dashboard.cvDeleted") });
   };
 
   const duplicateResume = async (id: string) => {
@@ -102,7 +106,7 @@ const Dashboard = () => {
     if (!original) return;
     const { id: _, created_at, updated_at, ...rest } = original;
     const { data: created } = await (supabase as any).from("resumes").insert({ ...rest, title: `${rest.title} (copie)` }).select().single();
-    if (created) { setResumes((prev) => [created, ...prev]); toast({ title: "CV dupliqué" }); }
+    if (created) { setResumes((prev) => [created, ...prev]); toast({ title: t("dashboard.cvDuplicated") }); }
   };
 
   const startRename = (id: string, currentTitle: string) => {
@@ -122,7 +126,7 @@ const Dashboard = () => {
   const deleteWebsite = async (id: string) => {
     await (supabase as any).from("websites").delete().eq("id", id);
     setWebsites((prev) => prev.filter((w) => w.id !== id));
-    toast({ title: "Site supprimé" });
+    toast({ title: t("dashboard.siteDeleted") });
   };
 
   if (loading) {
@@ -138,6 +142,8 @@ const Dashboard = () => {
   const onboardingProgress = getChecklistProgress(onboardingItems);
   const usageCards = getUsageCards(entitlement, usage);
   const planLabel = getPlanLabel(entitlement?.plan_key);
+  const hasCompletedCv = resumes.some((r: any) => getResumeCompletionPercent(r) >= 80);
+  const hasNoWebsite = websites.length === 0;
 
   const handleUpgradeClick = async () => {
     await trackProductEvent("upgrade_clicked", {
@@ -159,6 +165,12 @@ const Dashboard = () => {
             <span className="text-xl font-bold text-foreground">Resume</span>
           </Link>
           <div className="flex items-center gap-3">
+            {/* Compact stats in header */}
+            <div className="hidden md:flex items-center gap-3 mr-2">
+              <span className="text-xs text-muted-foreground">{resumes.length} {t("dashboard.cvCreated")}</span>
+              <span className="text-xs text-muted-foreground">·</span>
+              <span className="text-xs text-muted-foreground">{websites.length} {t("dashboard.publicProfiles")}</span>
+            </div>
             <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}><Settings className="h-5 w-5" /></Button>
             <Button variant="ghost" size="icon" onClick={handleLogout}><LogOut className="h-5 w-5" /></Button>
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
@@ -169,168 +181,155 @@ const Dashboard = () => {
       </header>
 
       <main className="container py-8">
-        {/* Welcome */}
+        {/* Welcome + Quick Actions Hero */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Bonjour, {displayName} ! 👋</h1>
-          <p className="mt-1 text-muted-foreground">Que souhaitez-vous créer aujourd'hui ?</p>
+          <h1 className="text-3xl font-bold text-foreground">{t("dashboard.hello", { name: displayName })}</h1>
+          <p className="mt-1 text-muted-foreground">{t("dashboard.whatCreate")}</p>
         </div>
 
-        <div className="mb-8 grid gap-6 xl:grid-cols-[1.3fr_1fr]">
-          <Card className="border">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between gap-4">
+        {/* Quick actions - most prominent */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => navigate("/resume/new")}>
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
+                <FileText className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground text-sm">{t("dashboard.newCv")}</h3>
+                <p className="text-xs text-muted-foreground">{t("dashboard.newCvDesc")}</p>
+              </div>
+              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+            </CardContent>
+          </Card>
+          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30 border-dashed" onClick={() => navigate("/resume/new?express=1")}>
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 transition-colors group-hover:bg-amber-500/20">
+                <span className="text-xl">⚡</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground text-sm">{t("dashboard.expressCv")}</h3>
+                <p className="text-xs text-muted-foreground">{t("dashboard.expressCvDesc")}</p>
+              </div>
+              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 transition-colors shrink-0" />
+            </CardContent>
+          </Card>
+          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => setImportOpen(true)}>
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-secondary/80">
+                <Upload className="h-6 w-6 text-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground text-sm">{t("dashboard.importCv", "Importer un CV")}</h3>
+                <p className="text-xs text-muted-foreground">{t("dashboard.importCvDesc", "PDF existant → extraction IA")}</p>
+              </div>
+              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+            </CardContent>
+          </Card>
+          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-accent/30" onClick={() => navigate("/website/new")}>
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10 transition-colors group-hover:bg-accent/20">
+                <Globe className="h-6 w-6 text-accent" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground text-sm">{t("dashboard.newProfile")}</h3>
+                <p className="text-xs text-muted-foreground">{t("dashboard.newProfileDesc")}</p>
+              </div>
+              <Plus className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Post-CV nudge: after first complete CV, prompt to create website */}
+        {hasCompletedCv && hasNoWebsite && (
+          <Card className="mb-8 border-primary/20 bg-primary/5">
+            <CardContent className="flex items-center justify-between gap-4 p-5">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🎉</span>
                 <div>
-                  <p className="text-sm font-medium text-foreground">Checklist d'activation</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Avancez jusqu'au premier CV terminé et au premier site publié.
-                  </p>
+                  <p className="text-sm font-semibold text-foreground">{t("dashboard.cvReady", "Votre CV est prêt !")}</p>
+                  <p className="text-xs text-muted-foreground">{t("dashboard.createProfileNudge", "Créez maintenant votre profil public pour partager votre candidature en un lien.")}</p>
                 </div>
-                <Badge variant="secondary">
-                  {onboardingProgress.completed}/{onboardingProgress.total}
+              </div>
+              <Button size="sm" className="gap-1.5 shrink-0" onClick={() => navigate("/website/new")}>
+                <Globe className="h-3.5 w-3.5" />
+                {t("dashboard.newProfile")}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Collapsible checklist + Plan card side by side */}
+        <div className="mb-8 grid gap-6 xl:grid-cols-[1.3fr_1fr]">
+          {/* Checklist - collapsed by default */}
+          <Collapsible open={checklistOpen} onOpenChange={setChecklistOpen}>
+            <Card className="border">
+              <CardContent className="p-5">
+                <CollapsibleTrigger asChild>
+                  <button className="flex w-full items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div>
+                        <p className="text-sm font-medium text-foreground text-left">{t("dashboard.activationChecklist")}</p>
+                        <div className="mt-2 flex items-center gap-3">
+                          <Progress value={onboardingProgress.percent} className="h-2 flex-1" />
+                          <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">{onboardingProgress.percent}%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform shrink-0 ${checklistOpen ? "rotate-180" : ""}`} />
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="mt-4 space-y-2">
+                    {onboardingItems.map((item) => (
+                      <div key={item.key} className="flex items-center justify-between gap-3 rounded-lg border p-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <CheckCircle2 className={`h-4 w-4 shrink-0 ${item.done ? "text-primary" : "text-muted-foreground"}`} />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground">{item.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+                          </div>
+                        </div>
+                        <Button asChild variant={item.done ? "outline" : "default"} size="sm" className="shrink-0 gap-1 text-xs h-8">
+                          <Link to={item.href}>
+                            {item.cta}
+                            <ArrowRight className="h-3 w-3" />
+                          </Link>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </CardContent>
+            </Card>
+          </Collapsible>
+
+          {/* Plan card */}
+          <Card className="border">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">{t("dashboard.currentPlan")}</p>
+                  <h2 className="mt-0.5 text-xl font-bold text-foreground">{planLabel}</h2>
+                </div>
+                <Badge variant={entitlement?.plan_key === "free" ? "secondary" : "default"}>
+                  {entitlement?.plan_key === "free" ? t("dashboard.starter") : t("dashboard.active")}
                 </Badge>
               </div>
 
               <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Progression</span>
-                  <span>{onboardingProgress.percent}%</span>
-                </div>
-                <Progress value={onboardingProgress.percent} />
-              </div>
-
-              <div className="mt-6 space-y-3">
-                {onboardingItems.map((item) => (
-                  <div key={item.key} className="flex items-center justify-between gap-4 rounded-lg border p-4">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className={`h-4 w-4 ${item.done ? "text-primary" : "text-muted-foreground"}`} />
-                        <p className="font-medium text-foreground">{item.title}</p>
-                      </div>
-                      <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-                    <Button asChild variant={item.done ? "outline" : "default"} size="sm" className="shrink-0 gap-1.5">
-                      <Link to={item.href}>
-                        {item.cta}
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Link>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Plan actuel</p>
-                  <h2 className="mt-1 text-2xl font-bold text-foreground">{planLabel}</h2>
-                </div>
-                <Badge variant={entitlement?.plan_key === "free" ? "secondary" : "default"}>
-                  {entitlement?.plan_key === "free" ? "Starter" : "Actif"}
-                </Badge>
-              </div>
-
-              <div className="mt-5 space-y-3">
                 {usageCards.map((card) => (
-                  <div key={card.key} className="rounded-lg border p-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-foreground">{card.title}</p>
-                      <span className="text-sm font-semibold text-foreground">
-                        {card.used}/{card.limit}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Restant: {getRemainingAllowance(card.used, card.limit)}
-                    </p>
+                  <div key={card.key} className="flex items-center justify-between rounded-lg border p-3">
+                    <p className="text-sm text-foreground">{card.title}</p>
+                    <span className="text-sm font-semibold text-foreground">
+                      {card.used}/{card.limit}
+                    </span>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-5 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                {entitlement?.custom_domain_enabled
-                  ? "Le domaine personnalisé est activé sur votre plan."
-                  : "Passez au plan supérieur pour débloquer plus de téléchargements, plus de sites et le domaine personnalisé."}
-              </div>
-
-              <Button className="mt-5 w-full" onClick={handleUpgradeClick}>
-                Voir les options de mise a niveau
+              <Button className="mt-4 w-full" size="sm" onClick={handleUpgradeClick}>
+                {t("dashboard.viewUpgrade")}
               </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick actions */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => navigate("/resume/new")}>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
-                <FileText className="h-7 w-7 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">Nouveau CV</h3>
-                <p className="text-sm text-muted-foreground">Créez un CV avec l'aide de l'IA</p>
-              </div>
-              <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </CardContent>
-          </Card>
-          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30 border-dashed" onClick={() => navigate("/resume/new?express=1")}>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 transition-colors group-hover:bg-amber-500/20">
-                <span className="text-2xl">⚡</span>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">CV Express</h3>
-                <p className="text-sm text-muted-foreground">CV prêt en 2 minutes par l'IA</p>
-              </div>
-              <Plus className="h-5 w-5 text-muted-foreground group-hover:text-amber-500 transition-colors" />
-            </CardContent>
-          </Card>
-          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => setImportOpen(true)}>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-secondary/80">
-                <Upload className="h-7 w-7 text-foreground" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">Importer un CV</h3>
-                <p className="text-sm text-muted-foreground">PDF existant → extraction IA</p>
-              </div>
-              <Plus className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </CardContent>
-          </Card>
-          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-accent/30" onClick={() => navigate("/website/new")}>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent/10 transition-colors group-hover:bg-accent/20">
-                <Globe className="h-7 w-7 text-accent" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">Nouveau profil public</h3>
-                <p className="text-sm text-muted-foreground">Profil pro ou portfolio généré par l'IA</p>
-              </div>
-              <Plus className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-3 mb-8">
-          <Card className="border">
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">CV créés</p>
-              <p className="mt-1 text-3xl font-bold text-foreground">{resumes.length}</p>
-            </CardContent>
-          </Card>
-          <Card className="border">
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">Profils publics</p>
-              <p className="mt-1 text-3xl font-bold text-foreground">{websites.length}</p>
-            </CardContent>
-          </Card>
-          <Card className="border">
-            <CardContent className="p-6">
-              <p className="text-sm text-muted-foreground">Téléchargements</p>
-              <p className="mt-1 text-3xl font-bold text-foreground">{usage?.pdf_downloads_count || 0}</p>
             </CardContent>
           </Card>
         </div>
@@ -338,7 +337,7 @@ const Dashboard = () => {
         {/* Resume list */}
         {resumes.length > 0 && (
           <div className="space-y-4 mb-8">
-            <h2 className="text-lg font-semibold text-foreground">Vos CV</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("dashboard.yourCvs")}</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {resumes.map((resume) => {
                 const pct = getResumeCompletionPercent(resume);
@@ -361,7 +360,7 @@ const Dashboard = () => {
                               className="font-semibold text-foreground group-hover:text-primary transition-colors cursor-pointer truncate"
                               onClick={() => navigate(`/resume/edit?id=${resume.id}`)}
                               onDoubleClick={() => startRename(resume.id, resume.title)}
-                              title="Double-cliquez pour renommer"
+                              title={t("dashboard.doubleClickRename", "Double-cliquez pour renommer")}
                             >
                               {resume.title}
                             </h3>
@@ -370,10 +369,9 @@ const Dashboard = () => {
                             <Badge variant={pct >= 80 ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
                               {pct}%
                             </Badge>
-                            <span className="text-xs text-muted-foreground">Modèle: {resume.template}</span>
+                            <span className="text-xs text-muted-foreground">{t("dashboard.model")}: {resume.template}</span>
                           </div>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(resume.updated_at)}</p>
-                          {/* Mini progress bar */}
+                          <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(resume.updated_at, t)}</p>
                           <div className="mt-2 h-1 w-full rounded-full bg-muted overflow-hidden">
                             <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
                           </div>
@@ -383,10 +381,10 @@ const Dashboard = () => {
                             <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0"><MoreHorizontal className="h-4 w-4" /></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/resume/edit?id=${resume.id}`)}><Edit className="h-4 w-4 mr-2" /> Modifier</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => startRename(resume.id, resume.title)}><Edit className="h-4 w-4 mr-2" /> Renommer</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => duplicateResume(resume.id)}><Copy className="h-4 w-4 mr-2" /> Dupliquer</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => deleteResume(resume.id)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> Supprimer</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => navigate(`/resume/edit?id=${resume.id}`)}><Edit className="h-4 w-4 mr-2" /> {t("dashboard.edit")}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => startRename(resume.id, resume.title)}><Edit className="h-4 w-4 mr-2" /> {t("dashboard.rename")}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => duplicateResume(resume.id)}><Copy className="h-4 w-4 mr-2" /> {t("dashboard.duplicate")}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => deleteResume(resume.id)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> {t("dashboard.delete")}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -401,7 +399,7 @@ const Dashboard = () => {
         {/* Website list */}
         {websites.length > 0 && (
           <div className="space-y-4 mb-8">
-            <h2 className="text-lg font-semibold text-foreground">Vos profils publics</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("dashboard.yourSites")}</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {websites.map((site) => (
                 <Card key={site.id} className="border group hover:shadow-md transition-all">
@@ -415,21 +413,21 @@ const Dashboard = () => {
                         <div className="mt-1 flex items-center gap-2">
                           <p className="text-xs text-muted-foreground">Type: {site.purpose === "portfolio" ? "Portfolio Pro" : "Profil Pro"}</p>
                           {site.is_published && (
-                            <Badge variant="default" className="text-[10px] px-1.5 py-0">Publié</Badge>
+                            <Badge variant="default" className="text-[10px] px-1.5 py-0">{t("dashboard.published")}</Badge>
                           )}
                         </div>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(site.updated_at)}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(site.updated_at, t)}</p>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0"><MoreHorizontal className="h-4 w-4" /></Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate(`/website/edit?id=${site.id}`)}><Edit className="h-4 w-4 mr-2" /> Modifier</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate(`/website/edit?id=${site.id}`)}><Edit className="h-4 w-4 mr-2" /> {t("dashboard.edit")}</DropdownMenuItem>
                           {site.is_published && (
-                            <DropdownMenuItem onClick={() => window.open(`/site/${site.id}`, "_blank")}><ExternalLink className="h-4 w-4 mr-2" /> Voir le site</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.open(`/site/${site.id}`, "_blank")}><ExternalLink className="h-4 w-4 mr-2" /> {t("dashboard.visitSite")}</DropdownMenuItem>
                           )}
-                          <DropdownMenuItem onClick={() => deleteWebsite(site.id)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> Supprimer</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => deleteWebsite(site.id)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> {t("dashboard.delete")}</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -447,17 +445,16 @@ const Dashboard = () => {
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
                 <span className="text-4xl">🚀</span>
               </div>
-              <h3 className="mt-6 text-xl font-bold text-foreground">Bienvenue sur Resume !</h3>
+              <h3 className="mt-6 text-xl font-bold text-foreground">{t("dashboard.welcomeTitle", "Bienvenue sur Resume !")}</h3>
               <p className="mt-3 max-w-md text-muted-foreground leading-relaxed">
-                Vous n'avez pas encore de CV ni de profil public. 
-                Commencez par en créer un — notre IA vous accompagne à chaque étape pour un résultat professionnel en quelques minutes ! ✨
+                {t("dashboard.welcomeDesc", "Vous n'avez pas encore de CV ni de profil public. Commencez par en créer un — notre IA vous accompagne à chaque étape !")}
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button className="gap-2" size="lg" onClick={() => navigate("/resume/new")}>
-                  <Plus className="h-4 w-4" /> Créer mon premier CV
+                  <Plus className="h-4 w-4" /> {t("dashboard.createFirstCv", "Créer mon premier CV")}
                 </Button>
                 <Button variant="outline" size="lg" className="gap-2" onClick={() => navigate("/website/new")}>
-                  <Globe className="h-4 w-4" /> Créer un profil public
+                  <Globe className="h-4 w-4" /> {t("dashboard.newProfile")}
                 </Button>
               </div>
             </CardContent>
@@ -465,26 +462,7 @@ const Dashboard = () => {
         )}
 
         {user?.id && (
-          <div className="mt-8 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-            <Card className="border">
-              <CardContent className="p-6">
-                <p className="text-sm font-medium text-foreground">Prochaine action recommandée</p>
-                <h2 className="mt-2 text-xl font-bold text-foreground">
-                  {onboardingProgress.nextItem?.title || "Vous avez atteint le premier niveau d'activation"}
-                </h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {onboardingProgress.nextItem?.description || "Continuez a iterer sur vos CV et sites pour augmenter vos chances de conversion."}
-                </p>
-                {onboardingProgress.nextItem && (
-                  <Button asChild className="mt-4 gap-2">
-                    <Link to={onboardingProgress.nextItem.href}>
-                      {onboardingProgress.nextItem.cta}
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+          <div className="mt-8">
             <FeedbackCard userId={user.id} />
           </div>
         )}
@@ -494,7 +472,6 @@ const Dashboard = () => {
         open={importOpen}
         onOpenChange={setImportOpen}
         onImportSuccess={(resumeData) => {
-          // Store imported data in sessionStorage so resume builder can pick it up
           sessionStorage.setItem("importedResumeData", JSON.stringify(resumeData));
           navigate("/resume/new?imported=1");
         }}
