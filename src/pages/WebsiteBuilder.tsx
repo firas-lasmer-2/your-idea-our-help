@@ -131,7 +131,7 @@ const WebsiteBuilder = () => {
               <div className="flex h-7 w-7 items-center justify-center rounded-md bg-accent">
                 <Globe className="h-4 w-4 text-accent-foreground" />
               </div>
-              <span className="font-bold text-foreground">{wizardDone ? title : "Nouveau site"}</span>
+              <span className="font-bold text-foreground">{wizardDone ? title : t("website.newSite", "Nouveau site")}</span>
             </Link>
           </div>
           {wizardDone && (
