@@ -335,45 +335,80 @@ const Dashboard = () => {
         </div>
 
         {/* Resume list */}
-        {resumes.length > 0 && (
-          <div className="space-y-4 mb-8">
-            <h2 className="text-lg font-semibold text-foreground">{t("dashboard.yourCvs")}</h2>
+        <div className="space-y-4 mb-8">
+          <h2 className="text-lg font-semibold text-foreground">{t("dashboard.yourCvs")}</h2>
+          {resumes.length === 0 ? (
+            <Card className="border border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
+                  <FileText className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-base font-semibold text-foreground">{t("dashboard.noCvYet", "Pas encore de CV")}</h3>
+                <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                  {t("dashboard.noCvDesc", "Créez votre premier CV professionnel en quelques minutes avec l'aide de l'IA.")}
+                </p>
+                <div className="mt-5 flex gap-3">
+                  <Button className="gap-2" onClick={() => navigate("/resume/new")}>
+                    <Plus className="h-4 w-4" /> {t("dashboard.createFirstCv")}
+                  </Button>
+                  <Button variant="outline" className="gap-2" onClick={() => setImportOpen(true)}>
+                    <Upload className="h-4 w-4" /> {t("dashboard.importCv")}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {resumes.map((resume) => {
                 const pct = getResumeCompletionPercent(resume);
+                const isComplete = pct >= 80;
+                const circumference = 2 * Math.PI * 18;
+                const strokeDashoffset = circumference - (pct / 100) * circumference;
                 return (
                   <Card key={resume.id} className="border group hover:shadow-md transition-all">
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          {editingTitle === resume.id ? (
-                            <Input
-                              ref={titleInputRef}
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={() => saveRename(resume.id)}
-                              onKeyDown={(e) => { if (e.key === "Enter") saveRename(resume.id); if (e.key === "Escape") setEditingTitle(null); }}
-                              className="h-7 text-sm font-semibold px-1"
-                            />
-                          ) : (
-                            <h3
-                              className="font-semibold text-foreground group-hover:text-primary transition-colors cursor-pointer truncate"
-                              onClick={() => navigate(`/resume/edit?id=${resume.id}`)}
-                              onDoubleClick={() => startRename(resume.id, resume.title)}
-                              title={t("dashboard.doubleClickRename", "Double-cliquez pour renommer")}
-                            >
-                              {resume.title}
-                            </h3>
-                          )}
-                          <div className="mt-1.5 flex items-center gap-2">
-                            <Badge variant={pct >= 80 ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          {/* Progress Ring */}
+                          <div className="relative h-11 w-11 shrink-0">
+                            <svg viewBox="0 0 40 40" className="h-11 w-11 -rotate-90">
+                              <circle cx="20" cy="20" r="18" fill="none" strokeWidth="3" className="stroke-muted" />
+                              <circle
+                                cx="20" cy="20" r="18" fill="none" strokeWidth="3"
+                                strokeDasharray={circumference}
+                                strokeDashoffset={strokeDashoffset}
+                                strokeLinecap="round"
+                                className={isComplete ? "stroke-primary" : "stroke-accent"}
+                              />
+                            </svg>
+                            <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-bold ${isComplete ? "text-primary" : "text-accent"}`}>
                               {pct}%
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">{t("dashboard.model")}: {resume.template}</span>
+                            </span>
                           </div>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(resume.updated_at, t)}</p>
-                          <div className="mt-2 h-1 w-full rounded-full bg-muted overflow-hidden">
-                            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                          <div className="flex-1 min-w-0">
+                            {editingTitle === resume.id ? (
+                              <Input
+                                ref={titleInputRef}
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onBlur={() => saveRename(resume.id)}
+                                onKeyDown={(e) => { if (e.key === "Enter") saveRename(resume.id); if (e.key === "Escape") setEditingTitle(null); }}
+                                className="h-7 text-sm font-semibold px-1"
+                              />
+                            ) : (
+                              <h3
+                                className="font-semibold text-foreground group-hover:text-primary transition-colors cursor-pointer truncate"
+                                onClick={() => navigate(`/resume/edit?id=${resume.id}`)}
+                                onDoubleClick={() => startRename(resume.id, resume.title)}
+                                title={t("dashboard.doubleClickRename")}
+                              >
+                                {resume.title}
+                              </h3>
+                            )}
+                            <div className="mt-1 flex items-center gap-2">
+                              <span className="text-xs text-muted-foreground">{t("dashboard.model")}: {resume.template}</span>
+                            </div>
+                            <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(resume.updated_at, t)}</p>
                           </div>
                         </div>
                         <DropdownMenu>
@@ -381,7 +416,7 @@ const Dashboard = () => {
                             <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0"><MoreHorizontal className="h-4 w-4" /></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/resume/edit?id=${resume.id}`)}><Edit className="h-4 w-4 mr-2" /> {t("dashboard.edit")}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => navigate(`/resume/edit?id=${resume.id}`)}><Edit className="h-4 w-4 mr-2" /> {isComplete ? t("dashboard.edit") : t("dashboard.continueEditing", "Continuer")}</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => startRename(resume.id, resume.title)}><Edit className="h-4 w-4 mr-2" /> {t("dashboard.rename")}</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => duplicateResume(resume.id)}><Copy className="h-4 w-4 mr-2" /> {t("dashboard.duplicate")}</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => deleteResume(resume.id)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> {t("dashboard.delete")}</DropdownMenuItem>
@@ -393,73 +428,76 @@ const Dashboard = () => {
                 );
               })}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Website list */}
-        {websites.length > 0 && (
-          <div className="space-y-4 mb-8">
-            <h2 className="text-lg font-semibold text-foreground">{t("dashboard.yourSites")}</h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {websites.map((site) => (
-                <Card key={site.id} className="border group hover:shadow-md transition-all">
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 cursor-pointer" onClick={() => navigate(`/website/edit?id=${site.id}`)}>
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-accent" />
-                          <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors">{site.title}</h3>
-                        </div>
-                        <div className="mt-1 flex items-center gap-2">
-                          <p className="text-xs text-muted-foreground">Type: {site.purpose === "portfolio" ? "Portfolio Pro" : "Profil Pro"}</p>
-                          {site.is_published && (
-                            <Badge variant="default" className="text-[10px] px-1.5 py-0">{t("dashboard.published")}</Badge>
-                          )}
-                        </div>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(site.updated_at, t)}</p>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0"><MoreHorizontal className="h-4 w-4" /></Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate(`/website/edit?id=${site.id}`)}><Edit className="h-4 w-4 mr-2" /> {t("dashboard.edit")}</DropdownMenuItem>
-                          {site.is_published && (
-                            <DropdownMenuItem onClick={() => window.open(`/site/${site.id}`, "_blank")}><ExternalLink className="h-4 w-4 mr-2" /> {t("dashboard.visitSite")}</DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem onClick={() => deleteWebsite(site.id)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> {t("dashboard.delete")}</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {resumes.length === 0 && websites.length === 0 && (
-          <Card className="border border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                <span className="text-4xl">🚀</span>
-              </div>
-              <h3 className="mt-6 text-xl font-bold text-foreground">{t("dashboard.welcomeTitle", "Bienvenue sur Resume !")}</h3>
-              <p className="mt-3 max-w-md text-muted-foreground leading-relaxed">
-                {t("dashboard.welcomeDesc", "Vous n'avez pas encore de CV ni de profil public. Commencez par en créer un — notre IA vous accompagne à chaque étape !")}
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button className="gap-2" size="lg" onClick={() => navigate("/resume/new")}>
-                  <Plus className="h-4 w-4" /> {t("dashboard.createFirstCv", "Créer mon premier CV")}
-                </Button>
-                <Button variant="outline" size="lg" className="gap-2" onClick={() => navigate("/website/new")}>
+        <div className="space-y-4 mb-8">
+          <h2 className="text-lg font-semibold text-foreground">{t("dashboard.yourSites")}</h2>
+          {websites.length === 0 ? (
+            <Card className="border border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 mb-4">
+                  <Globe className="h-8 w-8 text-accent" />
+                </div>
+                <h3 className="text-base font-semibold text-foreground">{t("dashboard.noSiteYet", "Pas encore de profil public")}</h3>
+                <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                  {t("dashboard.noSiteDesc", "Créez un profil public pour partager votre candidature en un seul lien. L'IA génère le contenu à partir de votre CV.")}
+                </p>
+                <Button className="mt-5 gap-2" onClick={() => navigate("/website/new")}>
                   <Globe className="h-4 w-4" /> {t("dashboard.newProfile")}
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {websites.map((site) => {
+                const siteUrl = `/site/${site.slug || site.id}`;
+                return (
+                  <Card key={site.id} className="border group hover:shadow-md transition-all">
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/website/edit?id=${site.id}`)}>
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-accent shrink-0" />
+                            <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors truncate">{site.title}</h3>
+                          </div>
+                          <div className="mt-1.5 flex items-center gap-2 flex-wrap">
+                            <Badge variant={site.is_published ? "default" : "secondary"} className="text-[10px] px-1.5 py-0">
+                              {site.is_published ? t("dashboard.published") : t("dashboard.draft")}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">{site.purpose === "portfolio" ? "Portfolio Pro" : "Profil Pro"}</span>
+                          </div>
+                          {site.is_published && (
+                            <p className="mt-1 text-[11px] text-primary truncate">{window.location.origin}{siteUrl}</p>
+                          )}
+                          <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(site.updated_at, t)}</p>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => navigate(`/website/edit?id=${site.id}`)}><Edit className="h-4 w-4 mr-2" /> {t("dashboard.edit")}</DropdownMenuItem>
+                            {site.is_published && (
+                              <>
+                                <DropdownMenuItem onClick={() => window.open(siteUrl, "_blank")}><ExternalLink className="h-4 w-4 mr-2" /> {t("dashboard.visitSite")}</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  navigator.clipboard.writeText(`${window.location.origin}${siteUrl}`);
+                                  toast({ title: t("dashboard.linkCopied") });
+                                }}><Copy className="h-4 w-4 mr-2" /> {t("dashboard.copyLink")}</DropdownMenuItem>
+                              </>
+                            )}
+                            <DropdownMenuItem onClick={() => deleteWebsite(site.id)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> {t("dashboard.delete")}</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
         {user?.id && (
           <div className="mt-8">
