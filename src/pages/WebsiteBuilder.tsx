@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useWebsite } from "@/hooks/use-website";
 import WebsiteWizard from "@/components/website/WebsiteWizard";
 import WebsiteEditor from "@/components/website/WebsiteEditor";
+import WebsiteOnboarding from "@/components/website/WebsiteOnboarding";
 import PublishSuccessDialog from "@/components/website/PublishSuccessDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
@@ -254,6 +255,7 @@ const WebsiteBuilder = () => {
                 </Button>
               )}
               <Button
+                data-tour="publish"
                 variant={isPublished ? "outline" : "default"}
                 size="sm"
                 className="gap-1.5"
@@ -346,6 +348,7 @@ const WebsiteBuilder = () => {
             onUndo={undo}
             onRedo={redo}
           />
+          <WebsiteOnboarding />
         </main>
       )}
 

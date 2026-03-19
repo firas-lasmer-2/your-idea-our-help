@@ -251,7 +251,7 @@ export default function WebsiteEditor({
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)]">
-      <aside className="flex w-80 shrink-0 flex-col border-r bg-background">
+      <aside data-tour="sidebar" className="flex w-80 shrink-0 flex-col border-r bg-background">
         <div className="border-b p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -493,7 +493,7 @@ export default function WebsiteEditor({
         )}
       </section>
 
-      <section className="flex flex-1 flex-col overflow-hidden bg-muted/30">
+      <section data-tour="preview" className="flex flex-1 flex-col overflow-hidden bg-muted/30">
         <div className="flex items-center justify-between border-b bg-background p-2">
           <div className="flex items-center gap-1">
             <Button variant={previewDevice === "desktop" ? "default" : "ghost"} size="icon" className="h-8 w-8" onClick={() => setPreviewDevice("desktop")}>

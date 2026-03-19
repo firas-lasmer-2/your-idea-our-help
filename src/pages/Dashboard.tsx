@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { FileText, Globe, Plus, LogOut, Settings, User, Trash2, Edit, MoreHorizontal, Copy, ExternalLink, CheckCircle2, ArrowRight, Upload, ChevronDown } from "lucide-react";
+import { FileText, Globe, Plus, LogOut, Settings, User, Trash2, Edit, MoreHorizontal, Copy, ExternalLink, CheckCircle2, ArrowRight, Upload, ChevronDown, Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
@@ -50,6 +50,7 @@ const Dashboard = () => {
   const [editValue, setEditValue] = useState("");
   const [importOpen, setImportOpen] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -129,6 +130,18 @@ const Dashboard = () => {
     setWebsites((prev) => prev.filter((w) => w.id !== id));
     toast({ title: t("dashboard.siteDeleted") });
   };
+
+  const quickDownloadPdf = useCallback(async (resumeId: string, resumeTitle: string) => {
+    setDownloadingId(resumeId);
+    try {
+      // Navigate to the resume edit page in a hidden iframe to render the preview, then use html2pdf
+      // Simpler approach: open resume in new tab with ?download=1 param
+      window.open(`/resume/edit?id=${resumeId}&download=1`, "_blank");
+      toast({ title: t("dashboard.downloadStarted", "Téléchargement lancé"), description: t("dashboard.downloadDesc", "Le PDF s'ouvrira dans un nouvel onglet.") });
+    } finally {
+      setTimeout(() => setDownloadingId(null), 1500);
+    }
+  }, [toast, t]);
 
   if (loading) {
     return (
@@ -425,17 +438,30 @@ const Dashboard = () => {
                             <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(resume.updated_at, t)}</p>
                           </div>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0"><MoreHorizontal className="h-4 w-4" /></Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/resume/edit?id=${resume.id}`)}><Edit className="h-4 w-4 mr-2" /> {isComplete ? t("dashboard.edit") : t("dashboard.continueEditing", "Continuer")}</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => startRename(resume.id, resume.title)}><Edit className="h-4 w-4 mr-2" /> {t("dashboard.rename")}</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => duplicateResume(resume.id)}><Copy className="h-4 w-4 mr-2" /> {t("dashboard.duplicate")}</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => deleteResume(resume.id)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> {t("dashboard.delete")}</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 shrink-0"
+                            disabled={downloadingId === resume.id}
+                            onClick={(e) => { e.stopPropagation(); quickDownloadPdf(resume.id, resume.title); }}
+                            title={t("dashboard.downloadPdf", "Télécharger PDF")}
+                          >
+                            {downloadingId === resume.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => navigate(`/resume/edit?id=${resume.id}`)}><Edit className="h-4 w-4 mr-2" /> {isComplete ? t("dashboard.edit") : t("dashboard.continueEditing", "Continuer")}</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => startRename(resume.id, resume.title)}><Edit className="h-4 w-4 mr-2" /> {t("dashboard.rename")}</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => duplicateResume(resume.id)}><Copy className="h-4 w-4 mr-2" /> {t("dashboard.duplicate")}</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => quickDownloadPdf(resume.id, resume.title)}><Download className="h-4 w-4 mr-2" /> {t("dashboard.downloadPdf", "Télécharger PDF")}</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => deleteResume(resume.id)} className="text-destructive focus:text-destructive"><Trash2 className="h-4 w-4 mr-2" /> {t("dashboard.delete")}</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

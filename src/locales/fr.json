@@ -742,6 +742,17 @@
     "certUrl": "URL",
     "addCertification": "Ajouter une certification"
   },
+  "onboarding": {
+    "sidebarTitle": "Sections & Structure",
+    "sidebarDesc": "Organisez vos sections ici. Activez/désactivez-les, réordonnez-les et éditez leur contenu.",
+    "previewTitle": "Aperçu en direct",
+    "previewDesc": "Visualisez le rendu final de votre site en temps réel. Changez de format (mobile, tablette, desktop).",
+    "publishTitle": "Publier votre site",
+    "publishDesc": "Quand tout est prêt, publiez en un clic et partagez votre lien professionnel.",
+    "stepOf": "Étape {{current}} sur {{total}}",
+    "next": "Suivant",
+    "done": "C'est parti !"
+  },
   "common": {
     "error": "Erreur",
     "save": "Sauvegarder",
