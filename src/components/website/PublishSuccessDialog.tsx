@@ -51,11 +51,11 @@ export default function PublishSuccessDialog({ open, onOpenChange, siteUrl, titl
           {/* Share buttons */}
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" className="gap-2" onClick={() => window.open(whatsappUrl, "_blank")}>
-              <MessageCircle className="h-4 w-4 text-green-600" />
+              <MessageCircle className="h-4 w-4" />
               WhatsApp
             </Button>
             <Button variant="outline" className="gap-2" onClick={() => window.open(linkedinUrl, "_blank")}>
-              <Linkedin className="h-4 w-4 text-blue-600" />
+              <Linkedin className="h-4 w-4" />
               LinkedIn
             </Button>
             <Button variant="outline" className="gap-2" onClick={() => window.open(siteUrl, "_blank")}>
