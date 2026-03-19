@@ -422,8 +422,8 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 2 && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Parlez-nous de votre candidature</h2>
-            <p className="mt-1 text-muted-foreground">Le système adaptera la structure à votre métier et à votre pays cible.</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step2Title", "Parlez-nous de votre candidature")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step2Subtitle", "Le système adaptera la structure à votre métier et à votre pays cible.")}</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
