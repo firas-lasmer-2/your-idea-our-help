@@ -490,7 +490,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Recommandé pour préremplir expériences, compétences, langues et coordonnées.
+                  {t("websiteWizard.importRecommended", "Recommandé pour préremplir expériences, compétences, langues et coordonnées.")}
                 </p>
               </div>
             )}
