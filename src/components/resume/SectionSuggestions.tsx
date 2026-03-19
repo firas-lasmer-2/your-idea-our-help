@@ -66,7 +66,7 @@ const SectionSuggestions = ({ data, onEnableSections, visible, onDismiss }: Prop
               if (parsed.suggestions) {
                 setSuggestions(parsed.suggestions);
                 // Pre-select recommended ones
-                const recommended = new Set(
+                const recommended = new Set<string>(
                   parsed.suggestions
                     .filter((s: SectionSuggestion) => s.recommended)
                     .map((s: SectionSuggestion) => s.section)
