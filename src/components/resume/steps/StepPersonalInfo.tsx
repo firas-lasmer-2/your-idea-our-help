@@ -204,6 +204,39 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
             </div>
           </div>
         )}
+
+        {/* Tunisian-specific fields */}
+        {(!data.targetCountry || data.targetCountry === "tunisia") && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="militaryService">Service militaire</Label>
+              <div className="relative">
+                <Shield className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Select value={data.personalInfo.militaryService || ""} onValueChange={(v) => update("militaryService", v)}>
+                  <SelectTrigger className="pl-10">
+                    <SelectValue placeholder="Sélectionner le statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="effectue">Effectué</SelectItem>
+                    <SelectItem value="exempte">Exempté</SelectItem>
+                    <SelectItem value="en_cours">En cours</SelectItem>
+                    <SelectItem value="non_applicable">Non applicable</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cin">CIN (optionnel)</Label>
+              <div className="relative">
+                <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input id="cin" placeholder="08XXXXXX" className="pl-10" value={data.personalInfo.cin || ""} onChange={(e) => update("cin", e.target.value)} />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Certains employeurs tunisiens demandent le numéro CIN.
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Country-specific warning */}

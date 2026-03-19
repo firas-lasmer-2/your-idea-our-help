@@ -182,10 +182,21 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
             Vérifiez votre CV avant de le télécharger.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={onSave} disabled={saving} className="gap-2">
             <Save className="h-4 w-4" />
             {saving ? "Sauvegarde..." : "Sauvegarder"}
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2 text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+            onClick={() => {
+              const text = encodeURIComponent(`Découvrez mon CV créé avec Resume Builder ! 📄`);
+              window.open(`https://wa.me/?text=${text}`, "_blank");
+            }}
+          >
+            <MessageCircle className="h-4 w-4" />
+            WhatsApp
           </Button>
           <Button className="gap-2" onClick={handleDownloadPDF} disabled={downloading || exportBlockers.length > 0}>
             {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
