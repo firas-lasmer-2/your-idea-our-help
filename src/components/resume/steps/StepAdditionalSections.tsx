@@ -3,15 +3,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ResumeData } from "@/types/resume";
 import { FolderOpen, Award, Heart, Star, Globe, Users } from "lucide-react";
-
-const sections = [
-  { value: "projects", label: "Projets", description: "Projets personnels ou académiques", icon: FolderOpen },
-  { value: "certifications", label: "Certifications", description: "Certifications et formations en ligne", icon: Award },
-  { value: "languages", label: "Langues", description: "Langues parlées et niveaux", icon: Globe },
-  { value: "interests", label: "Centres d'intérêt", description: "Loisirs et activités extra-professionnelles", icon: Heart },
-  { value: "volunteer", label: "Bénévolat", description: "Engagement associatif et communautaire", icon: Users },
-  { value: "awards", label: "Prix & Distinctions", description: "Prix, bourses, reconnaissances", icon: Star },
-];
+import { useTranslation } from "react-i18next";
 
 interface Props {
   data: ResumeData;
@@ -19,6 +11,17 @@ interface Props {
 }
 
 const StepAdditionalSections = ({ data, updateData }: Props) => {
+  const { t } = useTranslation();
+
+  const sections = [
+    { value: "projects", label: t("additional.projects", "Projets"), description: t("additional.projectsDesc", "Projets personnels ou académiques"), icon: FolderOpen },
+    { value: "certifications", label: t("additional.certifications", "Certifications"), description: t("additional.certificationsDesc", "Certifications et formations en ligne"), icon: Award },
+    { value: "languages", label: t("additional.languages", "Langues"), description: t("additional.languagesDesc", "Langues parlées et niveaux"), icon: Globe },
+    { value: "interests", label: t("additional.interests", "Centres d'intérêt"), description: t("additional.interestsDesc", "Loisirs et activités extra-professionnelles"), icon: Heart },
+    { value: "volunteer", label: t("additional.volunteer", "Bénévolat"), description: t("additional.volunteerDesc", "Engagement associatif et communautaire"), icon: Users },
+    { value: "awards", label: t("additional.awards", "Prix & Distinctions"), description: t("additional.awardsDesc", "Prix, bourses, reconnaissances"), icon: Star },
+  ];
+
   const toggle = (value: string) => {
     const current = data.additionalSections || [];
     updateData({
@@ -31,9 +34,9 @@ const StepAdditionalSections = ({ data, updateData }: Props) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Sections supplémentaires</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t("additional.title", "Sections supplémentaires")}</h2>
         <p className="mt-1 text-muted-foreground">
-          Activez les sections que vous souhaitez inclure dans votre CV.
+          {t("additional.subtitle", "Activez les sections que vous souhaitez inclure dans votre CV.")}
         </p>
       </div>
 

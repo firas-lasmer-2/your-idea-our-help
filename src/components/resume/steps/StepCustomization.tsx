@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ResumeCustomization } from "@/types/resume";
+import { useTranslation } from "react-i18next";
 
 const accentColors = [
   { value: "#0d9488", label: "Teal" },
@@ -26,19 +27,21 @@ interface Props {
 }
 
 const StepCustomization = ({ customization, updateCustomization }: Props) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Personnalisation</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t("customization.title", "Personnalisation")}</h2>
         <p className="mt-1 text-muted-foreground">
-          Ajustez l'apparence de votre CV à votre goût.
+          {t("customization.subtitle", "Ajustez l'apparence de votre CV à votre goût.")}
         </p>
       </div>
 
       {/* Accent color */}
       <Card className="border">
         <CardContent className="space-y-3 p-5">
-          <Label className="text-base font-semibold">Couleur d'accent</Label>
+          <Label className="text-base font-semibold">{t("customization.accentColor", "Couleur d'accent")}</Label>
           <div className="flex flex-wrap gap-3">
             {accentColors.map((c) => (
               <button
@@ -58,7 +61,7 @@ const StepCustomization = ({ customization, updateCustomization }: Props) => {
       {/* Font */}
       <Card className="border">
         <CardContent className="space-y-3 p-5">
-          <Label className="text-base font-semibold">Police</Label>
+          <Label className="text-base font-semibold">{t("customization.font", "Police")}</Label>
           <RadioGroup value={customization.fontPair} onValueChange={(v) => updateCustomization({ fontPair: v })}>
             {fontPairs.map((f) => (
               <div key={f.value} className="flex items-center gap-3">
@@ -74,8 +77,8 @@ const StepCustomization = ({ customization, updateCustomization }: Props) => {
       <Card className="border">
         <CardContent className="flex items-center justify-between p-5">
           <div>
-            <Label className="text-base font-semibold">Afficher la photo</Label>
-            <p className="text-sm text-muted-foreground">Inclure une photo sur le CV</p>
+            <Label className="text-base font-semibold">{t("customization.showPhoto", "Afficher la photo")}</Label>
+            <p className="text-sm text-muted-foreground">{t("customization.showPhotoDesc", "Inclure une photo sur le CV")}</p>
           </div>
           <Switch checked={customization.showPhoto} onCheckedChange={(v) => updateCustomization({ showPhoto: v })} />
         </CardContent>
@@ -84,13 +87,13 @@ const StepCustomization = ({ customization, updateCustomization }: Props) => {
       {/* Spacing */}
       <Card className="border">
         <CardContent className="space-y-3 p-5">
-          <Label className="text-base font-semibold">Espacement</Label>
+          <Label className="text-base font-semibold">{t("customization.spacing", "Espacement")}</Label>
           <RadioGroup value={customization.spacing} onValueChange={(v) => updateCustomization({ spacing: v })}>
             <div className="flex gap-4">
               {[
-                { value: "compact", label: "Compact" },
-                { value: "normal", label: "Normal" },
-                { value: "spacious", label: "Aéré" },
+                { value: "compact", label: t("customization.compact", "Compact") },
+                { value: "normal", label: t("customization.normal", "Normal") },
+                { value: "spacious", label: t("customization.spacious", "Aéré") },
               ].map((s) => (
                 <div key={s.value} className="flex items-center gap-2">
                   <RadioGroupItem value={s.value} id={`spacing-${s.value}`} />

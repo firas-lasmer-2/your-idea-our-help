@@ -4,15 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { FileText, ArrowLeft, User, Lock, Loader2, Check, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const auth = supabase.auth as any;
 
 const Settings = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
@@ -32,7 +33,6 @@ const Settings = () => {
       if (!session) { navigate("/login"); return; }
       setUser(session.user);
 
-      // Load profile
       const { data: profile } = await (supabase as any)
         .from("profiles")
         .select("full_name")
@@ -58,19 +58,19 @@ const Settings = () => {
     setProfileSaving(false);
 
     if (error) {
-      toast({ title: "Erreur", description: "Impossible de mettre à jour le profil.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("settings.updateError", "Impossible de mettre à jour le profil."), variant: "destructive" });
     } else {
-      toast({ title: "Profil mis à jour ✅", description: "Vos modifications ont été enregistrées." });
+      toast({ title: t("settings.profileUpdated", "Profil mis à jour ✅"), description: t("settings.changesSaved", "Vos modifications ont été enregistrées.") });
     }
   };
 
   const handleChangePassword = async () => {
     if (newPassword.length < 6) {
-      toast({ title: "Mot de passe trop court", description: "Le mot de passe doit contenir au moins 6 caractères.", variant: "destructive" });
+      toast({ title: t("settings.passwordTooShort", "Mot de passe trop court"), description: t("settings.minChars", "Le mot de passe doit contenir au moins 6 caractères."), variant: "destructive" });
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast({ title: "Erreur", description: "Les mots de passe ne correspondent pas.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("settings.passwordMismatch", "Les mots de passe ne correspondent pas."), variant: "destructive" });
       return;
     }
 
@@ -79,9 +79,9 @@ const Settings = () => {
     setPasswordSaving(false);
 
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Mot de passe modifié ✅", description: "Votre nouveau mot de passe a été enregistré." });
+      toast({ title: t("settings.passwordChanged", "Mot de passe modifié ✅"), description: t("settings.passwordSaved", "Votre nouveau mot de passe a été enregistré.") });
       setNewPassword("");
       setConfirmPassword("");
     }
@@ -103,7 +103,6 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
         <div className="container flex h-14 items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} className="h-8 w-8">
@@ -120,11 +119,10 @@ const Settings = () => {
 
       <main className="container max-w-2xl py-8 space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Paramètres du compte</h1>
-          <p className="mt-1 text-muted-foreground">Gérez votre profil et vos préférences.</p>
+          <h1 className="text-2xl font-bold text-foreground">{t("settings.title", "Paramètres du compte")}</h1>
+          <p className="mt-1 text-muted-foreground">{t("settings.subtitle", "Gérez votre profil et vos préférences.")}</p>
         </div>
 
-        {/* Profile section */}
         <Card className="border">
           <CardHeader>
             <div className="flex items-center gap-4">
@@ -135,7 +133,7 @@ const Settings = () => {
               </Avatar>
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" /> Profil
+                  <User className="h-5 w-5" /> {t("settings.profile", "Profil")}
                 </CardTitle>
                 <CardDescription>{user?.email}</CardDescription>
               </div>
@@ -143,62 +141,61 @@ const Settings = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Nom complet</Label>
+              <Label htmlFor="fullName">{t("settings.fullName", "Nom complet")}</Label>
               <Input
                 id="fullName"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Votre nom complet"
+                placeholder={t("settings.fullNamePlaceholder", "Votre nom complet")}
               />
             </div>
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>{t("settings.email", "Email")}</Label>
               <Input value={user?.email || ""} disabled className="bg-muted" />
-              <p className="text-xs text-muted-foreground">L'adresse email ne peut pas être modifiée.</p>
+              <p className="text-xs text-muted-foreground">{t("settings.emailCantChange", "L'adresse email ne peut pas être modifiée.")}</p>
             </div>
             <Button onClick={handleSaveProfile} disabled={profileSaving} className="gap-2">
               {profileSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              Enregistrer
+              {t("settings.save", "Enregistrer")}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Password section */}
         <Card className="border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" /> Mot de passe
+              <Lock className="h-5 w-5" /> {t("settings.password", "Mot de passe")}
             </CardTitle>
             <CardDescription>
               {isGoogleUser
-                ? "Vous êtes connecté avec Google. Vous pouvez définir un mot de passe pour aussi vous connecter par email."
-                : "Modifiez votre mot de passe de connexion."
+                ? t("settings.googlePassword", "Vous êtes connecté avec Google. Vous pouvez définir un mot de passe pour aussi vous connecter par email.")
+                : t("settings.changePasswordDesc", "Modifiez votre mot de passe de connexion.")
               }
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+              <Label htmlFor="newPassword">{t("settings.newPassword", "Nouveau mot de passe")}</Label>
               <Input
                 id="newPassword"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Au moins 6 caractères"
+                placeholder={t("settings.atLeast6", "Au moins 6 caractères")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+              <Label htmlFor="confirmPassword">{t("settings.confirmPassword", "Confirmer le mot de passe")}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Répétez le mot de passe"
+                placeholder={t("settings.repeatPassword", "Répétez le mot de passe")}
               />
               {confirmPassword && newPassword !== confirmPassword && (
                 <p className="flex items-center gap-1 text-xs text-destructive">
-                  <AlertCircle className="h-3 w-3" /> Les mots de passe ne correspondent pas.
+                  <AlertCircle className="h-3 w-3" /> {t("settings.passwordMismatch")}
                 </p>
               )}
             </div>
@@ -209,16 +206,15 @@ const Settings = () => {
               className="gap-2"
             >
               {passwordSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-              Changer le mot de passe
+              {t("settings.changePassword", "Changer le mot de passe")}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Danger zone */}
         <Card className="border border-destructive/20">
           <CardHeader>
-            <CardTitle className="text-destructive">Zone de danger</CardTitle>
-            <CardDescription>Actions irréversibles sur votre compte.</CardDescription>
+            <CardTitle className="text-destructive">{t("settings.dangerZone", "Zone de danger")}</CardTitle>
+            <CardDescription>{t("settings.dangerDesc", "Actions irréversibles sur votre compte.")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button
@@ -226,12 +222,12 @@ const Settings = () => {
               size="sm"
               onClick={() => {
                 toast({
-                  title: "Fonctionnalité à venir",
-                  description: "La suppression de compte sera disponible prochainement.",
+                  title: t("settings.comingSoon", "Fonctionnalité à venir"),
+                  description: t("settings.deleteComingSoon", "La suppression de compte sera disponible prochainement."),
                 });
               }}
             >
-              Supprimer mon compte
+              {t("settings.deleteAccount", "Supprimer mon compte")}
             </Button>
           </CardContent>
         </Card>

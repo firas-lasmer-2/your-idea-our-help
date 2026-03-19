@@ -8,57 +8,31 @@ import ResumePreview from "@/components/resume/ResumePreview";
 import { ResumeData, ResumeCustomization } from "@/types/resume";
 import { getRecommendedResumeTemplate, getResumeTemplateMeta } from "@/lib/template-recommendations";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const templates = [
-  {
-    id: "essentiel",
-    name: "Essentiel",
-    description: "ATS-first, direct et tres lisible. Ideal pour les candidatures terrain et generalistes.",
-    badge: "Populaire",
-  },
-  {
-    id: "horizon",
-    name: "Horizon",
-    description: "Equilibre entre modernite, clarte et securite ATS pour la plupart des profils.",
-    badge: null,
-  },
-  {
-    id: "trajectoire",
-    name: "Trajectoire",
-    description: "Montre clairement l'evolution de carriere, les promotions et la progression.",
-    badge: null,
-  },
-  {
-    id: "direction",
-    name: "Direction",
-    description: "Plus premium et plus pose. Pense pour les profils seniors et corporate.",
-    badge: null,
-  },
-  {
-    id: "signature",
-    name: "Signature",
-    description: "Ajoute de la personnalite sans tomber dans un style trop risque.",
-    badge: null,
-  },
-  {
-    id: "academique",
-    name: "Académique",
-    description: "Formation et publications en priorité. Idéal pour les candidatures universitaires et la recherche.",
-    badge: "Nouveau",
-  },
-  {
-    id: "medical",
-    name: "Médical",
-    description: "Certifications et expérience clinique mises en avant pour les professionnels de santé.",
-    badge: "Nouveau",
-  },
-  {
-    id: "technique",
-    name: "Technique",
-    description: "Permis, licences et compétences terrain en priorité pour les métiers manuels.",
-    badge: "Nouveau",
-  },
+  { id: "essentiel", name: "Essentiel", descKey: "template.essentielDesc", badge: "template.popular" },
+  { id: "horizon", name: "Horizon", descKey: "template.horizonDesc", badge: null },
+  { id: "trajectoire", name: "Trajectoire", descKey: "template.trajectoireDesc", badge: null },
+  { id: "direction", name: "Direction", descKey: "template.directionDesc", badge: null },
+  { id: "signature", name: "Signature", descKey: "template.signatureDesc", badge: null },
+  { id: "academique", name: "Académique", descKey: "template.academiqueDesc", badge: "template.new" },
+  { id: "medical", name: "Médical", descKey: "template.medicalDesc", badge: "template.new" },
+  { id: "technique", name: "Technique", descKey: "template.techniqueDesc", badge: "template.new" },
 ];
+
+const templateDescDefaults: Record<string, string> = {
+  "template.essentielDesc": "ATS-first, direct et très lisible. Idéal pour les candidatures terrain et généralistes.",
+  "template.horizonDesc": "Équilibre entre modernité, clarté et sécurité ATS pour la plupart des profils.",
+  "template.trajectoireDesc": "Montre clairement l'évolution de carrière, les promotions et la progression.",
+  "template.directionDesc": "Plus premium et plus posé. Pensé pour les profils seniors et corporate.",
+  "template.signatureDesc": "Ajoute de la personnalité sans tomber dans un style trop risqué.",
+  "template.academiqueDesc": "Formation et publications en priorité. Idéal pour les candidatures universitaires et la recherche.",
+  "template.medicalDesc": "Certifications et expérience clinique mises en avant pour les professionnels de santé.",
+  "template.techniqueDesc": "Permis, licences et compétences terrain en priorité pour les métiers manuels.",
+  "template.popular": "Populaire",
+  "template.new": "Nouveau",
+};
 
 // Fake sample data for realistic mini-previews
 const sampleData: ResumeData = {
@@ -126,6 +100,7 @@ interface Props {
 }
 
 const StepTemplate = ({ data, template, setTemplate }: Props) => {
+  const { t } = useTranslation();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [previewTemplateId, setPreviewTemplateId] = useState<string | null>(null);
   const recommended = getRecommendedResumeTemplate({
@@ -145,18 +120,18 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
   const advancedTemplates = templates.filter((entry) => !primaryTemplateIds.includes(entry.id));
   const previewTemplateIdSafe = previewTemplateId || template;
 
-  const renderTemplateCard = (t: typeof templates[number]) => {
-    const meta = getResumeTemplateMeta(t.id);
-    const isRecommended = recommended.id === t.id;
+  const renderTemplateCard = (tpl: typeof templates[number]) => {
+    const meta = getResumeTemplateMeta(tpl.id);
+    const isRecommended = recommended.id === tpl.id;
 
     return (
       <Card
-        key={t.id}
+        key={tpl.id}
         className={cn(
           "cursor-pointer border-2 transition-all hover:shadow-lg group",
-          template === t.id ? "border-primary shadow-md" : "border-border hover:border-primary/30"
+          template === tpl.id ? "border-primary shadow-md" : "border-border hover:border-primary/30"
         )}
-        onClick={() => setTemplate(t.id)}
+        onClick={() => setTemplate(tpl.id)}
       >
         <div className="relative overflow-hidden bg-white" style={{ height: "320px" }}>
           <div
@@ -168,12 +143,12 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
               pointerEvents: "none",
             }}
           >
-            <ResumePreview data={previewData} customization={sampleCustomization} template={t.id} />
+            <ResumePreview data={previewData} customization={sampleCustomization} template={tpl.id} />
           </div>
 
           <div className={cn(
             "absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity",
-            template === t.id && "opacity-100 bg-primary/10"
+            template === tpl.id && "opacity-100 bg-primary/10"
           )} />
 
           <div className="absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-black/55 to-transparent px-3 py-3 opacity-0 transition-opacity group-hover:opacity-100">
@@ -183,40 +158,40 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
               className="gap-1.5"
               onClick={(event) => {
                 event.stopPropagation();
-                setPreviewTemplateId(t.id);
+                setPreviewTemplateId(tpl.id);
               }}
             >
               <Eye className="h-4 w-4" />
-              Voir en grand
+              {t("template.viewLarge", "Voir en grand")}
             </Button>
           </div>
 
-          {template === t.id && (
+          {template === tpl.id && (
             <div className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary shadow-md">
               <Check className="h-4 w-4 text-primary-foreground" />
             </div>
           )}
 
-          {(t.badge || isRecommended) && (
+          {(tpl.badge || isRecommended) && (
             <Badge className={cn(
               "absolute left-2 top-2 text-[10px] pointer-events-none",
               isRecommended
                 ? "bg-primary text-primary-foreground"
-                : t.badge === "Nouveau"
+                : tpl.badge === "template.new"
                   ? "bg-accent text-accent-foreground"
                   : "bg-primary text-primary-foreground"
             )}>
-              {isRecommended ? "Recommandé" : t.badge}
+              {isRecommended ? t("template.recommended", "Recommandé") : t(tpl.badge!, templateDescDefaults[tpl.badge!])}
             </Badge>
           )}
         </div>
 
         <CardContent className="space-y-3 p-4">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-sm text-foreground">{t.name}</h3>
-            {template === t.id && <Badge variant="outline" className="text-[10px]">Sélectionné</Badge>}
+            <h3 className="font-semibold text-sm text-foreground">{tpl.name}</h3>
+            {template === tpl.id && <Badge variant="outline" className="text-[10px]">{t("template.selected", "Sélectionné")}</Badge>}
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">{t.description}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">{t(tpl.descKey, templateDescDefaults[tpl.descKey])}</p>
           {meta && (
             <div className="space-y-2 text-xs">
               <div className="flex flex-wrap gap-2">
@@ -224,9 +199,9 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
                 <Badge variant="outline" className="text-[10px]">{meta.atsLabel}</Badge>
                 <Badge variant="outline" className="text-[10px]">{meta.density}</Badge>
               </div>
-              <p className="text-muted-foreground"><span className="font-medium text-foreground">Idéal pour:</span> {meta.bestFor}</p>
-              <p className="text-muted-foreground"><span className="font-medium text-foreground">Met l'accent sur:</span> {meta.emphasis}</p>
-              <p className="text-muted-foreground"><span className="font-medium text-foreground">Photo:</span> {meta.photoLabel}</p>
+              <p className="text-muted-foreground"><span className="font-medium text-foreground">{t("template.idealFor", "Idéal pour")}:</span> {meta.bestFor}</p>
+              <p className="text-muted-foreground"><span className="font-medium text-foreground">{t("template.emphasizes", "Met l'accent sur")}:</span> {meta.emphasis}</p>
+              <p className="text-muted-foreground"><span className="font-medium text-foreground">{t("template.photo", "Photo")}:</span> {meta.photoLabel}</p>
             </div>
           )}
         </CardContent>
@@ -237,9 +212,9 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Choisissez un modèle</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t("template.chooseTitle", "Choisissez un modèle")}</h2>
         <p className="mt-1 text-muted-foreground">
-          Commencez par la famille recommandée, puis comparez les autres si vous voulez une presentation plus senior ou plus marquee.
+          {t("template.chooseSubtitle", "Commencez par la famille recommandée, puis comparez les autres si vous voulez une présentation plus senior ou plus marquée.")}
         </p>
       </div>
 
@@ -248,7 +223,7 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
-              <p className="text-sm font-semibold text-foreground">Recommandé pour votre profil</p>
+              <p className="text-sm font-semibold text-foreground">{t("template.recommendedForProfile", "Recommandé pour votre profil")}</p>
             </div>
             <p className="mt-1 text-sm text-foreground">{recommended.meta.label}</p>
             <p className="mt-1 text-xs text-muted-foreground">{recommended.reason}</p>
@@ -259,7 +234,7 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
               className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
               onClick={() => setTemplate(recommended.id)}
             >
-              Utiliser le recommandé
+              {t("template.useRecommended", "Utiliser le recommandé")}
             </button>
           )}
         </CardContent>
@@ -267,9 +242,9 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
 
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Choix rapides</h3>
+          <h3 className="text-sm font-semibold text-foreground">{t("template.quickPicks", "Choix rapides")}</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Les familles les plus sures pour la majorite des candidatures.
+            {t("template.quickPicksDesc", "Les familles les plus sûres pour la majorité des candidatures.")}
           </p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -285,9 +260,9 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
             onClick={() => setShowAdvanced((value) => !value)}
           >
             <div>
-              <h3 className="text-sm font-semibold text-foreground">Plus de modèles</h3>
+              <h3 className="text-sm font-semibold text-foreground">{t("template.moreTemplates", "Plus de modèles")}</h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                Styles specialises pour profils seniors, academiques, medicaux ou techniques.
+                {t("template.moreTemplatesDesc", "Styles spécialisés pour profils seniors, académiques, médicaux ou techniques.")}
               </p>
             </div>
             <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", showAdvanced && "rotate-180")} />
@@ -318,7 +293,7 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
                 setPreviewTemplateId(null);
               }}
             >
-              Utiliser ce modèle
+              {t("template.useThis", "Utiliser ce modèle")}
             </Button>
           </div>
         </DialogContent>

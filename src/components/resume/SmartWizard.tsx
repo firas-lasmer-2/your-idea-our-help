@@ -14,6 +14,7 @@ import {
   type ExperienceLevel,
 } from "@/lib/country-standards";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface WizardResult {
   targetCountry: TargetCountry;
@@ -28,20 +29,21 @@ interface Props {
   expressMode?: boolean;
 }
 
-const EXPERIENCE_LEVELS: { id: ExperienceLevel; label: string; desc: string; icon: string }[] = [
-  { id: "none", label: "Pas d'expérience", desc: "Étudiant ou premier emploi", icon: "🎓" },
-  { id: "1-3", label: "1 à 3 ans", desc: "Début de carrière", icon: "🌱" },
-  { id: "3-10", label: "3 à 10 ans", desc: "Expérience confirmée", icon: "💪" },
-  { id: "10+", label: "Plus de 10 ans", desc: "Expert / Senior", icon: "⭐" },
-];
-
 const SmartWizard = ({ onComplete, onSkip, expressMode = false }: Props) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [country, setCountry] = useState<TargetCountry | null>(null);
   const [jobField, setJobField] = useState<JobField | null>(null);
   const [jobTitle, setJobTitle] = useState("");
   const [jobSearch, setJobSearch] = useState("");
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel | null>(null);
+
+  const EXPERIENCE_LEVELS: { id: ExperienceLevel; label: string; desc: string; icon: string }[] = [
+    { id: "none", label: t("resume.noExperience"), desc: t("wizard.noneDesc", "Étudiant ou premier emploi"), icon: "🎓" },
+    { id: "1-3", label: t("resume.exp1to3"), desc: t("wizard.juniorDesc", "Début de carrière"), icon: "🌱" },
+    { id: "3-10", label: t("resume.exp3to10"), desc: t("wizard.midDesc", "Expérience confirmée"), icon: "💪" },
+    { id: "10+", label: t("resume.exp10plus"), desc: t("wizard.seniorDesc", "Expert / Senior"), icon: "⭐" },
+  ];
 
   const allJobs = useMemo(() => getAllJobs(), []);
   const filteredJobs = useMemo(() => {
@@ -81,17 +83,17 @@ const SmartWizard = ({ onComplete, onSkip, expressMode = false }: Props) => {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-4">
             <Sparkles className="h-4 w-4" />
-            {expressMode ? "CV Express — prêt en 2 minutes" : "Assistant intelligent"}
+            {expressMode ? t("wizard.expressMode", "CV Express — prêt en 2 minutes") : t("wizard.smartAssistant", "Assistant intelligent")}
           </div>
           <h1 className="text-3xl font-bold text-foreground">
-            {step === 0 && "Où postulez-vous ?"}
-            {step === 1 && "Quel est votre métier ?"}
-            {step === 2 && "Quelle est votre expérience ?"}
+            {step === 0 && t("wizard.step0Title", "Où postulez-vous ?")}
+            {step === 1 && t("wizard.step1Title", "Quel est votre métier ?")}
+            {step === 2 && t("wizard.step2Title", "Quelle est votre expérience ?")}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            {step === 0 && "Chaque pays a ses propres standards de CV. On s'adapte pour vous."}
-            {step === 1 && "On adaptera le contenu et les compétences à votre domaine."}
-            {step === 2 && "Pour adapter le ton et le contenu de votre CV."}
+            {step === 0 && t("wizard.step0Desc", "Chaque pays a ses propres standards de CV. On s'adapte pour vous.")}
+            {step === 1 && t("wizard.step1Desc", "On adaptera le contenu et les compétences à votre domaine.")}
+            {step === 2 && t("wizard.step2Desc", "Pour adapter le ton et le contenu de votre CV.")}
           </p>
         </div>
 
@@ -127,7 +129,7 @@ const SmartWizard = ({ onComplete, onSkip, expressMode = false }: Props) => {
                       <div>
                         <p className="font-semibold text-foreground">{c.label}</p>
                         <p className="text-xs text-muted-foreground">
-                          {c.showPhoto ? "Photo: Oui" : "Photo: Non"} · Max {c.maxPages} page{c.maxPages > 1 ? "s" : ""}
+                          {t("wizard.photo", "Photo")}: {c.showPhoto ? t("wizard.yes", "Oui") : t("wizard.no", "Non")} · Max {c.maxPages} {t("wizard.pages", "page(s)")}
                         </p>
                       </div>
                     </CardContent>
@@ -142,7 +144,7 @@ const SmartWizard = ({ onComplete, onSkip, expressMode = false }: Props) => {
                 <div className="relative">
                   <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Tapez votre métier (ex: Chauffeur, Développeur, Infirmier...)"
+                    placeholder={t("wizard.jobSearchPlaceholder", "Tapez votre métier (ex: Chauffeur, Développeur, Infirmier...)")}
                     className="pl-10 h-12 text-base"
                     value={jobSearch}
                     onChange={e => {
@@ -171,7 +173,7 @@ const SmartWizard = ({ onComplete, onSkip, expressMode = false }: Props) => {
                 </div>
 
                 {/* Category grid */}
-                <p className="text-sm text-muted-foreground font-medium">Ou choisissez un domaine :</p>
+                <p className="text-sm text-muted-foreground font-medium">{t("wizard.orChooseDomain", "Ou choisissez un domaine :")}</p>
                 <div className="grid gap-2 grid-cols-2 sm:grid-cols-4">
                   {JOB_CATEGORIES.map(cat => (
                     <button
@@ -244,22 +246,22 @@ const SmartWizard = ({ onComplete, onSkip, expressMode = false }: Props) => {
           <div>
             {step > 0 ? (
               <Button variant="ghost" onClick={() => setStep(step - 1)} className="gap-2">
-                <ArrowLeft className="h-4 w-4" /> Retour
+                <ArrowLeft className="h-4 w-4" /> {t("common.back")}
               </Button>
             ) : (
               <Button variant="ghost" onClick={onSkip} className="text-muted-foreground">
-                Passer cette étape
+                {t("wizard.skip", "Passer cette étape")}
               </Button>
             )}
           </div>
           <Button onClick={next} disabled={!canNext()} className="gap-2" size="lg">
             {step === 2 ? (
               <>
-                {expressMode ? "Générer mon CV" : "Commencer"} <Sparkles className="h-4 w-4" />
+                {expressMode ? t("wizard.generateCv", "Générer mon CV") : t("wizard.start", "Commencer")} <Sparkles className="h-4 w-4" />
               </>
             ) : (
               <>
-                Suivant <ArrowRight className="h-4 w-4" />
+                {t("resume.next")} <ArrowRight className="h-4 w-4" />
               </>
             )}
           </Button>
@@ -268,7 +270,7 @@ const SmartWizard = ({ onComplete, onSkip, expressMode = false }: Props) => {
         {/* Country tips */}
         {step === 0 && country && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 rounded-lg border bg-muted/50 p-4">
-            <p className="text-xs font-semibold text-foreground mb-2">💡 Conseils pour {COUNTRY_STANDARDS[country].label} :</p>
+            <p className="text-xs font-semibold text-foreground mb-2">💡 {t("wizard.tipsFor", "Conseils pour")} {COUNTRY_STANDARDS[country].label} :</p>
             <ul className="space-y-1">
               {COUNTRY_STANDARDS[country].tips.map((tip, i) => (
                 <li key={i} className="text-xs text-muted-foreground flex gap-2">
