@@ -16,6 +16,7 @@ import type { WebsiteCandidateProfile, WebsiteGlobalSettings, WebsiteSection, We
 const auth = supabase.auth as any;
 
 const WebsiteBuilder = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const websiteId = searchParams.get("id") || undefined;
   const navigate = useNavigate();
