@@ -236,7 +236,8 @@
     "step4Desc": "Vérifiez votre score de compatibilité ATS, générez une lettre de motivation, et téléchargez en PDF.",
     "skip": "Passer",
     "next": "Suivant",
-    "letsGo": "C'est parti !"
+    "letsGo": "C'est parti !",
+    "stepOf": "Étape {{current}} / {{total}}"
   },
   "website": {
     "newSite": "Nouveau site",
