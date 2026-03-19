@@ -6,7 +6,10 @@ export type ResumeTemplateId =
   | "horizon"
   | "trajectoire"
   | "direction"
-  | "signature";
+  | "signature"
+  | "academique"
+  | "medical"
+  | "technique";
 
 export type WebsiteTemplateId =
   | "profile-clean"
@@ -104,6 +107,36 @@ const RESUME_TEMPLATE_META: Record<ResumeTemplateId, ResumeTemplateMeta> = {
     density: "equilibre",
     photoLabel: "photo recommandee si le marche l'accepte",
   },
+  academique: {
+    id: "academique",
+    label: "Académique",
+    styleLabel: "Universitaire et recherche",
+    bestFor: "enseignants, chercheurs, doctorants, candidatures universitaires",
+    emphasis: "formation, publications, recherche, diplomes",
+    atsLabel: "ATS fort",
+    density: "equilibre",
+    photoLabel: "photo optionnelle",
+  },
+  medical: {
+    id: "medical",
+    label: "Médical",
+    styleLabel: "Santé et clinique",
+    bestFor: "medecins, infirmiers, pharmaciens, profils de sante",
+    emphasis: "certifications, experience clinique, diplomes medicaux",
+    atsLabel: "ATS fort",
+    density: "equilibre",
+    photoLabel: "photo optionnelle",
+  },
+  technique: {
+    id: "technique",
+    label: "Technique",
+    styleLabel: "Métiers terrain et manuels",
+    bestFor: "batiment, electricite, mecanique, metiers avec permis et licences",
+    emphasis: "permis, certifications, experience terrain, competences pratiques",
+    atsLabel: "ATS maximal",
+    density: "compact",
+    photoLabel: "photo optionnelle",
+  },
 };
 
 const WEBSITE_TEMPLATE_META: Record<WebsiteTemplateId, WebsiteTemplateMeta> = {
@@ -189,11 +222,23 @@ export function getRecommendedResumeTemplate(input: {
   const isCreativeRole = /design|designer|graph|ux|ui|brand|contenu|content|social/i.test(title);
   const isSalesOrMarketing = /marketing|commercial|sales|vente|communication/i.test(title);
   const isExecutiveRole = /director|directeur|manager|head|lead|responsable|chef/i.test(title);
+  const isAcademicRole = /professeur|chercheur|enseignant|doctorant|research|university|universite|teacher|lecturer/i.test(title);
+  const isMedicalRole = /medecin|docteur|infirmier|pharmacien|dentiste|kinesitherapeut|sage.femme|nurse|physician|doctor/i.test(title);
+  const isTradeRole = /electricien|plombier|mecanicien|soudeur|charpentier|macon|technicien|ouvrier|installateur/i.test(title);
 
   let id: ResumeTemplateId = "horizon";
   let reason = "Le meilleur equilibre entre lisibilite, professionnalisme et modernite.";
 
-  if (level === "10+" || isExecutiveRole) {
+  if (isAcademicRole || field === "education") {
+    id = "academique";
+    reason = "Recommande pour un profil academique qui met en avant formation, publications et recherche.";
+  } else if (isMedicalRole || field === "healthcare") {
+    id = "medical";
+    reason = "Recommande pour un professionnel de sante avec certifications et experience clinique en priorite.";
+  } else if (isTradeRole || field === "construction") {
+    id = "technique";
+    reason = "Recommande pour un metier technique ou les permis, licences et competences terrain sont prioritaires.";
+  } else if (level === "10+" || isExecutiveRole) {
     id = "direction";
     reason = "Recommande pour une posture senior, plus premium et plus strategique.";
   } else if (isCreativeRole || isSalesOrMarketing) {
@@ -202,15 +247,12 @@ export function getRecommendedResumeTemplate(input: {
   } else if (field === "tech" && (level === "3-10" || /architect|senior|engineer/i.test(title))) {
     id = "trajectoire";
     reason = "Recommande pour montrer clairement la progression, les promotions et les projets.";
-  } else if (field === "transport" || field === "healthcare" || field === "construction" || field === "hospitality") {
+  } else if (field === "transport" || field === "hospitality") {
     id = "essentiel";
     reason = "Recommande pour un metier terrain ou les recruteurs veulent surtout une lecture rapide et fiable.";
   } else if (field === "business" && (country === "germany" || country === "tunisia")) {
     id = "direction";
     reason = "Recommande pour un profil business ou corporate qui demande plus de credibilite visuelle.";
-  } else if (field === "education") {
-    id = "essentiel";
-    reason = "Recommande pour une candidature sobre, claire et facile a lire.";
   } else if (country === "canada" || country === "usa") {
     id = "horizon";
     reason = "Recommande pour une candidature internationale simple et ATS-friendly.";
