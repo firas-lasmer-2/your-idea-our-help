@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface CounterProps {
   end: number;
@@ -47,12 +48,14 @@ const AnimatedCounter = ({ end, suffix = "", label }: CounterProps) => {
 };
 
 const StatsCounter = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-      <AnimatedCounter end={5200} suffix="+" label="CV créés" />
-      <AnimatedCounter end={92} suffix="%" label="Score ATS moyen" />
-      <AnimatedCounter end={850} suffix="+" label="Sites web générés" />
-      <AnimatedCounter end={4} suffix=".8★" label="Note utilisateurs" />
+      <AnimatedCounter end={5200} suffix="+" label={t("stats.cvCreated")} />
+      <AnimatedCounter end={92} suffix="%" label={t("stats.atsScore")} />
+      <AnimatedCounter end={850} suffix="+" label={t("stats.websitesGenerated")} />
+      <AnimatedCounter end={4} suffix=".8★" label={t("stats.userRating")} />
     </div>
   );
 };

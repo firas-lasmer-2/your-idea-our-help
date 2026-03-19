@@ -4,35 +4,20 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-const faqs = [
-  {
-    q: "Est-ce vraiment gratuit ?",
-    a: "Oui ! Le plan gratuit vous permet de créer 1 CV avec 3 téléchargements par mois, 1 profil public, et 20 requêtes IA par jour. C'est largement suffisant pour créer votre premier CV professionnel.",
-  },
-  {
-    q: "Qu'est-ce que le score ATS ?",
-    a: "ATS (Applicant Tracking System) est le logiciel utilisé par les recruteurs pour filtrer automatiquement les CV. Notre score ATS analyse votre CV selon les mêmes critères que ces logiciels et vous donne des recommandations pour augmenter vos chances de passer le filtre.",
-  },
-  {
-    q: "Puis-je exporter mon CV en PDF ?",
-    a: "Absolument ! Vous pouvez télécharger votre CV en PDF haute qualité, prêt à envoyer par email ou à uploader sur LinkedIn, Tanitjobs, ou Emploi.tn.",
-  },
-  {
-    q: "L'IA écrit-elle vraiment bien en français ?",
-    a: "Oui, notre IA est optimisée pour le français professionnel. Elle transforme vos descriptions simples en bullet points quantifiés et impactants, adaptés au marché tunisien et international.",
-  },
-  {
-    q: "Mes données sont-elles sécurisées ?",
-    a: "Vos données sont stockées de manière sécurisée et ne sont jamais partagées avec des tiers. Vous pouvez supprimer votre compte et toutes vos données à tout moment.",
-  },
-  {
-    q: "Puis-je matcher mon CV avec une offre d'emploi ?",
-    a: "Oui ! Collez la description du poste et notre IA compare les mots-clés avec votre CV. Vous obtenez un score de correspondance et les compétences manquantes à ajouter.",
-  },
-];
+import { useTranslation } from "react-i18next";
 
 const FAQ = () => {
+  const { t } = useTranslation();
+
+  const faqs = [
+    { q: t("faq.q1"), a: t("faq.a1") },
+    { q: t("faq.q2"), a: t("faq.a2") },
+    { q: t("faq.q3"), a: t("faq.a3") },
+    { q: t("faq.q4"), a: t("faq.a4") },
+    { q: t("faq.q5"), a: t("faq.a5") },
+    { q: t("faq.q6"), a: t("faq.a6") },
+  ];
+
   return (
     <Accordion type="single" collapsible className="w-full">
       {faqs.map((faq, i) => (

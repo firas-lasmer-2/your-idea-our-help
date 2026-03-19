@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 const auth = supabase.auth as any;
 import { useToast } from "@/hooks/use-toast";
 import { captureAcquisitionSource, ensureGrowthProfile, trackProductEvent } from "@/lib/product-events";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,6 +19,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     captureAcquisitionSource();
@@ -29,9 +32,9 @@ const Login = () => {
     setLoading(false);
     if (error) {
       toast({
-        title: "Erreur de connexion",
+        title: t("auth.loginError"),
         description: error.message === "Invalid login credentials"
-          ? "Email ou mot de passe incorrect. Vérifiez vos identifiants."
+          ? t("auth.invalidCredentials")
           : error.message,
         variant: "destructive",
       });
@@ -53,7 +56,7 @@ const Login = () => {
       options: { redirectTo: `${window.location.origin}/dashboard` },
     });
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
     }
   };
 
@@ -61,14 +64,17 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md border">
         <CardHeader className="text-center">
-          <Link to="/" className="mx-auto mb-4 flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <FileText className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">Resume</span>
-          </Link>
-          <CardTitle className="text-2xl">Bon retour ! 👋</CardTitle>
-          <CardDescription>Connectez-vous pour accéder à vos CV et sites web.</CardDescription>
+          <div className="flex items-center justify-between mb-4">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+                <FileText className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-bold text-foreground">Resume</span>
+            </Link>
+            <LanguageSwitcher />
+          </div>
+          <CardTitle className="text-2xl">{t("auth.welcomeBack")}</CardTitle>
+          <CardDescription>{t("auth.loginDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <Button variant="outline" className="w-full gap-2" onClick={handleGoogleLogin}>
@@ -78,68 +84,44 @@ const Login = () => {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
-            Continuer avec Google
+            {t("auth.continueGoogle")}
           </Button>
 
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs text-muted-foreground">ou par email</span>
+            <span className="text-xs text-muted-foreground">{t("auth.orEmail")}</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="votre@email.com"
-                  className="pl-10"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                <Input id="email" type="email" placeholder="votre@email.com" className="ps-10" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Mot de passe</Label>
-                <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-                  Mot de passe oublié ?
-                </Link>
+                <Label htmlFor="password">{t("auth.password")}</Label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline">{t("auth.forgotPassword")}</Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  className="pl-10 pr-10"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" className="ps-10 pe-10" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Connexion..." : "Se connecter"}
+              {loading ? t("auth.loggingIn") : t("auth.loginButton")}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Pas encore de compte ?{" "}
-            <Link to="/signup" className="font-medium text-primary hover:underline">
-              Créer un compte
-            </Link>
+            {t("auth.noAccount")}{" "}
+            <Link to="/signup" className="font-medium text-primary hover:underline">{t("auth.createAccount")}</Link>
           </p>
         </CardContent>
       </Card>
