@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import WebsitePreview from "./WebsitePreview";
 import DraggableSectionList from "./DraggableSectionList";
 import SectionStyleEditor from "./SectionStyleEditor";
@@ -71,11 +72,11 @@ interface Props {
 
 const accentColors = [
   { value: "#0f766e", label: "Teal" },
-  { value: "#2563eb", label: "Bleu" },
-  { value: "#b45309", label: "Ambre" },
-  { value: "#7c3aed", label: "Prune" },
-  { value: "#7c2d12", label: "Terre" },
-  { value: "#1e293b", label: "Ardoise" },
+  { value: "#2563eb", label: "Blue" },
+  { value: "#b45309", label: "Amber" },
+  { value: "#7c3aed", label: "Purple" },
+  { value: "#7c2d12", label: "Earth" },
+  { value: "#1e293b", label: "Slate" },
 ];
 
 export default function WebsiteEditor({
@@ -99,6 +100,7 @@ export default function WebsiteEditor({
   onUndo,
   onRedo,
 }: Props) {
+  const { t } = useTranslation();
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(sections[0]?.id || null);
   const [sidebarTab, setSidebarTab] = useState<"structure" | "style">("structure");
   const [editorMode, setEditorMode] = useState<"simple" | "advanced">("simple");
@@ -162,30 +164,30 @@ export default function WebsiteEditor({
       });
 
       if (error || !result?.result?.sections?.[section.type]) {
-        throw error || new Error("Impossible de régénérer cette section.");
+        throw error || new Error(t("editor.regenError", "Impossible de régénérer cette section."));
       }
 
       onUpdateSection(section.id, result.result.sections[section.type]);
       toast({
-        title: "Section mise à jour",
-        description: `${SECTION_LABELS[section.type]} a été régénérée pour ce profil.`,
+        title: t("editor.sectionUpdated", "Section mise à jour"),
+        description: `${SECTION_LABELS[section.type]} ${t("editor.regenerated", "a été régénérée pour ce profil.")}`,
       });
     } catch (error) {
       toast({
-        title: "Erreur IA",
-        description: error instanceof Error ? error.message : "Impossible de régénérer cette section.",
+        title: t("website.aiError"),
+        description: error instanceof Error ? error.message : t("editor.regenError", "Impossible de régénérer cette section."),
         variant: "destructive",
       });
     } finally {
       setRegeneratingId(null);
     }
-  }, [candidateTrack, onUpdateSection, profile?.experienceLevel, profile?.jobTitle, profile?.summary, profile?.targetCountry, title, toast, websiteMode]);
+  }, [candidateTrack, onUpdateSection, profile?.experienceLevel, profile?.jobTitle, profile?.summary, profile?.targetCountry, title, toast, websiteMode, t]);
 
   const handleImageUpload = useCallback(async (file: File, sectionId: string, field: string) => {
     try {
       const session = (await (supabase.auth as any).getSession()).data.session;
       if (!session) {
-        throw new Error("Session expirée.");
+        throw new Error(t("editor.sessionExpired", "Session expirée."));
       }
 
       const ext = file.name.split(".").pop();
@@ -195,21 +197,21 @@ export default function WebsiteEditor({
 
       const { data } = supabase.storage.from("website-assets").getPublicUrl(path);
       onUpdateSection(sectionId, { [field]: data.publicUrl });
-      toast({ title: "Image ajoutée" });
+      toast({ title: t("editor.imageAdded", "Image ajoutée") });
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Échec de l'upload.",
+        title: t("common.error"),
+        description: error instanceof Error ? error.message : t("editor.uploadFailed", "Échec de l'upload."),
         variant: "destructive",
       });
     }
-  }, [onUpdateSection, toast]);
+  }, [onUpdateSection, toast, t]);
 
   const handleGalleryUpload = useCallback(async (file: File, sectionId: string, index: number, items: any[]) => {
     try {
       const session = (await (supabase.auth as any).getSession()).data.session;
       if (!session) {
-        throw new Error("Session expirée.");
+        throw new Error(t("editor.sessionExpired", "Session expirée."));
       }
 
       const ext = file.name.split(".").pop();
@@ -221,15 +223,15 @@ export default function WebsiteEditor({
       const nextItems = [...items];
       nextItems[index] = { ...nextItems[index], image: data.publicUrl };
       onUpdateSection(sectionId, { items: nextItems });
-      toast({ title: "Image ajoutée" });
+      toast({ title: t("editor.imageAdded", "Image ajoutée") });
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: error instanceof Error ? error.message : "Échec de l'upload.",
+        title: t("common.error"),
+        description: error instanceof Error ? error.message : t("editor.uploadFailed", "Échec de l'upload."),
         variant: "destructive",
       });
     }
-  }, [onUpdateSection, toast]);
+  }, [onUpdateSection, toast, t]);
 
   if (showPreview) {
     return (
@@ -237,7 +239,7 @@ export default function WebsiteEditor({
         <div className="fixed right-4 top-4 z-50">
           <Button variant="outline" className="gap-2 bg-background shadow-md" onClick={() => setShowPreview(false)}>
             <EyeOff className="h-4 w-4" />
-            Quitter l'aperçu
+            {t("editor.exitPreview", "Quitter l'aperçu")}
           </Button>
         </div>
         <WebsitePreview sections={sections} globalSettings={globalSettings} title={title} template={template} />
@@ -255,7 +257,7 @@ export default function WebsiteEditor({
             <div>
               <p className="text-sm font-semibold text-foreground">{getWebsiteModeLabel(websiteMode)}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {profile?.jobTitle || "Profil public"} · {profile?.targetCountry || "marché cible"}
+                {profile?.jobTitle || t("editor.publicProfile", "Profil public")} · {profile?.targetCountry || t("editor.targetMarket", "marché cible")}
               </p>
             </div>
             <Button
@@ -265,7 +267,7 @@ export default function WebsiteEditor({
               onClick={() => setEditorMode((mode) => mode === "simple" ? "advanced" : "simple")}
             >
               <Wand2 className="h-3.5 w-3.5" />
-              {editorMode === "simple" ? "Mode avancé" : "Mode simple"}
+              {editorMode === "simple" ? t("editor.advancedMode", "Mode avancé") : t("editor.simpleMode", "Mode simple")}
             </Button>
           </div>
 
@@ -277,7 +279,7 @@ export default function WebsiteEditor({
               )}
               onClick={() => setSidebarTab("structure")}
             >
-              Structure
+              {t("editor.structure", "Structure")}
             </button>
             <button
               className={cn(
@@ -287,7 +289,7 @@ export default function WebsiteEditor({
               onClick={() => setSidebarTab("style")}
             >
               <Paintbrush className="mr-1 inline h-3.5 w-3.5" />
-              Style
+              {t("editor.style", "Style")}
             </button>
           </div>
         </div>
@@ -298,12 +300,12 @@ export default function WebsiteEditor({
               <Card className="border-dashed">
                 <CardContent className="space-y-2 p-4 text-sm">
                   <p className="font-medium text-foreground">
-                    {editorMode === "simple" ? "Flux guidé" : "Contrôle avancé"}
+                    {editorMode === "simple" ? t("editor.guidedFlow", "Flux guidé") : t("editor.advancedControl", "Contrôle avancé")}
                   </p>
                   <p className="text-muted-foreground">
                     {editorMode === "simple"
-                      ? "Concentrez-vous sur le contenu essentiel. Les sections sont déjà ordonnées pour un recruteur."
-                      : "Ajoutez des sections compatibles, changez le style et régénérez le contenu si nécessaire."}
+                      ? t("editor.guidedFlowDesc", "Concentrez-vous sur le contenu essentiel. Les sections sont déjà ordonnées pour un recruteur.")
+                      : t("editor.advancedControlDesc", "Ajoutez des sections compatibles, changez le style et régénérez le contenu si nécessaire.")}
                   </p>
                 </CardContent>
               </Card>
@@ -323,7 +325,7 @@ export default function WebsiteEditor({
                 <Select onValueChange={(value) => handleAddSection(value as SectionType)}>
                   <SelectTrigger className="border-dashed">
                     <Plus className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Ajouter une section utile" />
+                    <SelectValue placeholder={t("editor.addSection", "Ajouter une section utile")} />
                   </SelectTrigger>
                   <SelectContent>
                     {availableSectionTypes.map((type) => (
@@ -338,7 +340,7 @@ export default function WebsiteEditor({
           ) : (
             <div className="space-y-6 p-4">
               <div className="space-y-3">
-                <Label className="text-sm font-semibold">Couleur principale</Label>
+                <Label className="text-sm font-semibold">{t("editor.primaryColor", "Couleur principale")}</Label>
                 <div className="flex flex-wrap gap-2">
                   {accentColors.map((colorOption) => (
                     <button
@@ -361,12 +363,12 @@ export default function WebsiteEditor({
                     className="h-8 w-8 cursor-pointer rounded-full border border-dashed border-border bg-transparent"
                   />
                 ) : (
-                  <p className="text-xs text-muted-foreground">Palette guidee par defaut. La couleur libre reste disponible en mode avance.</p>
+                  <p className="text-xs text-muted-foreground">{t("editor.colorHint", "Palette guidée par défaut. La couleur libre reste disponible en mode avancé.")}</p>
                 )}
               </div>
 
               <div className="space-y-3">
-                <Label className="text-sm font-semibold">Police</Label>
+                <Label className="text-sm font-semibold">{t("editor.font", "Police")}</Label>
                 <Select value={globalSettings.fontPair} onValueChange={(value) => onUpdateGlobalSettings({ fontPair: value })}>
                   <SelectTrigger>
                     <SelectValue />
@@ -382,7 +384,7 @@ export default function WebsiteEditor({
               </div>
 
               <div className="space-y-3">
-                <Label className="text-sm font-semibold">Mise en page</Label>
+                <Label className="text-sm font-semibold">{t("editor.layout", "Mise en page")}</Label>
                 <div className="space-y-2">
                   {TEMPLATE_STYLES.map((styleOption) => (
                     <label key={styleOption.value} className="flex cursor-pointer items-start gap-2 rounded-lg border p-3">
@@ -403,12 +405,12 @@ export default function WebsiteEditor({
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-semibold">Meta description</Label>
+                <Label className="text-sm font-semibold">{t("editor.metaDescription", "Meta description")}</Label>
                 <Textarea
                   rows={3}
                   value={globalSettings.metaDescription || ""}
                   onChange={(event) => onUpdateGlobalSettings({ metaDescription: event.target.value })}
-                  placeholder="Décrivez votre profil professionnel pour Google et le partage social."
+                  placeholder={t("editor.metaPlaceholder", "Décrivez votre profil professionnel pour Google et le partage social.")}
                 />
               </div>
             </div>
@@ -419,16 +421,16 @@ export default function WebsiteEditor({
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1 gap-1.5" onClick={onUndo} disabled={!canUndo}>
               <Undo2 className="h-3.5 w-3.5" />
-              Annuler
+              {t("editor.undo", "Annuler")}
             </Button>
             <Button variant="outline" size="sm" className="flex-1 gap-1.5" onClick={onRedo} disabled={!canRedo}>
               <Redo2 className="h-3.5 w-3.5" />
-              Refaire
+              {t("editor.redo", "Refaire")}
             </Button>
           </div>
           <Button className="w-full gap-2" onClick={() => setShowPreview(true)}>
             <Eye className="h-4 w-4" />
-            Aperçu plein écran
+            {t("editor.fullPreview", "Aperçu plein écran")}
           </Button>
         </div>
       </aside>
@@ -442,8 +444,8 @@ export default function WebsiteEditor({
                   <h3 className="text-lg font-bold text-foreground">{SECTION_LABELS[selectedSection.type]}</h3>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {editorMode === "simple"
-                      ? "Modifiez le contenu de base pour ce profil public."
-                      : "Vous pouvez éditer, styliser et régénérer cette section."}
+                      ? t("editor.editBasicContent", "Modifiez le contenu de base pour ce profil public.")
+                      : t("editor.editAdvancedContent", "Vous pouvez éditer, styliser et régénérer cette section.")}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -456,7 +458,7 @@ export default function WebsiteEditor({
                       onClick={() => handleRegenerate(selectedSection)}
                     >
                       {regeneratingId === selectedSection.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                      IA
+                      {t("editor.ai", "IA")}
                     </Button>
                   ) : null}
                   <Switch checked={selectedSection.enabled} onCheckedChange={() => onToggleSection(selectedSection.id)} />
@@ -479,14 +481,14 @@ export default function WebsiteEditor({
 
               {editorMode === "advanced" && onRemoveSection && selectedSection.type !== "navbar" ? (
                 <Button variant="outline" className="w-full" onClick={() => onRemoveSection(selectedSection.id)}>
-                  Retirer cette section
+                  {t("editor.removeSection", "Retirer cette section")}
                 </Button>
               ) : null}
             </div>
           </ScrollArea>
         ) : (
           <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-muted-foreground">
-            Sélectionnez une section dans la colonne de gauche.
+            {t("editor.selectSection", "Sélectionnez une section dans la colonne de gauche.")}
           </div>
         )}
       </section>
@@ -531,6 +533,7 @@ function SectionEditor({
   onImageUpload: (file: File, field: string) => void;
   onItemImageUpload: (file: File, index: number, items: any[]) => void;
 }) {
+  const { t } = useTranslation();
   const { type, content } = section;
 
   const updateField = (key: string, value: any) => onUpdate({ [key]: value });
@@ -551,16 +554,16 @@ function SectionEditor({
       {type === "navbar" ? (
         <>
           <div className="space-y-2">
-            <Label>Nom affiché</Label>
-            <Input value={content.logoText || ""} onChange={(event) => updateField("logoText", event.target.value)} placeholder="Mon profil pro" />
+            <Label>{t("editor.displayName", "Nom affiché")}</Label>
+            <Input value={content.logoText || ""} onChange={(event) => updateField("logoText", event.target.value)} placeholder={t("editor.myProfile", "Mon profil pro")} />
           </div>
           <div className="space-y-2">
-            <Label>Style</Label>
+            <Label>{t("editor.style", "Style")}</Label>
             <Select value={content.style || "sticky"} onValueChange={(value) => updateField("style", value)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="sticky">Fixe</SelectItem>
-                <SelectItem value="static">Statique</SelectItem>
+                <SelectItem value="sticky">{t("editor.fixed", "Fixe")}</SelectItem>
+                <SelectItem value="static">{t("editor.static", "Statique")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -569,7 +572,7 @@ function SectionEditor({
 
       {type !== "navbar" && content.title !== undefined ? (
         <div className="space-y-2">
-          <Label>Titre de section</Label>
+          <Label>{t("editor.sectionTitle", "Titre de section")}</Label>
           <Input value={content.title || ""} onChange={(event) => updateField("title", event.target.value)} />
         </div>
       ) : null}
@@ -577,25 +580,25 @@ function SectionEditor({
       {type === "hero" ? (
         <>
           <div className="space-y-2">
-            <Label>Titre principal</Label>
-            <Input value={content.title || ""} onChange={(event) => updateField("title", event.target.value)} placeholder="Nom complet ou accroche forte" />
+            <Label>{t("editor.mainTitle", "Titre principal")}</Label>
+            <Input value={content.title || ""} onChange={(event) => updateField("title", event.target.value)} placeholder={t("editor.mainTitlePlaceholder", "Nom complet ou accroche forte")} />
           </div>
           <div className="space-y-2">
-            <Label>Sous-titre</Label>
-            <Textarea value={content.subtitle || ""} onChange={(event) => updateField("subtitle", event.target.value)} rows={3} placeholder="Poste ciblé, pays, disponibilité..." />
+            <Label>{t("editor.subtitle", "Sous-titre")}</Label>
+            <Textarea value={content.subtitle || ""} onChange={(event) => updateField("subtitle", event.target.value)} rows={3} placeholder={t("editor.subtitlePlaceholder", "Poste ciblé, pays, disponibilité...")} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Bouton principal</Label>
-              <Input value={content.cta || ""} onChange={(event) => updateField("cta", event.target.value)} placeholder="Me contacter" />
+              <Label>{t("editor.mainButton", "Bouton principal")}</Label>
+              <Input value={content.cta || ""} onChange={(event) => updateField("cta", event.target.value)} placeholder={t("editor.contactMe", "Me contacter")} />
             </div>
             <div className="space-y-2">
-              <Label>Lien du bouton</Label>
+              <Label>{t("editor.buttonLink", "Lien du bouton")}</Label>
               <Input value={content.ctaLink || ""} onChange={(event) => updateField("ctaLink", event.target.value)} placeholder="#contact" />
             </div>
           </div>
           <ImageField
-            label="Image de fond"
+            label={t("editor.backgroundImage", "Image de fond")}
             value={content.backgroundImage}
             onUpload={(file) => onImageUpload(file, "backgroundImage")}
             onClear={() => updateField("backgroundImage", "")}
@@ -606,11 +609,11 @@ function SectionEditor({
       {type === "about" ? (
         <>
           <div className="space-y-2">
-            <Label>Texte de présentation</Label>
+            <Label>{t("editor.introText", "Texte de présentation")}</Label>
             <Textarea value={content.text || ""} onChange={(event) => updateField("text", event.target.value)} rows={5} />
           </div>
           <ImageField
-            label="Photo"
+            label={t("editor.photo", "Photo")}
             value={content.image}
             onUpload={(file) => onImageUpload(file, "image")}
             onClear={() => updateField("image", "")}
@@ -621,7 +624,7 @@ function SectionEditor({
       {type === "contact" ? (
         <>
           <div className="space-y-2">
-            <Label>Texte d'introduction</Label>
+            <Label>{t("editor.introductionText", "Texte d'introduction")}</Label>
             <Textarea value={content.text || ""} onChange={(event) => updateField("text", event.target.value)} rows={2} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -630,7 +633,7 @@ function SectionEditor({
               <Input value={content.email || ""} onChange={(event) => updateField("email", event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Téléphone</Label>
+              <Label>{t("editor.phone", "Téléphone")}</Label>
               <Input value={content.phone || ""} onChange={(event) => updateField("phone", event.target.value)} />
             </div>
           </div>
@@ -640,13 +643,13 @@ function SectionEditor({
               <Input value={content.whatsapp || ""} onChange={(event) => updateField("whatsapp", event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Adresse</Label>
+              <Label>{t("editor.address", "Adresse")}</Label>
               <Input value={content.address || ""} onChange={(event) => updateField("address", event.target.value)} />
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Switch checked={content.showForm !== false} onCheckedChange={(checked) => updateField("showForm", checked)} />
-            <Label className="text-sm">Afficher le formulaire</Label>
+            <Label className="text-sm">{t("editor.showForm", "Afficher le formulaire")}</Label>
           </div>
         </>
       ) : null}
@@ -656,7 +659,7 @@ function SectionEditor({
           {["linkedin", "github", "whatsapp", "instagram", "facebook", "twitter", "youtube"].map((platform) => (
             <div key={platform} className="space-y-1">
               <Label className="capitalize">{platform}</Label>
-              <Input value={content[platform] || ""} onChange={(event) => updateField(platform, event.target.value)} placeholder={`Lien ${platform}`} />
+              <Input value={content[platform] || ""} onChange={(event) => updateField(platform, event.target.value)} placeholder={`${t("editor.link", "Lien")} ${platform}`} />
             </div>
           ))}
         </div>
@@ -665,19 +668,19 @@ function SectionEditor({
       {content.items !== undefined ? (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-semibold">Éléments</Label>
+            <Label className="text-sm font-semibold">{t("editor.elements", "Éléments")}</Label>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={addItem}>
               <Plus className="h-3.5 w-3.5" />
-              Ajouter
+              {t("editor.add", "Ajouter")}
             </Button>
           </div>
           {(content.items || []).map((item: any, index: number) => (
             <Card key={`${type}-${index}`}>
               <CardContent className="space-y-3 p-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">Élément {index + 1}</p>
+                  <p className="text-xs text-muted-foreground">{t("editor.element", "Élément")} {index + 1}</p>
                   <Button variant="ghost" size="sm" onClick={() => removeItem(index)}>
-                    Retirer
+                    {t("editor.remove", "Retirer")}
                   </Button>
                 </div>
                 <ItemEditor
@@ -706,16 +709,18 @@ function ItemEditor({
   onUpdate: (updates: Record<string, any>) => void;
   onImageUpload?: (file: File) => void;
 }) {
+  const { t } = useTranslation();
+
   switch (type) {
     case "skills":
       return (
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
-            <Label className="text-xs">Compétence</Label>
+            <Label className="text-xs">{t("editor.skill", "Compétence")}</Label>
             <Input value={item.name || ""} onChange={(event) => onUpdate({ name: event.target.value })} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Niveau</Label>
+            <Label className="text-xs">{t("editor.level", "Niveau")}</Label>
             <Input type="number" min="0" max="100" value={item.level || ""} onChange={(event) => onUpdate({ level: event.target.value })} />
           </div>
         </div>
@@ -724,17 +729,17 @@ function ItemEditor({
       return (
         <div className="grid gap-3">
           <div className="space-y-1">
-            <Label className="text-xs">Permis ou certification</Label>
+            <Label className="text-xs">{t("editor.certification", "Permis ou certification")}</Label>
             <Input value={item.name || ""} onChange={(event) => onUpdate({ name: event.target.value })} />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label className="text-xs">Émetteur</Label>
+              <Label className="text-xs">{t("editor.issuer", "Émetteur")}</Label>
               <Input value={item.issuer || ""} onChange={(event) => onUpdate({ issuer: event.target.value })} />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Détail</Label>
-              <Input value={item.detail || ""} onChange={(event) => onUpdate({ detail: event.target.value })} placeholder="Valide, 2025, CE..." />
+              <Label className="text-xs">{t("editor.detail", "Détail")}</Label>
+              <Input value={item.detail || ""} onChange={(event) => onUpdate({ detail: event.target.value })} placeholder={t("editor.detailPlaceholder", "Valide, 2025, CE...")} />
             </div>
           </div>
         </div>
@@ -743,12 +748,12 @@ function ItemEditor({
       return (
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
-            <Label className="text-xs">Libellé</Label>
-            <Input value={item.label || ""} onChange={(event) => onUpdate({ label: event.target.value })} placeholder="Disponibilité" />
+            <Label className="text-xs">{t("editor.label", "Libellé")}</Label>
+            <Input value={item.label || ""} onChange={(event) => onUpdate({ label: event.target.value })} placeholder={t("editor.availability", "Disponibilité")} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Valeur</Label>
-            <Input value={item.value || ""} onChange={(event) => onUpdate({ value: event.target.value })} placeholder="Immédiate" />
+            <Label className="text-xs">{t("editor.value", "Valeur")}</Label>
+            <Input value={item.value || ""} onChange={(event) => onUpdate({ value: event.target.value })} placeholder={t("editor.immediate", "Immédiate")} />
           </div>
         </div>
       );
@@ -756,12 +761,12 @@ function ItemEditor({
       return (
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
-            <Label className="text-xs">Langue</Label>
+            <Label className="text-xs">{t("editor.language", "Langue")}</Label>
             <Input value={item.name || ""} onChange={(event) => onUpdate({ name: event.target.value })} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Niveau</Label>
-            <Input value={item.level || ""} onChange={(event) => onUpdate({ level: event.target.value })} placeholder="Courant, B2..." />
+            <Label className="text-xs">{t("editor.level", "Niveau")}</Label>
+            <Input value={item.level || ""} onChange={(event) => onUpdate({ level: event.target.value })} placeholder={t("editor.levelPlaceholder", "Courant, B2...")} />
           </div>
         </div>
       );
@@ -769,11 +774,11 @@ function ItemEditor({
       return (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label className="text-xs">Nom du projet</Label>
+            <Label className="text-xs">{t("editor.projectName", "Nom du projet")}</Label>
             <Input value={item.name || ""} onChange={(event) => onUpdate({ name: event.target.value })} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Description</Label>
+            <Label className="text-xs">{t("editor.description", "Description")}</Label>
             <Textarea value={item.description || ""} onChange={(event) => onUpdate({ description: event.target.value })} rows={3} />
           </div>
           <div className="space-y-1">
@@ -785,7 +790,7 @@ function ItemEditor({
             />
           </div>
           <ImageField
-            label="Image du projet"
+            label={t("editor.projectImage", "Image du projet")}
             value={item.image}
             onUpload={(file) => onImageUpload?.(file)}
             onClear={() => onUpdate({ image: "" })}
@@ -797,20 +802,20 @@ function ItemEditor({
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label className="text-xs">Poste</Label>
+              <Label className="text-xs">{t("editor.position", "Poste")}</Label>
               <Input value={item.position || ""} onChange={(event) => onUpdate({ position: event.target.value })} />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Entreprise</Label>
+              <Label className="text-xs">{t("editor.company", "Entreprise")}</Label>
               <Input value={item.company || ""} onChange={(event) => onUpdate({ company: event.target.value })} />
             </div>
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Période</Label>
+            <Label className="text-xs">{t("editor.period", "Période")}</Label>
             <Input value={item.period || ""} onChange={(event) => onUpdate({ period: event.target.value })} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Description</Label>
+            <Label className="text-xs">{t("editor.description", "Description")}</Label>
             <Textarea value={item.description || ""} onChange={(event) => onUpdate({ description: event.target.value })} rows={3} />
           </div>
         </div>
@@ -819,15 +824,15 @@ function ItemEditor({
       return (
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label className="text-xs">Diplôme</Label>
+            <Label className="text-xs">{t("editor.degree", "Diplôme")}</Label>
             <Input value={item.degree || ""} onChange={(event) => onUpdate({ degree: event.target.value })} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Établissement</Label>
+            <Label className="text-xs">{t("editor.institution", "Établissement")}</Label>
             <Input value={item.institution || ""} onChange={(event) => onUpdate({ institution: event.target.value })} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Période</Label>
+            <Label className="text-xs">{t("editor.period", "Période")}</Label>
             <Input value={item.period || ""} onChange={(event) => onUpdate({ period: event.target.value })} />
           </div>
         </div>
@@ -836,19 +841,19 @@ function ItemEditor({
       return (
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
-            <Label className="text-xs">Valeur</Label>
+            <Label className="text-xs">{t("editor.value", "Valeur")}</Label>
             <Input value={item.number || ""} onChange={(event) => onUpdate({ number: event.target.value })} placeholder="5+" />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Libellé</Label>
-            <Input value={item.label || ""} onChange={(event) => onUpdate({ label: event.target.value })} placeholder="Années d'expérience" />
+            <Label className="text-xs">{t("editor.label", "Libellé")}</Label>
+            <Input value={item.label || ""} onChange={(event) => onUpdate({ label: event.target.value })} placeholder={t("editor.yearsExperience", "Années d'expérience")} />
           </div>
         </div>
       );
     default:
       return (
         <div className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
-          Cette section n'a pas encore de panneau d'édition détaillé.
+          {t("editor.noDetailPanel", "Cette section n'a pas encore de panneau d'édition détaillé.")}
         </div>
       );
   }
@@ -865,6 +870,8 @@ function ImageField({
   onUpload: (file: File) => void;
   onClear: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
@@ -872,13 +879,13 @@ function ImageField({
         <div className="space-y-2">
           <img src={value} alt="" className="h-32 w-full rounded-lg object-cover" />
           <Button variant="outline" size="sm" onClick={onClear}>
-            Retirer l'image
+            {t("editor.removeImage", "Retirer l'image")}
           </Button>
         </div>
       ) : (
         <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground hover:bg-muted/50">
           <Upload className="h-4 w-4" />
-          <span>Choisir une image</span>
+          <span>{t("editor.chooseImage", "Choisir une image")}</span>
           <input
             type="file"
             accept="image/*"
