@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Download, Save, Sparkles, Loader2, FileText, Target, CheckCircle, AlertCircle, ChevronDown, MessageCircle, Globe, Linkedin, ArrowRight } from "lucide-react";
+import { Download, Save, Sparkles, Loader2, FileText, Target, CheckCircle, AlertCircle, ChevronDown, MessageCircle, Globe, Linkedin, ArrowRight, Star } from "lucide-react";
+import ShareDialog from "@/components/ShareDialog";
 import { ResumeData, ResumeCustomization } from "@/types/resume";
 import ResumePreview from "@/components/resume/ResumePreview";
 import ATSScoreGauge from "@/components/resume/ATSScoreGauge";
