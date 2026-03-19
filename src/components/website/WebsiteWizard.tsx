@@ -513,12 +513,12 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
             <p className="mt-1 text-muted-foreground">{t("websiteWizard.step3Subtitle")}</p>
           </div>
 
-          {templates.length > 0 && (
+          {templates.length > 0 && purpose && (
             <TemplateGallery
-              templates={templates}
-              selected={selectedTemplate?.id || ""}
+              category={purpose}
+              selectedTemplateId={selectedTemplate?.id || null}
               onSelect={(tpl) => setSelectedTemplate(tpl)}
-              recommendedId={recommendedWebsiteTemplate?.id}
+              recommendedTemplateId={recommendedWebsiteTemplate?.id}
             />
           )}
 
