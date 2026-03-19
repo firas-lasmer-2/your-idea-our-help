@@ -2,35 +2,37 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, Sparkles, Target, Palette, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 const TOUR_KEY = "resume-onboarding-done";
 
-const steps = [
-  {
-    icon: Target,
-    title: "Commencez par votre objectif",
-    description: "Choisissez votre type de recherche et collez une offre d'emploi pour un matching IA automatique.",
-  },
-  {
-    icon: Sparkles,
-    title: "L'IA vous accompagne",
-    description: "À chaque étape, utilisez les boutons ✨ pour améliorer vos bullet points, générer un résumé, et suggérer des compétences.",
-  },
-  {
-    icon: Palette,
-    title: "Personnalisez votre design",
-    description: "Choisissez parmi 3 modèles uniques (Classique, Moderne, Créatif) et ajustez couleurs et typographie.",
-  },
-  {
-    icon: BarChart3,
-    title: "Score ATS & téléchargement",
-    description: "Vérifiez votre score de compatibilité ATS, générez une lettre de motivation, et téléchargez en PDF.",
-  },
-];
-
 const OnboardingTour = () => {
+  const { t } = useTranslation();
   const [show, setShow] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+
+  const steps = [
+    {
+      icon: Target,
+      title: t("onboarding.step1Title", "Commencez par votre objectif"),
+      description: t("onboarding.step1Desc", "Choisissez votre type de recherche et collez une offre d'emploi pour un matching IA automatique."),
+    },
+    {
+      icon: Sparkles,
+      title: t("onboarding.step2Title", "L'IA vous accompagne"),
+      description: t("onboarding.step2Desc", "À chaque étape, utilisez les boutons ✨ pour améliorer vos bullet points, générer un résumé, et suggérer des compétences."),
+    },
+    {
+      icon: Palette,
+      title: t("onboarding.step3Title", "Personnalisez votre design"),
+      description: t("onboarding.step3Desc", "Choisissez parmi nos modèles (Essentiel, Horizon, Signature) et ajustez couleurs et typographie."),
+    },
+    {
+      icon: BarChart3,
+      title: t("onboarding.step4Title", "Score ATS & téléchargement"),
+      description: t("onboarding.step4Desc", "Vérifiez votre score de compatibilité ATS, générez une lettre de motivation, et téléchargez en PDF."),
+    },
+  ];
 
   useEffect(() => {
     if (!localStorage.getItem(TOUR_KEY)) {
@@ -79,7 +81,6 @@ const OnboardingTour = () => {
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{step.description}</p>
             </div>
 
-            {/* Progress dots */}
             <div className="flex gap-1.5">
               {steps.map((_, i) => (
                 <div key={i} className={`h-1.5 rounded-full transition-all ${i === currentStep ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/20"}`} />
@@ -88,10 +89,10 @@ const OnboardingTour = () => {
 
             <div className="flex gap-2 pt-2">
               <Button variant="ghost" size="sm" onClick={dismiss} className="text-muted-foreground">
-                Passer
+                {t("onboarding.skip", "Passer")}
               </Button>
               <Button size="sm" onClick={next} className="gap-1.5">
-                {currentStep < steps.length - 1 ? "Suivant" : "C'est parti !"}
+                {currentStep < steps.length - 1 ? t("onboarding.next", "Suivant") : t("onboarding.letsGo", "C'est parti !")}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </div>

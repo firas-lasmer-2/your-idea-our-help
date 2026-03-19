@@ -8,8 +8,11 @@ import { FileText, Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 const auth = supabase.auth as any;
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const ForgotPassword = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -23,7 +26,7 @@ const ForgotPassword = () => {
     });
     setLoading(false);
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
     } else {
       setSent(true);
     }
@@ -31,6 +34,9 @@ const ForgotPassword = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="fixed top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md border">
         <CardHeader className="text-center">
           <Link to="/" className="mx-auto mb-4 flex items-center gap-2">
@@ -44,16 +50,16 @@ const ForgotPassword = () => {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
-              <CardTitle className="text-2xl">Email envoyé ! 📧</CardTitle>
+              <CardTitle className="text-2xl">{t("forgotPassword.emailSent", "Email envoyé ! 📧")}</CardTitle>
               <CardDescription>
-                Vérifiez votre boîte mail à <strong>{email}</strong> et suivez le lien pour réinitialiser votre mot de passe.
+                {t("forgotPassword.checkInbox", "Vérifiez votre boîte mail à")} <strong>{email}</strong> {t("forgotPassword.followLink", "et suivez le lien pour réinitialiser votre mot de passe.")}
               </CardDescription>
             </>
           ) : (
             <>
-              <CardTitle className="text-2xl">Mot de passe oublié ?</CardTitle>
+              <CardTitle className="text-2xl">{t("forgotPassword.title", "Mot de passe oublié ?")}</CardTitle>
               <CardDescription>
-                Pas de souci ! Entrez votre email et on vous envoie un lien de réinitialisation.
+                {t("forgotPassword.description", "Pas de souci ! Entrez votre email et on vous envoie un lien de réinitialisation.")}
               </CardDescription>
             </>
           )}
@@ -64,20 +70,20 @@ const ForgotPassword = () => {
               <Button variant="outline" className="w-full" asChild>
                 <Link to="/login">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Retour à la connexion
+                  {t("forgotPassword.backToLogin", "Retour à la connexion")}
                 </Link>
               </Button>
             </div>
           ) : (
             <form onSubmit={handleReset} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.email")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="votre@email.com"
+                    placeholder={t("forgotPassword.emailPlaceholder", "votre@email.com")}
                     className="pl-10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -86,12 +92,12 @@ const ForgotPassword = () => {
                 </div>
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Envoi..." : "Envoyer le lien"}
+                {loading ? t("forgotPassword.sending", "Envoi...") : t("forgotPassword.sendLink", "Envoyer le lien")}
               </Button>
               <Button variant="ghost" className="w-full" asChild>
                 <Link to="/login">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Retour à la connexion
+                  {t("forgotPassword.backToLogin", "Retour à la connexion")}
                 </Link>
               </Button>
             </form>

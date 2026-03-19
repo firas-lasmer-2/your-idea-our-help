@@ -244,40 +244,6 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
       {/* ATS Score - compact */}
       <ATSScoreGauge data={data} autoAnalyze={exportBlockers.length === 0} />
 
-      {/* Professional Summary */}
-      <Card className="border p-5">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold">{t("preview.summary", "Résumé professionnel")}</Label>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 text-xs"
-              disabled={generatingSummary}
-              onClick={handleGenerateSummary}
-            >
-              {generatingSummary ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-              )}
-              {generatingSummary ? t("preview.generatingAi", "Génération...") : t("preview.generateWithAi", "Générer avec l'IA")}
-            </Button>
-          </div>
-          <Textarea
-            placeholder={t("preview.summaryPlaceholder", "Écrivez un court résumé professionnel ou laissez l'IA le générer...")}
-            value={data.summary}
-            onChange={(e) => onUpdateData({ summary: e.target.value })}
-            rows={3}
-            className="resize-none"
-          />
-          {!data.summary && (
-            <p className="text-xs text-muted-foreground">
-              💡 {t("preview.summaryHint", "Cliquez sur « Générer avec l'IA » pour créer un résumé basé sur vos informations.")}
-            </p>
-          )}
-        </div>
-      </Card>
 
       {/* Post-download: What's next? */}
       {downloaded && (
