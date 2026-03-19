@@ -379,8 +379,8 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 1 && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Quel profil public souhaitez-vous créer ?</h2>
-            <p className="mt-1 text-muted-foreground">Choisissez le format qui aide le mieux votre candidature.</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step1Title", "Quel profil public souhaitez-vous créer ?")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step1Subtitle", "Choisissez le format qui aide le mieux votre candidature.")}</p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {WEBSITE_MODE_CARDS.map((modeCard) => {
