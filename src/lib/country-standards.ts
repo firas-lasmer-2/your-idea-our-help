@@ -263,11 +263,9 @@ export function isSimplifiedMode(field: JobField): boolean {
   return getJobCategory(field).isSimplified;
 }
 
-export function getVisibleSteps(simplifiedMode: boolean) {
-  if (simplifiedMode) {
-    return [1, 2, 3, 4, 6, 9] as const;
-  }
-  return [1, 2, 3, 4, 5, 6, 7, 9] as const;
+export function getVisibleSteps(_simplifiedMode: boolean) {
+  // All users see the same steps. The Design tab handles template, style, and sections internally.
+  return [1, 2, 3, 4, 5, 9] as const;
 }
 
 export function getAllJobs(): { label: string; category: string; field: JobField }[] {

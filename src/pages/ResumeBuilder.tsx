@@ -10,9 +10,7 @@ import StepPersonalInfo from "@/components/resume/steps/StepPersonalInfo";
 import StepEducation from "@/components/resume/steps/StepEducation";
 import StepExperience from "@/components/resume/steps/StepExperience";
 import StepSkills from "@/components/resume/steps/StepSkills";
-import StepAdditionalSections from "@/components/resume/steps/StepAdditionalSections";
-import StepTemplate from "@/components/resume/steps/StepTemplate";
-import StepCustomization from "@/components/resume/steps/StepCustomization";
+import StepDesign from "@/components/resume/steps/StepDesign";
 import StepPreview from "@/components/resume/steps/StepPreview";
 import OnboardingTour from "@/components/resume/OnboardingTour";
 import SmartWizard from "@/components/resume/SmartWizard";
@@ -252,9 +250,7 @@ const ResumeBuilder = () => {
       case 2: return <StepExperience data={data} updateData={updateData} />;
       case 3: return <StepEducation data={data} updateData={updateData} />;
       case 4: return <StepSkills data={data} updateData={updateData} />;
-      case 5: return <StepAdditionalSections data={data} updateData={updateData} />;
-      case 6: return <StepTemplate data={data} template={template} setTemplate={setTemplate} />;
-      case 7: return <StepCustomization customization={customization} updateCustomization={updateCustomization} />;
+      case 5: return <StepDesign data={data} updateData={updateData} template={template} setTemplate={setTemplate} customization={customization} updateCustomization={updateCustomization} />;
       case 9: return <StepPreview data={data} customization={customization} template={template} saving={saving} completionPercent={readiness.completionPercent} exportBlockers={readiness.exportBlockers} onSave={() => save()} onUpdateData={updateData} />;
       default: return null;
     }

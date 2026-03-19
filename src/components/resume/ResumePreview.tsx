@@ -23,8 +23,8 @@ const ResumePreview = ({ data, customization, template }: Props) => {
   if (!fullName && education.length === 0 && experience.length === 0) {
     return (
       <div className="py-16 text-center" style={{ color: "#94a3b8" }}>
-        <p style={{ fontSize: "18px" }}>Votre CV apparaitra ici</p>
-        <p style={{ fontSize: "14px", marginTop: "4px" }}>Remplissez les etapes pour voir l'aperçu</p>
+        <p style={{ fontSize: "18px" }}>📄</p>
+        <p style={{ fontSize: "14px", marginTop: "8px" }}>CV Preview</p>
       </div>
     );
   }

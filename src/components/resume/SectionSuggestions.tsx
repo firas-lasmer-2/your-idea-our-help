@@ -6,6 +6,7 @@ import { Sparkles, Check, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ResumeData } from "@/types/resume";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface SectionSuggestion {
   section: string;
@@ -20,13 +21,6 @@ interface Props {
   onDismiss: () => void;
 }
 
-const SECTION_LABELS: Record<string, string> = {
-  projects: "Projets",
-  certifications: "Certifications",
-  languages: "Langues",
-  interests: "Centres d'intérêt",
-};
-
 const SECTION_ICONS: Record<string, string> = {
   projects: "🔧",
   certifications: "📜",
@@ -35,10 +29,18 @@ const SECTION_ICONS: Record<string, string> = {
 };
 
 const SectionSuggestions = ({ data, onEnableSections, visible, onDismiss }: Props) => {
+  const { t } = useTranslation();
   const [suggestions, setSuggestions] = useState<SectionSuggestion[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
+
+  const SECTION_LABELS: Record<string, string> = {
+    projects: t("sectionSuggestions.projects", "Projets"),
+    certifications: t("sectionSuggestions.certifications", "Certifications"),
+    languages: t("sectionSuggestions.languages", "Langues"),
+    interests: t("sectionSuggestions.interests", "Centres d'intérêt"),
+  };
 
   useEffect(() => {
     if (!visible || fetched) return;
@@ -65,7 +67,6 @@ const SectionSuggestions = ({ data, onEnableSections, visible, onDismiss }: Prop
               const parsed = JSON.parse(jsonMatch[0]);
               if (parsed.suggestions) {
                 setSuggestions(parsed.suggestions);
-                // Pre-select recommended ones
                 const recommended = new Set<string>(
                   parsed.suggestions
                     .filter((s: SectionSuggestion) => s.recommended)
@@ -74,13 +75,9 @@ const SectionSuggestions = ({ data, onEnableSections, visible, onDismiss }: Prop
                 setSelected(recommended);
               }
             }
-          } catch {
-            // Parse error, silently fail
-          }
+          } catch { /* Parse error */ }
         }
-      } catch {
-        // Network error, silently fail
-      } finally {
+      } catch { /* Network error */ } finally {
         setLoading(false);
         setFetched(true);
       }
@@ -105,19 +102,15 @@ const SectionSuggestions = ({ data, onEnableSections, visible, onDismiss }: Prop
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-      >
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="p-5 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
                 <div>
-                  <p className="text-sm font-semibold text-foreground">Sections recommandées par l'IA</p>
-                  <p className="text-xs text-muted-foreground">Basé sur votre profil et votre domaine</p>
+                  <p className="text-sm font-semibold text-foreground">{t("sectionSuggestions.title", "Sections recommandées par l'IA")}</p>
+                  <p className="text-xs text-muted-foreground">{t("sectionSuggestions.subtitle", "Basé sur votre profil et votre domaine")}</p>
                 </div>
               </div>
               <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={onDismiss}>
@@ -128,7 +121,7 @@ const SectionSuggestions = ({ data, onEnableSections, visible, onDismiss }: Prop
             {loading ? (
               <div className="flex items-center gap-2 py-4">
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                <span className="text-sm text-muted-foreground">Analyse de votre profil...</span>
+                <span className="text-sm text-muted-foreground">{t("sectionSuggestions.analyzing", "Analyse de votre profil...")}</span>
               </div>
             ) : suggestions.length > 0 ? (
               <>
@@ -152,26 +145,25 @@ const SectionSuggestions = ({ data, onEnableSections, visible, onDismiss }: Prop
                         <div className="flex items-center gap-2">
                           <span className="text-sm">{SECTION_ICONS[s.section] || "📄"}</span>
                           <span className="text-sm font-medium text-foreground">{SECTION_LABELS[s.section] || s.section}</span>
-                          {s.recommended && <Badge variant="secondary" className="text-[10px]">Recommandé</Badge>}
+                          {s.recommended && <Badge variant="secondary" className="text-[10px]">{t("sectionSuggestions.recommended", "Recommandé")}</Badge>}
                         </div>
                         <p className="mt-0.5 text-xs text-muted-foreground">{s.reason}</p>
                       </div>
                     </button>
                   ))}
                 </div>
-
                 <div className="flex items-center justify-end gap-2">
                   <Button variant="ghost" size="sm" onClick={onDismiss}>
-                    Ignorer
+                    {t("sectionSuggestions.ignore", "Ignorer")}
                   </Button>
                   <Button size="sm" onClick={handleApply} disabled={selected.size === 0} className="gap-1.5">
                     <Check className="h-3.5 w-3.5" />
-                    Activer {selected.size > 0 ? `(${selected.size})` : ""}
+                    {t("sectionSuggestions.enable", "Activer")} {selected.size > 0 ? `(${selected.size})` : ""}
                   </Button>
                 </div>
               </>
             ) : (
-              <p className="text-sm text-muted-foreground py-2">Aucune suggestion disponible pour le moment.</p>
+              <p className="text-sm text-muted-foreground py-2">{t("sectionSuggestions.noSuggestions", "Aucune suggestion disponible pour le moment.")}</p>
             )}
           </CardContent>
         </Card>

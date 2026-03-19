@@ -254,12 +254,10 @@ export const DEGREE_TYPES = [
 ];
 
 export const RESUME_STEPS = [
-  { id: 1, label: "Infos personnelles", icon: "User" },
-  { id: 2, label: "Expérience", icon: "Briefcase" },
-  { id: 3, label: "Formation", icon: "GraduationCap" },
-  { id: 4, label: "Compétences", icon: "Wrench" },
-  { id: 5, label: "Sections", icon: "LayoutGrid" },
-  { id: 6, label: "Modèle", icon: "Palette" },
-  { id: 7, label: "Personnalisation", icon: "Settings" },
-  { id: 9, label: "Aperçu", icon: "Eye" },
+  { id: 1, label: "steps.personalInfo", icon: "User" },
+  { id: 2, label: "steps.experience", icon: "Briefcase" },
+  { id: 3, label: "steps.education", icon: "GraduationCap" },
+  { id: 4, label: "steps.skills", icon: "Wrench" },
+  { id: 5, label: "steps.design", icon: "Palette" },
+  { id: 9, label: "steps.preview", icon: "Eye" },
 ] as const;
