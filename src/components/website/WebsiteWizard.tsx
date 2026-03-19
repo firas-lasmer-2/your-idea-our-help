@@ -566,8 +566,8 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 4 && purpose && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Prêt à générer votre profil public ?</h2>
-            <p className="mt-1 text-muted-foreground">Le site sera adapté à votre métier et facile à éditer ensuite.</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step4Title", "Prêt à générer votre profil public ?")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step4Subtitle", "Le site sera adapté à votre métier et facile à éditer ensuite.")}</p>
           </div>
 
           <Card className="border">
