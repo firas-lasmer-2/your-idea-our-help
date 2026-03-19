@@ -20,6 +20,7 @@ const WebsiteBuilder = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const websiteId = searchParams.get("id") || undefined;
+  const fromResumeId = searchParams.get("fromResume") || null;
   const navigate = useNavigate();
   const [authLoading, setAuthLoading] = useState(true);
   const [wizardDone, setWizardDone] = useState(!!websiteId);
