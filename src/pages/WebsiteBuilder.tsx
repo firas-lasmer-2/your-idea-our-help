@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Globe, ArrowLeft, Loader2, Share2, ExternalLink, GlobeLock, Link2, CheckCircle2, AlertTriangle, ListChecks } from "lucide-react";
+import { Globe, ArrowLeft, Loader2, Share2, ExternalLink, GlobeLock, Link2, CheckCircle2, AlertTriangle, ListChecks, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useWebsite } from "@/hooks/use-website";
