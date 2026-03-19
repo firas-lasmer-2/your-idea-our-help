@@ -348,6 +348,7 @@ const WebsiteBuilder = () => {
             onUndo={undo}
             onRedo={redo}
           />
+          <WebsiteOnboarding />
         </main>
       )}
 
