@@ -1,180 +1,76 @@
 
 
-# Comprehensive Analysis and Improvement Plan
+# UX Polish & Workflow Cohesion Plan
 
-## Current Architecture Overview
+## Problem Statement
+The app has many features but they feel disconnected. The workflow between landing page, wizard, builder steps, and preview needs to be smoother. Several components have hardcoded French strings (not using i18n), the Dashboard is dense, and navigation between features lacks clear guidance.
 
-```text
-┌─────────────────────────────────────────────────────┐
-│  Landing Page (Index.tsx)                            │
-│  Hero, Persona Cards, Features, Pricing, FAQ        │
-├───────────┬───────────┬─────────────────────────────┤
-│  Auth     │  Dashboard│  Admin Panel                │
-│  Login    │  Resumes  │  Users, Analytics, Contacts  │
-│  Signup   │  Websites │  Resumes, Websites           │
-│  Reset PW │  Usage    │                              │
-├───────────┴───────────┴─────────────────────────────┤
-│  Resume Builder          │  Website Builder           │
-│  SmartWizard → 8 Steps   │  WebsiteWizard → Editor    │
-│  AI prefill, ATS score   │  Profile/Portfolio modes    │
-│  5 templates             │  4 layout styles            │
-│  Country-aware           │  Section-based              │
-├──────────────────────────┴───────────────────────────┤
-│  Supabase Backend                                    │
-│  Tables: profiles, resumes, websites, user_roles,    │
-│          contact_submissions                         │
-│  Edge Functions: resume-ai, resume-score,            │
-│    resume-import, cover-letter, website-ai,          │
-│    website-contact                                   │
-│  Auth: Email + Google OAuth                          │
-└─────────────────────────────────────────────────────┘
-```
+## Key Issues Found
 
-## What Already Works Well
+1. **Dashboard is overwhelming** -- 4 quick action cards + onboarding checklist + plan card + stats + resume list + website list all crammed together. New users don't know where to start.
+2. **Resume Builder header is cluttered** -- save status, country badge, progress bar, readiness banner, blockers, section suggestions all stack vertically before any content.
+3. **StepPreview is overloaded** -- ATS score, summary editor, job matching collapsible, tabs for CV+cover letter, export blockers all on one page.
+4. **Many strings still hardcoded in French** -- Dashboard, Settings, StepExperience, StepEducation, StepSkills, StepPreview, SmartWizard, and all admin pages don't use `useTranslation`.
+5. **No clear "next action" after completing a CV** -- user downloads PDF and then what? No prompt to create a website, share on LinkedIn, or match with jobs.
+6. **Live preview panel scaling** -- `scale(0.5)` with `width: 200%` creates a confusing scrollable area that's hard to read.
+7. **No loading/empty states** for several flows -- importing a CV from Dashboard stores to sessionStorage but the builder doesn't check for it.
+8. **WhatsApp share in StepPreview** shares a generic message with no actual link -- not useful.
 
-- **Smart Wizard**: Country-aware onboarding (Tunisia, France, Canada, USA, Gulf, Germany) with auto-configuration of photo rules, page limits, and preferred templates
-- **Industry Adaptation**: 8 job categories with simplified mode for manual trades (hides GitHub/LinkedIn/projects for construction workers, drivers, etc.)
-- **AI Integration**: Edge functions for bullet enhancement, summary generation, skill suggestions, job matching, and full resume pre-fill
-- **5 Resume Templates**: Essentiel, Horizon, Trajectoire, Direction, Signature -- each with distinct visual identity
-- **Website Builder**: Profile and Portfolio modes with 13 section types, drag-and-drop reordering, per-section styling, undo/redo
-- **Growth Engine**: Onboarding checklist, usage tracking, freemium tiers (Free/Student/Pro) priced in TND
-- **Admin Panel**: User management, analytics, contacts
+## Implementation Plan
 
-## Gaps and Improvement Opportunities
+### 1. Simplify Dashboard Layout
+- Collapse onboarding checklist into a slim progress bar with expandable details (not always open)
+- Move stats into the header area as compact badges
+- Make quick actions more prominent with a "What do you want to do?" hero section
+- Add "post-CV" nudge: after first complete CV, show "Create your public profile" CTA
 
-### 1. UI/UX Improvements
+### 2. Streamline Resume Builder Chrome
+- Merge the readiness banner into the StepProgress component as a subtle indicator
+- Remove the separate blocker list from the main content area (keep only in StepPreview)
+- Make section suggestions a dismissible toast/banner instead of a full card
+- Fix live preview: use `aspect-ratio` container with proper overflow hidden, increase scale to 0.55
 
-**Landing Page**
-- No Arabic language toggle despite targeting Tunisia (Arabic is primary language)
-- Hero roles list is small (8 roles) -- should include more Tunisian-relevant professions
-- Trust badges show "5,200+ CV" -- likely hardcoded/fake; needs real data or removal
-- No mobile-optimized resume preview demo on landing page
-- Missing social proof from Tunisian companies/universities
+### 3. Simplify StepPreview
+- Move professional summary editor to Step 1 (personal info) -- it's more logical there
+- Make ATS score a compact badge in the header instead of a full card
+- Keep job matching and cover letter as secondary tabs
+- Add clear "What's next?" section after download: create website, share on LinkedIn, match with jobs
 
-**Resume Builder**
-- No live side-by-side preview while editing (only at step 9)
-- Step 5 "Additional Sections" is skipped in simplified mode but references in data still exist
-- No LinkedIn/PDF import flow visible in UI (edge function exists)
-- Cover letter generator exists as edge function but no UI integration found
-- No PDF export button visible in the step components (likely in StepPreview but needs verification)
+### 4. Fix WhatsApp Share
+- Generate a shareable link (public website URL if published, otherwise just the app URL)
+- Include the user's name in the message
 
-**Website Builder**
-- No real-time preview alongside editor
-- Missing SEO fields (meta description, OG image exist in types but no UI)
-- No analytics/visitor tracking for published sites
+### 5. Complete i18n Coverage
+- Add translation keys for: Dashboard, Settings, StepExperience, StepEducation, StepSkills, StepPreview, SmartWizard, StepCustomization, StepTemplate, StepAdditionalSections
+- Update Arabic translations in parallel
+- This is the largest task but critical for market fit
 
-### 2. Tunisian Market Specific Gaps
+### 6. Add Post-Completion Flow
+- After PDF download in StepPreview, show a "congratulations" card with 3 next actions:
+  - "Create your public profile" (link to /website/new)
+  - "Match with a job posting" (scroll to job matching section)
+  - "Share on WhatsApp/LinkedIn"
 
-- **No Arabic support**: All UI is French-only. Arabic RTL layout needed for domestic market
-- **No "Service Militaire" field**: Required for male candidates in Tunisia
-- **No SIVP/KARAMA/AMAL mentions**: Government employment programs Tunisian candidates reference
-- **No CIN (Carte d'Identite Nationale) field**: Sometimes required on Tunisian CVs
-- **Missing Tunisian job platforms integration**: Tanitjobs, Emploi.tn, Keejob sharing
-- **No WhatsApp sharing**: Primary communication channel in Tunisia
+### 7. Fix Import Flow
+- In ResumeBuilder, check `sessionStorage` for imported resume data on mount
+- If found, populate the form and clear sessionStorage
+- Show a toast confirming import
 
-### 3. Template Improvements
+### 8. Mobile Responsive Fixes
+- Hide the live preview toggle on mobile (already done, but verify)
+- Make StepPreview tabs full-width on mobile
+- Ensure the AI chat button doesn't overlap with navigation buttons
 
-- Templates use inline styles (not Tailwind) -- good for PDF export but limits customization
-- No dark mode variants
-- Missing industry-specific templates (medical, legal, academic CV formats)
-- No A4 page-break handling for multi-page CVs
+## Technical Details
 
----
+**Files to modify:**
+- `src/pages/Dashboard.tsx` -- simplify layout, add post-CV nudge
+- `src/pages/ResumeBuilder.tsx` -- streamline chrome, fix live preview scaling, handle import from sessionStorage
+- `src/components/resume/steps/StepPreview.tsx` -- simplify, add post-download flow, fix WhatsApp
+- `src/components/resume/steps/StepPersonalInfo.tsx` -- add summary field
+- `src/components/resume/SectionSuggestions.tsx` -- convert to dismissible banner
+- `src/locales/fr.json` + `src/locales/ar.json` -- add ~150 new translation keys
+- Multiple step components -- add `useTranslation` hooks
 
-## Implementation Plan (Prioritized)
-
-### Phase 1: Critical UX Fixes (High Impact, Low Effort)
-
-**1.1 Add Split-Screen Live Preview to Resume Builder**
-- Add a responsive two-column layout in `ResumeBuilder.tsx` for desktop (form left, preview right)
-- Use existing `ResumePreview` component
-- Mobile: keep current step-based flow
-
-**1.2 Integrate Cover Letter Generator UI**
-- Create `src/pages/CoverLetterPage.tsx` or modal in Dashboard
-- Wire to existing `cover-letter` edge function
-- Allow generating from any saved resume
-
-**1.3 Add WhatsApp Share Button**
-- Add to `StepPreview.tsx` and `WebsiteBuilder.tsx` header
-- `https://wa.me/?text=` with site URL
-
-**1.4 Add Missing Tunisian Fields**
-- Add `militaryService` (optional) to `PersonalInfo` type
-- Add `cin` field (optional, hidden by default, shown for Tunisia)
-- Update `StepPersonalInfo` to conditionally show based on `targetCountry`
-
-### Phase 2: Multilingual Support (High Impact, Medium Effort)
-
-**2.1 i18n Infrastructure**
-- Install `react-i18next`
-- Create `src/locales/fr.json` and `src/locales/ar.json`
-- Extract all hardcoded French strings from components
-- Add language switcher in navbar and settings
-
-**2.2 RTL Layout Support**
-- Add `dir="rtl"` toggle to `<html>` element
-- Add Tailwind RTL plugin
-- Test all components in RTL mode
-
-### Phase 3: Template & Export Enhancements (Medium Impact, Medium Effort)
-
-**3.1 New Industry Templates**
-- **"Academique"**: For university applications (publications, research)
-- **"Medical"**: For healthcare with certifications prominent
-- **"Technique"**: For construction/manual trades with licenses/permits highlighted
-- Add to `ResumePreview.tsx` template switch
-
-**3.2 PDF Export Improvements**
-- Add A4 page-break CSS with `@media print`
-- Add watermark removal for paid plans
-- Multi-page support with proper pagination
-
-**3.3 Resume Import from LinkedIn/PDF**
-- Add UI button in Dashboard "Importer un CV"
-- Wire to existing `resume-import` edge function
-- Parse and map to `ResumeData` structure
-
-### Phase 4: SEO & Growth (Medium Impact, Low Effort)
-
-**4.1 Public Website SEO**
-- Add meta description editor in WebsiteEditor
-- Add OG image upload (fields exist in types, need UI)
-- Generate structured data (JSON-LD) for published sites
-- Add `<title>` and `<meta>` via react-helmet
-
-**4.2 Tunisian Job Platform Integration**
-- Add "Partager sur Tanitjobs" / "Emploi.tn" buttons
-- Deep links to create profiles on those platforms
-
-**4.3 Analytics for Published Websites**
-- Track page views per published site
-- Show visitor count in Dashboard website cards
-- Add simple analytics table in Supabase
-
-### Phase 5: Advanced AI Features (High Impact, Higher Effort)
-
-**5.1 AI Chat Assistant in Resume Builder**
-- Floating chat widget using Lovable AI Gateway
-- Context-aware: knows current step, user data, target country
-- Can answer "How should I describe my experience at X?"
-
-**5.2 Job Description Matching UI**
-- Add "Coller une offre d'emploi" textarea in StepPreview
-- Display match score, matched/missing keywords
-- Wire to existing `match-job` action in resume-ai edge function
-
-**5.3 AI-Powered Section Suggestions**
-- After wizard completion, suggest which optional sections to enable
-- Based on job field, experience level, and target country
-
----
-
-## Technical Recommendations
-
-- **Accessibility**: Add `aria-labels`, keyboard navigation for wizard cards, focus management between steps
-- **Performance**: Lazy-load landing page sections below fold; code-split ResumeBuilder and WebsiteBuilder
-- **Responsive**: Resume preview needs `transform: scale()` wrapper for mobile viewing
-- **Testing**: Add Playwright tests for critical flows (wizard -> preview, publish website)
-- **Security**: The `resume-ai` edge function uses `AI_API_KEY` env var -- should migrate to `LOVABLE_API_KEY` for consistency with Lovable AI Gateway
+**Estimated scope:** ~12 files modified, focused on UX cohesion rather than new features.
 
