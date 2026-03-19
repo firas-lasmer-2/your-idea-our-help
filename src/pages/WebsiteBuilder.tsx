@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useWebsite } from "@/hooks/use-website";
 import WebsiteWizard from "@/components/website/WebsiteWizard";
 import WebsiteEditor from "@/components/website/WebsiteEditor";
+import PublishSuccessDialog from "@/components/website/PublishSuccessDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { getWebsitePublishReadiness } from "@/lib/website-readiness";
@@ -24,6 +25,7 @@ const WebsiteBuilder = () => {
   const [wizardDone, setWizardDone] = useState(!!websiteId);
   const [resumes, setResumes] = useState<{ id: string; title: string }[]>([]);
   const [slugInput, setSlugInput] = useState("");
+  const [showPublishSuccess, setShowPublishSuccess] = useState(false);
   const { toast } = useToast();
 
   const {
@@ -254,8 +256,13 @@ const WebsiteBuilder = () => {
                 variant={isPublished ? "outline" : "default"}
                 size="sm"
                 className="gap-1.5"
-                onClick={() => {
-                  void (isPublished ? unpublish() : publish());
+                onClick={async () => {
+                  if (isPublished) {
+                    await unpublish();
+                  } else {
+                    await publish();
+                    setShowPublishSuccess(true);
+                  }
                 }}
                 disabled={saving || (!isPublished && !publishReadiness.ready)}
               >
@@ -324,6 +331,13 @@ const WebsiteBuilder = () => {
           />
         </main>
       )}
+
+      <PublishSuccessDialog
+        open={showPublishSuccess}
+        onOpenChange={setShowPublishSuccess}
+        siteUrl={siteUrl}
+        title={title}
+      />
     </div>
   );
 };

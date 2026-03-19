@@ -44,33 +44,6 @@ interface Props {
   resumes: { id: string; title: string }[];
 }
 
-const WEBSITE_MODE_CARDS: Array<{
-  value: WebsiteMode;
-  label: string;
-  description: string;
-  icon: typeof Briefcase;
-}> = [
-  {
-    value: "profile",
-    label: "Profil Pro",
-    description: "Une page simple, claire et partageable pour convaincre vite un recruteur.",
-    icon: Briefcase,
-  },
-  {
-    value: "portfolio",
-    label: "Portfolio Pro",
-    description: "Pour montrer projets, realisations et preuves de travail avec plus de personnalite.",
-    icon: Code,
-  },
-];
-
-const EXPERIENCE_OPTIONS: Array<{ value: ExperienceLevel; label: string }> = [
-  { value: "none", label: "Pas d'expérience" },
-  { value: "1-3", label: "1 à 3 ans" },
-  { value: "3-10", label: "3 à 10 ans" },
-  { value: "10+", label: "Plus de 10 ans" },
-];
-
 const TOTAL_STEPS = 4;
 
 function mapExperienceItems(resumeData: ResumeData) {
@@ -143,6 +116,33 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
   const [categoryFields, setCategoryFields] = useState<Record<string, string>>({});
   const [generating, setGenerating] = useState(false);
   const { toast } = useToast();
+
+  const WEBSITE_MODE_CARDS: Array<{
+    value: WebsiteMode;
+    label: string;
+    description: string;
+    icon: typeof Briefcase;
+  }> = [
+    {
+      value: "profile",
+      label: t("websiteWizard.modeProfile", "Profil Pro"),
+      description: t("websiteWizard.modeProfileDesc", "Une page simple, claire et partageable pour convaincre vite un recruteur."),
+      icon: Briefcase,
+    },
+    {
+      value: "portfolio",
+      label: t("websiteWizard.modePortfolio", "Portfolio Pro"),
+      description: t("websiteWizard.modePortfolioDesc", "Pour montrer projets, realisations et preuves de travail avec plus de personnalite."),
+      icon: Code,
+    },
+  ];
+
+  const EXPERIENCE_OPTIONS: Array<{ value: ExperienceLevel; label: string }> = [
+    { value: "none", label: t("websiteWizard.expNone", "Pas d'expérience") },
+    { value: "1-3", label: t("websiteWizard.exp1to3", "1 à 3 ans") },
+    { value: "3-10", label: t("websiteWizard.exp3to10", "3 à 10 ans") },
+    { value: "10+", label: t("websiteWizard.exp10plus", "Plus de 10 ans") },
+  ];
 
   const selectedPurpose = WEBSITE_MODE_CARDS.find((mode) => mode.value === purpose);
   const wizardFields = CATEGORY_WIZARD_FIELDS[purpose || "profile"] || [];
@@ -251,7 +251,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       });
 
       if (error || result?.error) {
-        toast({ title: t("website.aiError", "Erreur IA"), description: result?.error || t("website.generateError", "Impossible de générer le contenu."), variant: "destructive" });
+        toast({ title: t("website.aiError"), description: result?.error || t("website.generateError"), variant: "destructive" });
         setGenerating(false);
         return;
       }
@@ -263,7 +263,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       if (heroSection) {
         heroSection.content.title = heroSection.content.title || siteName;
         heroSection.content.subtitle = heroSection.content.subtitle || `${profile.jobTitle} • ${trackPitch.label}`;
-        heroSection.content.cta = heroSection.content.cta || "Me contacter";
+        heroSection.content.cta = heroSection.content.cta || t("websiteWizard.contactMe", "Me contacter");
       }
 
       const navbarSection = sections.find((section) => section.type === "navbar");
@@ -300,8 +300,8 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       const availabilitySection = sections.find((section) => section.type === "availability");
       if (availabilitySection) {
         availabilitySection.content.items = [
-          { label: "Disponibilité", value: profile.availabilityNote || "À préciser" },
-          { label: "Pays cible", value: COUNTRY_STANDARDS[profile.targetCountry].label },
+          { label: t("websiteWizard.availabilityLabel", "Disponibilité"), value: profile.availabilityNote || t("websiteWizard.tbd", "À préciser") },
+          { label: t("websiteWizard.targetCountryLabel", "Pays cible"), value: COUNTRY_STANDARDS[profile.targetCountry].label },
         ];
       }
 
@@ -352,26 +352,39 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
         profile,
       });
     } catch (error) {
-      toast({ title: t("common.error"), description: t("website.generateFailed", "Échec de la génération du profil public."), variant: "destructive" });
+      toast({ title: t("common.error"), description: t("website.generateFailed"), variant: "destructive" });
     }
 
     setGenerating(false);
   };
 
+  const stepLabels = [
+    t("websiteWizard.stepMode", "Mode"),
+    t("websiteWizard.stepCandidate", "Candidature"),
+    t("websiteWizard.stepTemplate", "Template"),
+    t("websiteWizard.stepGenerate", "Génération"),
+  ];
+
   return (
     <div className="mx-auto max-w-4xl">
+      {/* Step indicators with labels */}
       <div className="mb-8 flex items-center justify-center gap-2">
         {Array.from({ length: TOTAL_STEPS }, (_, index) => index + 1).map((index) => (
           <div key={index} className="flex items-center gap-2">
-            <div
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors",
-                index === step ? "bg-primary text-primary-foreground" : index < step ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground",
-              )}
-            >
-              {index}
+            <div className="flex flex-col items-center gap-1">
+              <div
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors",
+                  index === step ? "bg-primary text-primary-foreground" : index < step ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground",
+                )}
+              >
+                {index}
+              </div>
+              <span className={cn("text-[10px] font-medium", index === step ? "text-primary" : "text-muted-foreground")}>
+                {stepLabels[index - 1]}
+              </span>
             </div>
-            {index < TOTAL_STEPS && <div className={cn("h-px w-8", index < step ? "bg-primary" : "bg-border")} />}
+            {index < TOTAL_STEPS && <div className={cn("h-px w-8 self-start mt-4", index < step ? "bg-primary" : "bg-border")} />}
           </div>
         ))}
       </div>
@@ -379,8 +392,8 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 1 && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step1Title", "Quel profil public souhaitez-vous créer ?")}</h2>
-            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step1Subtitle", "Choisissez le format qui aide le mieux votre candidature.")}</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step1Title")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step1Subtitle")}</p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {WEBSITE_MODE_CARDS.map((modeCard) => {
@@ -413,7 +426,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
           </div>
           <div className="flex justify-end">
             <Button onClick={() => setStep(2)} disabled={!purpose} className="gap-2">
-              {t("websiteWizard.next", "Suivant")} <ArrowRight className="h-4 w-4" />
+              {t("websiteWizard.next")} <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -422,195 +435,177 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 2 && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step2Title", "Parlez-nous de votre candidature")}</h2>
-            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step2Subtitle", "Le système adaptera la structure à votre métier et à votre pays cible.")}</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step2Title")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step2Subtitle")}</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label>{t("websiteWizard.profileName")}</Label>
+              <Input value={siteName} onChange={(e) => setSiteName(e.target.value)} placeholder={t("websiteWizard.profileNamePlaceholder")} />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("websiteWizard.targetJob")}</Label>
+              <Input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder={t("websiteWizard.targetJobPlaceholder")} />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("websiteWizard.sector")}</Label>
+              <Select value={candidateTrack} onValueChange={(v) => setCandidateTrack(v as JobField)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {JOB_CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("websiteWizard.targetCountry")}</Label>
+              <Select value={targetCountry} onValueChange={(v) => setTargetCountry(v as TargetCountry)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(COUNTRY_STANDARDS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("websiteWizard.experienceLevel")}</Label>
+              <Select value={experienceLevel} onValueChange={(v) => setExperienceLevel(v as ExperienceLevel)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {EXPERIENCE_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2 md:col-span-2">
-              <Label>{t("websiteWizard.profileName", "Nom du profil public")}</Label>
-              <Input value={siteName} onChange={(event) => setSiteName(event.target.value)} placeholder={t("websiteWizard.profileNamePlaceholder", "Ahmed Ben Ali, Profil Chauffeur, Mon Portfolio...")} />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("websiteWizard.targetJob", "Poste ciblé")}</Label>
-              <Input value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder={t("websiteWizard.targetJobPlaceholder", "Chauffeur poids lourd, Développeur frontend...")} />
-            </div>
-            <div className="space-y-2">
-              <Label>{t("websiteWizard.sector", "Secteur")}</Label>
-              <Select value={candidateTrack} onValueChange={(value) => setCandidateTrack(value as JobField)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {JOB_CATEGORIES.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.icon} {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>{t("websiteWizard.targetCountry", "Pays cible")}</Label>
-              <Select value={targetCountry} onValueChange={(value) => setTargetCountry(value as TargetCountry)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {Object.values(COUNTRY_STANDARDS).map((country) => (
-                    <SelectItem key={country.id} value={country.id}>
-                      {country.flag} {country.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>{t("websiteWizard.experienceLevel", "Niveau d'expérience")}</Label>
-              <Select value={experienceLevel} onValueChange={(value) => setExperienceLevel(value as ExperienceLevel)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {EXPERIENCE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {resumes.length > 0 && (
-              <div className="space-y-2 md:col-span-2 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4">
-                <Label className="flex items-center gap-2">
+          {CV_IMPORT_CATEGORIES.includes(purpose as WebsiteMode) && resumes.length > 0 && (
+            <Card className="border-dashed">
+              <CardContent className="space-y-3 p-4">
+                <div className="flex items-center gap-2">
                   <Globe2 className="h-4 w-4 text-primary" />
-                  {t("websiteWizard.importFromCv", "Importer les données d'un CV existant")}
-                </Label>
+                  <p className="text-sm font-semibold text-foreground">{t("websiteWizard.importFromCv")}</p>
+                </div>
                 <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("websiteWizard.optionalCv", "Optionnel : choisissez un CV...")} />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("websiteWizard.optionalCv")} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">{t("websiteWizard.noCv", "Aucun CV")}</SelectItem>
-                    {resumes.map((resume) => (
-                      <SelectItem key={resume.id} value={resume.id}>{resume.title}</SelectItem>
-                    ))}
+                    <SelectItem value="none">{t("websiteWizard.noCv")}</SelectItem>
+                    {resumes.map((r) => <SelectItem key={r.id} value={r.id}>{r.title}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">
-                  {t("websiteWizard.importRecommended", "Recommandé pour préremplir expériences, compétences, langues et coordonnées.")}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <p className="text-sm font-medium text-foreground">{trackPitch.label}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{trackPitch.description}</p>
-          </div>
+                <p className="text-xs text-muted-foreground">{t("websiteWizard.importRecommended")}</p>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep(1)} className="gap-2">
-              <ArrowLeft className="h-4 w-4" /> {t("common.back")}
+              <ArrowLeft className="h-4 w-4" /> {t("common.back", "Retour")}
             </Button>
             <Button onClick={() => setStep(3)} disabled={!canContinueCandidateStep} className="gap-2">
-              {t("websiteWizard.next", "Suivant")} <ArrowRight className="h-4 w-4" />
+              {t("websiteWizard.next")} <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
 
-      {step === 3 && purpose && (
+      {step === 3 && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step3Title", "Choisissez un template et ajoutez vos repères")}</h2>
-            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step3Subtitle", "Le contenu sera généré selon votre métier, votre pays cible et votre niveau.")}</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step3Title")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step3Subtitle")}</p>
           </div>
 
-          <TemplateGallery
-            category={purpose}
-            selectedTemplateId={selectedTemplate?.id || null}
-            recommendedTemplateId={recommendedWebsiteTemplate?.id || null}
-            recommendedReason={recommendedWebsiteTemplate?.reason}
-            onSelect={setSelectedTemplate}
-          />
+          {templates.length > 0 && purpose && (
+            <TemplateGallery
+              category={purpose}
+              selectedTemplateId={selectedTemplate?.id || null}
+              onSelect={(tpl) => setSelectedTemplate(tpl)}
+              recommendedTemplateId={recommendedWebsiteTemplate?.id}
+            />
+          )}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {wizardFields.map((field) => (
-              <div key={field.key} className={cn("space-y-2", field.type === "textarea" && "md:col-span-2")}>
-                <Label>
-                  {field.label}
-                  {field.required && <span className="text-destructive"> *</span>}
-                </Label>
-                {field.type === "textarea" ? (
-                  <Textarea
-                    value={categoryFields[field.key] || ""}
-                    onChange={(event) => updateCategoryField(field.key, event.target.value)}
-                    placeholder={field.placeholder}
-                    rows={3}
-                  />
-                ) : (
-                  <Input
-                    value={categoryFields[field.key] || ""}
-                    onChange={(event) => updateCategoryField(field.key, event.target.value)}
-                    placeholder={field.placeholder}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setStep(2)} className="gap-2">
-              <ArrowLeft className="h-4 w-4" /> {t("common.back")}
-            </Button>
-            <Button onClick={() => setStep(4)} disabled={!selectedTemplate || !canContinueDetailsStep} className="gap-2">
-              {t("websiteWizard.next", "Suivant")} <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {step === 4 && purpose && (
-        <div className="space-y-6">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step4Title", "Prêt à générer votre profil public ?")}</h2>
-            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step4Subtitle", "Le site sera adapté à votre métier et facile à éditer ensuite.")}</p>
-          </div>
-
-          <Card className="border">
-            <CardContent className="space-y-3 p-5 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("websiteWizard.mode", "Mode")}</span>
-                <span className="font-medium text-foreground">{selectedPurpose?.label}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("websiteWizard.sector", "Secteur")}</span>
-                <span className="font-medium text-foreground">{trackPitch.label}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("websiteWizard.targetCountry", "Pays cible")}</span>
-                <span className="font-medium text-foreground">{COUNTRY_STANDARDS[targetCountry].label}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">{t("websiteWizard.position", "Poste")}</span>
-                <span className="font-medium text-foreground">{jobTitle}</span>
-              </div>
-              {selectedTemplate && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Template</span>
-                  <span className="font-medium text-foreground">{selectedTemplate.name}</span>
+          {wizardFields.length > 0 && (
+            <div className="grid gap-4 md:grid-cols-2">
+              {wizardFields.map((field) => (
+                <div key={field.key} className="space-y-2">
+                  <Label>
+                    {field.label} {field.required && <span className="text-destructive">*</span>}
+                  </Label>
+                  {field.type === "textarea" ? (
+                    <Textarea
+                      value={categoryFields[field.key] || ""}
+                      onChange={(e) => updateCategoryField(field.key, e.target.value)}
+                      placeholder={field.placeholder}
+                      rows={3}
+                    />
+                  ) : (
+                    <Input
+                      value={categoryFields[field.key] || ""}
+                      onChange={(e) => updateCategoryField(field.key, e.target.value)}
+                      placeholder={field.placeholder}
+                    />
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {generating && (
-            <div className="flex flex-col items-center gap-3 py-8">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">{t("websiteWizard.aiPreparing", "L'IA prépare votre profil public...")}</p>
+              ))}
             </div>
           )}
 
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setStep(3)} disabled={generating} className="gap-2">
-              <ArrowLeft className="h-4 w-4" /> {t("common.back")}
+            <Button variant="outline" onClick={() => setStep(2)} className="gap-2">
+              <ArrowLeft className="h-4 w-4" /> {t("common.back", "Retour")}
             </Button>
-            <Button onClick={handleGenerate} disabled={generating || !selectedTemplate} className="gap-2">
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {generating ? t("websiteWizard.generating", "Génération...") : t("websiteWizard.generateProfile", "Générer mon profil")}
+            <Button onClick={() => setStep(4)} disabled={!canContinueDetailsStep} className="gap-2">
+              {t("websiteWizard.next")} <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {step === 4 && (
+        <div className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step4Title")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step4Subtitle")}</p>
+          </div>
+
+          <Card>
+            <CardContent className="space-y-3 p-6">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">{t("websiteWizard.mode")}</span>
+                  <p className="font-semibold text-foreground">{selectedPurpose?.label}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t("websiteWizard.position")}</span>
+                  <p className="font-semibold text-foreground">{jobTitle}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t("websiteWizard.sector")}</span>
+                  <p className="font-semibold text-foreground">{JOB_CATEGORIES.find((c) => c.id === candidateTrack)?.label}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t("websiteWizard.targetCountry")}</span>
+                  <p className="font-semibold text-foreground">{COUNTRY_STANDARDS[targetCountry].label}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {generating && (
+            <div className="flex items-center justify-center gap-3 py-10">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <div>
+                <p className="font-semibold text-foreground">{t("websiteWizard.aiPreparing")}</p>
+                <p className="text-sm text-muted-foreground">{t("websiteWizard.generating")}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between">
+            <Button variant="outline" onClick={() => setStep(3)} className="gap-2" disabled={generating}>
+              <ArrowLeft className="h-4 w-4" /> {t("common.back", "Retour")}
+            </Button>
+            <Button onClick={handleGenerate} disabled={generating} className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              {generating ? t("websiteWizard.generating") : t("websiteWizard.generateProfile")}
             </Button>
           </div>
         </div>
