@@ -194,7 +194,7 @@ const WebsiteBuilder = () => {
 
                     {publishReadiness.warnings.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Améliorations conseillées</p>
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("website.improvements", "Améliorations conseillées")}</p>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                           {publishReadiness.warnings.map((warning) => (
                             <li key={warning} className="flex items-start gap-2">
