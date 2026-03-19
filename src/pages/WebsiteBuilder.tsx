@@ -101,16 +101,16 @@ const WebsiteBuilder = () => {
   const handleSlugSave = async () => {
     const clean = slugInput.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/--+/g, "-");
     if (clean.length < 2) {
-      toast({ title: "Slug trop court", description: "Minimum 2 caractères.", variant: "destructive" });
+      toast({ title: t("website.slugTooShort", "Slug trop court"), description: t("website.minChars", "Minimum 2 caractères."), variant: "destructive" });
       return;
     }
     const success = await setSlug(clean);
     if (!success) {
-      toast({ title: "Erreur", description: "Cette URL est deja prise ou n'a pas pu etre enregistree.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("website.slugTaken", "Cette URL est déjà prise ou n'a pas pu être enregistrée."), variant: "destructive" });
       return;
     }
     setSlugInput(clean);
-    toast({ title: "URL personnalisée enregistrée !" });
+    toast({ title: t("website.slugSaved", "URL personnalisée enregistrée !") });
   };
 
   const siteUrl = id
