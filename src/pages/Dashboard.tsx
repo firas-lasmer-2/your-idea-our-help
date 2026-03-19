@@ -261,7 +261,7 @@ const Dashboard = () => {
         </div>
 
         {/* Quick actions */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => navigate("/resume/new")}>
             <CardContent className="flex items-center gap-4 p-6">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
@@ -284,6 +284,18 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">CV prêt en 2 minutes par l'IA</p>
               </div>
               <Plus className="h-5 w-5 text-muted-foreground group-hover:text-amber-500 transition-colors" />
+            </CardContent>
+          </Card>
+          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => setImportOpen(true)}>
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-secondary/80">
+                <Upload className="h-7 w-7 text-foreground" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground">Importer un CV</h3>
+                <p className="text-sm text-muted-foreground">PDF existant → extraction IA</p>
+              </div>
+              <Plus className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             </CardContent>
           </Card>
           <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-accent/30" onClick={() => navigate("/website/new")}>
