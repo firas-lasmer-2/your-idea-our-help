@@ -493,7 +493,7 @@ export default function WebsiteEditor({
         )}
       </section>
 
-      <section className="flex flex-1 flex-col overflow-hidden bg-muted/30">
+      <section data-tour="preview" className="flex flex-1 flex-col overflow-hidden bg-muted/30">
         <div className="flex items-center justify-between border-b bg-background p-2">
           <div className="flex items-center gap-1">
             <Button variant={previewDevice === "desktop" ? "default" : "ghost"} size="icon" className="h-8 w-8" onClick={() => setPreviewDevice("desktop")}>
