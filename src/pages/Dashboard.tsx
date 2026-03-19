@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { FileText, Globe, Plus, LogOut, Settings, User, Trash2, Edit, MoreHorizontal, Copy, ExternalLink, CheckCircle2, ArrowRight, Upload, ChevronDown } from "lucide-react";
+import { FileText, Globe, Plus, LogOut, Settings, User, Trash2, Edit, MoreHorizontal, Copy, ExternalLink, CheckCircle2, ArrowRight, Upload, ChevronDown, Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
