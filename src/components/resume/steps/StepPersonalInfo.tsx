@@ -2,13 +2,15 @@ import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ResumeData, TUNISIAN_CITIES } from "@/types/resume";
-import { Mail, Phone, MapPin, Linkedin, Github, User, Upload, Loader2, Briefcase, Shield, CreditCard } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Github, User, Upload, Loader2, Briefcase, Shield, CreditCard, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getCountryStandard, type TargetCountry } from "@/lib/country-standards";
 import { useTranslation } from "react-i18next";
+import { useResumeAi } from "@/hooks/use-resume-ai";
 
 interface Props {
   data: ResumeData;
@@ -17,14 +19,16 @@ interface Props {
 
 const StepPersonalInfo = ({ data, updateData }: Props) => {
   const [importing, setImporting] = useState(false);
+  const [generatingSummary, setGeneratingSummary] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { generateSummary } = useResumeAi();
   const experienceOptions = [
-    { value: "none", label: "Pas d'expérience" },
-    { value: "1-3", label: "1 à 3 ans" },
-    { value: "3-10", label: "3 à 10 ans" },
-    { value: "10+", label: "Plus de 10 ans" },
+    { value: "none", label: t("resume.noExperience") },
+    { value: "1-3", label: t("resume.exp1to3") },
+    { value: "3-10", label: t("resume.exp3to10") },
+    { value: "10+", label: t("resume.exp10plus") },
   ];
 
   const countryStd = data.targetCountry ? getCountryStandard(data.targetCountry as TargetCountry) : null;
@@ -42,11 +46,11 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.type !== "application/pdf") {
-      toast({ title: "Erreur", description: "Veuillez sélectionner un fichier PDF.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("resume.pdfOnly", "Veuillez sélectionner un fichier PDF."), variant: "destructive" });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "Erreur", description: "Le fichier est trop volumineux (max 5 Mo).", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("resume.fileTooLarge", "Le fichier est trop volumineux (max 5 Mo)."), variant: "destructive" });
       return;
     }
 
@@ -64,7 +68,7 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
       });
 
       if (error || result?.error) {
-        toast({ title: "Erreur", description: result?.error || "Erreur d'importation.", variant: "destructive" });
+        toast({ title: t("common.error"), description: result?.error || t("resume.importError", "Erreur d'importation."), variant: "destructive" });
       } else if (result?.resumeData) {
         const imported = result.resumeData;
         updateData({
@@ -75,13 +79,22 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
           languages: imported.languages?.length > 0 ? imported.languages : data.languages,
           interests: imported.interests?.length > 0 ? imported.interests : data.interests,
         });
-        toast({ title: "CV importé !", description: "Vos informations ont été pré-remplies." });
+        toast({ title: t("resume.importSuccess"), description: t("resume.importSuccessDesc") });
       }
     } catch {
-      toast({ title: "Erreur", description: "Impossible d'importer le CV.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("resume.importFailed", "Impossible d'importer le CV."), variant: "destructive" });
     }
     setImporting(false);
     if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const handleGenerateSummary = async () => {
+    setGeneratingSummary(true);
+    const summary = await generateSummary(data);
+    if (summary) {
+      updateData({ summary });
+    }
+    setGeneratingSummary(false);
   };
 
   return (
@@ -89,12 +102,10 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold text-foreground">
-            {data.simplifiedMode ? "Vos coordonnées" : "Informations personnelles"}
+            {data.simplifiedMode ? t("resume.coordinates") : t("resume.personalInfo")}
           </h2>
           <p className="mt-1 text-muted-foreground">
-            {data.simplifiedMode
-              ? "Remplissez vos coordonnées pour que les employeurs puissent vous contacter."
-              : "Ces informations apparaîtront en haut de votre CV."}
+            {data.simplifiedMode ? t("resume.coordDesc") : t("resume.personalDesc")}
           </p>
         </div>
         <div>
@@ -107,36 +118,34 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
             disabled={importing}
           >
             {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-            {importing ? "Importation..." : "Importer un CV (PDF)"}
+            {importing ? t("resume.importing") : t("resume.importPdf")}
           </Button>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="jobTitle">Poste ciblé *</Label>
+          <Label htmlFor="jobTitle">{t("resume.targetJob")}</Label>
           <div className="relative">
             <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="jobTitle"
-              placeholder="Développeur web, Comptable, Infirmier..."
+              placeholder={t("resume.targetJobPlaceholder")}
               className="pl-10"
               value={data.jobTitle}
               onChange={(e) => updateData({ jobTitle: e.target.value, jobTarget: e.target.value })}
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Définissez le rôle que vous visez pour guider l'IA et débloquer l'export final.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("resume.targetJobHint")}</p>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="experienceLevel">Niveau d'expérience</Label>
+          <Label htmlFor="experienceLevel">{t("resume.experienceLevel")}</Label>
           <Select
             value={data.experienceLevel || undefined}
             onValueChange={(value) => updateData({ experienceLevel: value })}
           >
             <SelectTrigger id="experienceLevel">
-              <SelectValue placeholder="Sélectionner un niveau" />
+              <SelectValue placeholder={t("resume.selectLevel")} />
             </SelectTrigger>
             <SelectContent>
               {experienceOptions.map((option) => (
@@ -148,37 +157,37 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="firstName">Prénom *</Label>
+          <Label htmlFor="firstName">{t("resume.firstName")}</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input id="firstName" placeholder="Ahmed" className="pl-10" value={data.personalInfo.firstName} onChange={(e) => update("firstName", e.target.value)} />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lastName">Nom *</Label>
+          <Label htmlFor="lastName">{t("resume.lastName")}</Label>
           <Input id="lastName" placeholder="Ben Ali" value={data.personalInfo.lastName} onChange={(e) => update("lastName", e.target.value)} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
+          <Label htmlFor="email">{t("resume.emailLabel")}</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input id="email" type="email" placeholder="ahmed@email.com" className="pl-10" value={data.personalInfo.email} onChange={(e) => update("email", e.target.value)} />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Téléphone</Label>
+          <Label htmlFor="phone">{t("resume.phone")}</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input id="phone" placeholder="+216 XX XXX XXX" className="pl-10" value={data.personalInfo.phone} onChange={(e) => update("phone", e.target.value)} />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="city">Ville</Label>
+          <Label htmlFor="city">{t("resume.city")}</Label>
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
             <Select value={data.personalInfo.city} onValueChange={(v) => update("city", v)}>
               <SelectTrigger className="pl-10">
-                <SelectValue placeholder="Sélectionner une ville" />
+                <SelectValue placeholder={t("resume.selectCity")} />
               </SelectTrigger>
               <SelectContent>
                 {TUNISIAN_CITIES.map((city) => (
@@ -190,7 +199,7 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
         </div>
         {!hideLinkedIn && (
           <div className="space-y-2">
-            <Label htmlFor="linkedin">LinkedIn</Label>
+            <Label htmlFor="linkedin">{t("resume.linkedin")}</Label>
             <div className="relative">
               <Linkedin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input id="linkedin" placeholder="linkedin.com/in/ahmed" className="pl-10" value={data.personalInfo.linkedIn} onChange={(e) => update("linkedIn", e.target.value)} />
@@ -199,7 +208,7 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
         )}
         {!hideGithub && (
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="github">GitHub</Label>
+            <Label htmlFor="github">{t("resume.github")}</Label>
             <div className="relative">
               <Github className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input id="github" placeholder="github.com/ahmed" className="pl-10" value={data.personalInfo.github} onChange={(e) => update("github", e.target.value)} />
@@ -211,33 +220,64 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
         {(!data.targetCountry || data.targetCountry === "tunisia") && (
           <>
             <div className="space-y-2">
-              <Label htmlFor="militaryService">Service militaire</Label>
+              <Label htmlFor="militaryService">{t("resume.militaryService")}</Label>
               <div className="relative">
                 <Shield className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Select value={data.personalInfo.militaryService || ""} onValueChange={(v) => update("militaryService", v)}>
                   <SelectTrigger className="pl-10">
-                    <SelectValue placeholder="Sélectionner le statut" />
+                    <SelectValue placeholder={t("resume.selectStatus")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="effectue">Effectué</SelectItem>
-                    <SelectItem value="exempte">Exempté</SelectItem>
-                    <SelectItem value="en_cours">En cours</SelectItem>
-                    <SelectItem value="non_applicable">Non applicable</SelectItem>
+                    <SelectItem value="effectue">{t("resume.completed")}</SelectItem>
+                    <SelectItem value="exempte">{t("resume.exempt")}</SelectItem>
+                    <SelectItem value="en_cours">{t("resume.inProgress")}</SelectItem>
+                    <SelectItem value="non_applicable">{t("resume.notApplicable")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="cin">CIN (optionnel)</Label>
+              <Label htmlFor="cin">{t("resume.cin")}</Label>
               <div className="relative">
                 <CreditCard className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input id="cin" placeholder="08XXXXXX" className="pl-10" value={data.personalInfo.cin || ""} onChange={(e) => update("cin", e.target.value)} />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Certains employeurs tunisiens demandent le numéro CIN.
-              </p>
+              <p className="text-xs text-muted-foreground">{t("resume.cinHint")}</p>
             </div>
           </>
+        )}
+      </div>
+
+      {/* Professional summary - moved here from StepPreview */}
+      <div className="space-y-3 rounded-lg border p-5">
+        <div className="flex items-center justify-between">
+          <Label className="text-base font-semibold">{t("preview.summary")}</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs"
+            disabled={generatingSummary}
+            onClick={handleGenerateSummary}
+          >
+            {generatingSummary ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+            )}
+            {generatingSummary ? t("preview.generatingAi") : t("preview.generateWithAi")}
+          </Button>
+        </div>
+        <Textarea
+          placeholder={t("preview.summaryPlaceholder")}
+          value={data.summary}
+          onChange={(e) => updateData({ summary: e.target.value })}
+          rows={3}
+          className="resize-none"
+        />
+        {!data.summary && (
+          <p className="text-xs text-muted-foreground">
+            💡 {t("preview.summaryHint")}
+          </p>
         )}
       </div>
 

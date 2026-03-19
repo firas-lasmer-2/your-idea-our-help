@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus, X, Sparkles, Loader2 } from "lucide-react";
 import { ResumeData } from "@/types/resume";
 import { useResumeAi } from "@/hooks/use-resume-ai";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   data: ResumeData;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const StepSkills = ({ data, updateData }: Props) => {
+  const { t } = useTranslation();
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const { suggestSkills, isLoading } = useResumeAi();
   const [suggestingCat, setSuggestingCat] = useState<string | null>(null);
@@ -75,9 +77,9 @@ const StepSkills = ({ data, updateData }: Props) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Compétences</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t("skills.title", "Compétences")}</h2>
         <p className="mt-1 text-muted-foreground">
-          Ajoutez vos compétences ou laissez l'IA vous en suggérer ! ✨
+          {t("skills.subtitle", "Ajoutez vos compétences ou laissez l'IA vous en suggérer ! ✨")}
         </p>
       </div>
 
@@ -98,7 +100,7 @@ const StepSkills = ({ data, updateData }: Props) => {
                 ) : (
                   <Sparkles className="h-3.5 w-3.5 text-primary" />
                 )}
-                Suggestions IA
+                {t("skills.aiSuggestions", "Suggestions IA")}
               </Button>
             </div>
 
@@ -117,7 +119,7 @@ const StepSkills = ({ data, updateData }: Props) => {
             {suggestions[cat.id] && suggestions[cat.id].length > 0 && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
                 <p className="text-xs font-medium text-primary mb-2 flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" /> Suggestions — cliquez pour ajouter
+                  <Sparkles className="h-3 w-3" /> {t("skills.clickToAdd", "Suggestions — cliquez pour ajouter")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {suggestions[cat.id].map((skill) => (
@@ -137,7 +139,7 @@ const StepSkills = ({ data, updateData }: Props) => {
 
             <div className="flex gap-2">
               <Input
-                placeholder="Ajouter une compétence..."
+                placeholder={t("skills.addPlaceholder", "Ajouter une compétence...")}
                 value={inputs[cat.id] || ""}
                 onChange={(e) => setInputs((prev) => ({ ...prev, [cat.id]: e.target.value }))}
                 onKeyDown={(e) => handleKeyDown(cat.id, e)}
