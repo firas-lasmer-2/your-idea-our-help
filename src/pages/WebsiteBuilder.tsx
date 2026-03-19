@@ -331,6 +331,13 @@ const WebsiteBuilder = () => {
           />
         </main>
       )}
+
+      <PublishSuccessDialog
+        open={showPublishSuccess}
+        onOpenChange={setShowPublishSuccess}
+        siteUrl={siteUrl}
+        title={title}
+      />
     </div>
   );
 };
