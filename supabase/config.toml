@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.website-contact]
 verify_jwt = false
+
+[functions.resume-chat]
+verify_jwt = false
+
+[functions.section-suggest]
+verify_jwt = false
