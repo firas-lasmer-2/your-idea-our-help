@@ -462,7 +462,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Niveau d'expérience</Label>
+              <Label>{t("websiteWizard.experienceLevel", "Niveau d'expérience")}</Label>
               <Select value={experienceLevel} onValueChange={(value) => setExperienceLevel(value as ExperienceLevel)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
