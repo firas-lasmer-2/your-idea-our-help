@@ -189,7 +189,7 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
           </Button>
           <Button
             variant="outline"
-            className="gap-2 text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+            className="gap-2 text-primary border-primary/20 hover:bg-primary/5 hover:text-primary"
             onClick={() => {
               const text = encodeURIComponent(`Découvrez mon CV créé avec Resume Builder ! 📄`);
               window.open(`https://wa.me/?text=${text}`, "_blank");
