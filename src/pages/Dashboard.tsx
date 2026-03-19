@@ -50,6 +50,7 @@ const Dashboard = () => {
   const [editValue, setEditValue] = useState("");
   const [importOpen, setImportOpen] = useState(false);
   const [checklistOpen, setChecklistOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
