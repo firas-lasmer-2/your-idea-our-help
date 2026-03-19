@@ -104,6 +104,7 @@ const ResumeBuilder = () => {
     updateCustomization({ showPhoto: countryStd.showPhoto });
 
     setShowWizard(false);
+    setShowSectionSuggestions(true);
 
     // AI pre-fill
     if (expressMode || result.jobTitle) {
