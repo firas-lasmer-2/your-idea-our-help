@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const resumeTemplates = ["essentiel", "horizon", "trajectoire", "direction", "signature"] as const;
+const resumeTemplates = ["essentiel", "horizon", "trajectoire", "direction", "signature", "academique", "medical", "technique"] as const;
 const websiteTemplates = ["profile-clean", "route-pro", "executive-profile", "casefile", "showcase"] as const;
 
 test.describe("resume template visuals", () => {
