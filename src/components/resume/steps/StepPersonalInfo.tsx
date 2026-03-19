@@ -8,6 +8,7 @@ import { Mail, Phone, MapPin, Linkedin, Github, User, Upload, Loader2, Briefcase
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getCountryStandard, type TargetCountry } from "@/lib/country-standards";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   data: ResumeData;
@@ -18,6 +19,7 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
   const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
   const experienceOptions = [
     { value: "none", label: "Pas d'expérience" },
     { value: "1-3", label: "1 à 3 ans" },

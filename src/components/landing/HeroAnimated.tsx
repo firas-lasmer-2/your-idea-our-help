@@ -3,18 +3,19 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Globe, Sparkles, FileText, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const roles = ["Développeur", "Infirmier", "Comptable", "Designer", "Chauffeur", "Ingénieur", "Enseignant", "Technicien"];
+import { useTranslation } from "react-i18next";
 
 export default function HeroAnimated() {
   const [roleIndex, setRoleIndex] = useState(0);
+  const { t } = useTranslation();
+  const roles = t("hero.roles", { returnObjects: true }) as string[];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setRoleIndex((i) => (i + 1) % roles.length);
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [roles.length]);
 
   return (
     <section className="relative overflow-hidden py-20 md:py-32 lg:py-40">
@@ -23,20 +24,15 @@ export default function HeroAnimated() {
         <div className="absolute left-1/4 top-1/4 h-[500px] w-[500px] animate-blob rounded-full bg-primary/8 blur-3xl" />
         <div className="absolute right-1/4 top-1/3 h-[400px] w-[400px] animate-blob animation-delay-2000 rounded-full bg-accent/8 blur-3xl" />
         <div className="absolute bottom-1/4 left-1/3 h-[350px] w-[350px] animate-blob animation-delay-4000 rounded-full bg-primary/5 blur-3xl" />
-        {/* Grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--border)/0.3)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.3)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,black_40%,transparent_100%)]" />
       </div>
 
       <div className="container relative z-10">
         <div className="mx-auto max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <span className="inline-flex items-center gap-2 rounded-full border bg-card/80 backdrop-blur-sm px-5 py-2 text-sm text-muted-foreground shadow-sm">
               <Sparkles className="h-4 w-4 text-accent" />
-              Propulsé par l'intelligence artificielle
+              {t("hero.badge")}
             </span>
           </motion.div>
 
@@ -46,10 +42,10 @@ export default function HeroAnimated() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-8 font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
           >
-            Le CV parfait pour{" "}
+            {t("hero.title")}{" "}
             <span className="relative inline-block">
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                chaque
+                {t("hero.titleHighlight")}
               </span>
             </span>{" "}
             <br className="hidden sm:block" />
@@ -73,8 +69,7 @@ export default function HeroAnimated() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl"
           >
-            Score ATS, bullet points optimisés par l'IA, matching avec l'offre d'emploi.
-            Créez un CV professionnel en moins de 10 minutes.
+            {t("hero.subtitle")}
           </motion.p>
 
           <motion.div
@@ -85,14 +80,14 @@ export default function HeroAnimated() {
           >
             <Button size="lg" className="gap-2 px-8 text-base shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all" asChild>
               <Link to="/signup">
-                Créer mon CV gratuitement
+                {t("hero.ctaPrimary")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="gap-2 px-6 text-base" asChild>
               <Link to="/signup">
                 <Globe className="h-4 w-4" />
-                Créer mon profil public
+                {t("hero.ctaSecondary")}
               </Link>
             </Button>
           </motion.div>
@@ -105,9 +100,9 @@ export default function HeroAnimated() {
             className="mt-12 flex flex-wrap items-center justify-center gap-4"
           >
             {[
-              { label: "5,200+ CV créés", icon: FileText },
-              { label: "Score ATS 92%", icon: CheckCircle },
-              { label: "100% Gratuit", icon: Sparkles },
+              { label: t("hero.badge1"), icon: FileText },
+              { label: t("hero.badge2"), icon: CheckCircle },
+              { label: t("hero.badge3"), icon: Sparkles },
             ].map((badge) => (
               <div
                 key={badge.label}

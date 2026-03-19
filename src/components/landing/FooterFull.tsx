@@ -4,14 +4,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export default function FooterFull() {
   const [email, setEmail] = useState("");
+  const { t } = useTranslation();
 
   const handleNewsletter = (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
-      toast.success("Merci ! Vous recevrez nos actualités.");
+      toast.success(t("footer.thanks"));
       setEmail("");
     }
   };
@@ -28,26 +30,18 @@ export default function FooterFull() {
               </div>
               <span className="text-xl font-bold text-foreground">Resume</span>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">
-              La plateforme #1 en Tunisie pour créer des CV professionnels et des profils publics orientés recrutement avec l'aide de l'IA.
-            </p>
+            <p className="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">{t("footer.description")}</p>
             <form onSubmit={handleNewsletter} className="mt-6 flex gap-2 max-w-xs">
-              <Input
-                placeholder="Votre email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="text-sm"
-              />
+              <Input placeholder={t("footer.emailPlaceholder")} type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="text-sm" />
               <Button type="submit" size="sm">OK</Button>
             </form>
           </div>
 
           {/* Produit */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-4">Produit</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-4">{t("footer.product")}</h4>
             <ul className="space-y-3">
-              {["Créer un CV", "Créer un profil public", "Score ATS", "Templates"].map((item) => (
+              {[t("footer.createCv"), t("footer.createProfile"), t("footer.atsScore"), t("nav.templates")].map((item) => (
                 <li key={item}>
                   <Link to="/signup" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{item}</Link>
                 </li>
@@ -57,11 +51,16 @@ export default function FooterFull() {
 
           {/* Ressources */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-4">Ressources</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-4">{t("footer.resources")}</h4>
             <ul className="space-y-3">
-              {["Guide CV", "Blog", "FAQ", "Tarifs"].map((item) => (
-                <li key={item}>
-                  <a href={item === "FAQ" ? "#faq" : item === "Tarifs" ? "#pricing" : "#"} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{item}</a>
+              {[
+                { label: t("footer.cvGuide"), href: "#" },
+                { label: t("footer.blog"), href: "#" },
+                { label: t("faq.title"), href: "#faq" },
+                { label: t("nav.pricing"), href: "#pricing" },
+              ].map((item) => (
+                <li key={item.label}>
+                  <a href={item.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{item.label}</a>
                 </li>
               ))}
             </ul>
@@ -69,9 +68,9 @@ export default function FooterFull() {
 
           {/* Entreprise */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-4">Entreprise</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-4">{t("footer.company")}</h4>
             <ul className="space-y-3">
-              {["À propos", "Contact", "Confidentialité", "Conditions"].map((item) => (
+              {[t("footer.about"), t("footer.contact"), t("footer.privacy"), t("footer.terms")].map((item) => (
                 <li key={item}>
                   <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{item}</a>
                 </li>
@@ -81,7 +80,7 @@ export default function FooterFull() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
-          <p className="text-xs text-muted-foreground">© 2026 Resume. Fait avec ❤️ en Tunisie.</p>
+          <p className="text-xs text-muted-foreground">{t("footer.copyright")}</p>
           <div className="flex gap-4">
             {["Facebook", "Instagram", "LinkedIn"].map((s) => (
               <a key={s} href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{s}</a>

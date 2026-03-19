@@ -7,56 +7,54 @@ import { CheckCircle, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-
-const plans = [
-  {
-    name: "Gratuit",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    period: "pour toujours",
-    features: ["1 CV", "3 téléchargements/mois", "1 profil public", "Score ATS", "IA limitée (20/jour)"],
-    cta: "Commencer",
-    popular: false,
-  },
-  {
-    name: "Étudiant",
-    monthlyPrice: 5,
-    yearlyPrice: 3,
-    period: "TND/mois",
-    features: ["CV illimités", "Téléchargements illimités", "3 profils publics", "IA complète", "Matching offre d'emploi", "Sous-domaine personnalisé"],
-    cta: "Essai gratuit 7 jours",
-    popular: true,
-  },
-  {
-    name: "Pro",
-    monthlyPrice: 15,
-    yearlyPrice: 10,
-    period: "TND/mois",
-    features: ["Tout dans Étudiant", "Domaine personnalisé", "Sans badge Resume", "Support prioritaire", "Analytiques"],
-    cta: "Commencer",
-    popular: false,
-  },
-];
+import { useTranslation } from "react-i18next";
 
 export default function PricingToggle() {
   const [yearly, setYearly] = useState(false);
+  const { t } = useTranslation();
+
+  const plans = [
+    {
+      name: t("pricing.free"),
+      monthlyPrice: 0,
+      yearlyPrice: 0,
+      period: t("pricing.forever"),
+      features: [t("pricing.features.1cv"), t("pricing.features.3downloads"), t("pricing.features.1profile"), t("pricing.features.atsScore"), t("pricing.features.limitedAi")],
+      cta: t("pricing.start"),
+      popular: false,
+    },
+    {
+      name: t("pricing.student"),
+      monthlyPrice: 5,
+      yearlyPrice: 3,
+      period: t("pricing.perMonth"),
+      features: [t("pricing.features.unlimitedCv"), t("pricing.features.unlimitedDownloads"), t("pricing.features.3profiles"), t("pricing.features.fullAi"), t("pricing.features.jobMatching"), t("pricing.features.customSubdomain")],
+      cta: t("pricing.freeTrial"),
+      popular: true,
+    },
+    {
+      name: t("pricing.pro"),
+      monthlyPrice: 15,
+      yearlyPrice: 10,
+      period: t("pricing.perMonth"),
+      features: [t("pricing.features.allStudent"), t("pricing.features.customDomain"), t("pricing.features.noBadge"), t("pricing.features.prioritySupport"), t("pricing.features.analytics")],
+      cta: t("pricing.start"),
+      popular: false,
+    },
+  ];
 
   return (
     <section id="pricing" className="border-t bg-secondary/30 py-20 md:py-28">
       <div className="container">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl font-bold text-foreground md:text-4xl">
-            Tarifs adaptés aux étudiants
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            Commencez gratuitement. Passez au niveau supérieur quand vous êtes prêt.
-          </p>
+          <h2 className="font-display text-3xl font-bold text-foreground md:text-4xl">{t("pricing.title")}</h2>
+          <p className="mt-4 text-muted-foreground">{t("pricing.subtitle")}</p>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <Label htmlFor="billing" className={`text-sm ${!yearly ? "text-foreground" : "text-muted-foreground"}`}>Mensuel</Label>
+            <Label htmlFor="billing" className={`text-sm ${!yearly ? "text-foreground" : "text-muted-foreground"}`}>{t("pricing.monthly")}</Label>
             <Switch id="billing" checked={yearly} onCheckedChange={setYearly} />
             <Label htmlFor="billing" className={`text-sm ${yearly ? "text-foreground" : "text-muted-foreground"}`}>
-              Annuel
-              <Badge variant="secondary" className="ml-2 text-xs text-primary">-33%</Badge>
+              {t("pricing.yearly")}
+              <Badge variant="secondary" className="ms-2 text-xs text-primary">-33%</Badge>
             </Label>
           </div>
         </div>
@@ -65,18 +63,12 @@ export default function PricingToggle() {
           {plans.map((plan, i) => {
             const price = yearly ? plan.yearlyPrice : plan.monthlyPrice;
             return (
-              <motion.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
+              <motion.div key={plan.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
                 <Card className={`relative h-full border ${plan.popular ? "border-primary shadow-lg ring-1 ring-primary/20" : ""}`}>
                   {plan.popular && (
                     <>
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-medium text-primary-foreground">
-                        Populaire
+                        {t("pricing.popular")}
                       </div>
                       <div className="absolute inset-0 rounded-lg bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
                     </>
@@ -89,13 +81,13 @@ export default function PricingToggle() {
                     </div>
                     {yearly && plan.monthlyPrice > 0 && (
                       <p className="mt-1 text-xs text-primary">
-                        Économisez {(plan.monthlyPrice - plan.yearlyPrice) * 12} TND/an
+                        {t("pricing.save", { amount: (plan.monthlyPrice - plan.yearlyPrice) * 12 })}
                       </p>
                     )}
                     {plan.popular && plan.monthlyPrice > 0 && (
                       <div className="mt-2 flex items-center gap-1 text-xs text-accent">
                         <Sparkles className="h-3 w-3" />
-                        Essai gratuit 7 jours
+                        {t("pricing.freeTrial")}
                       </div>
                     )}
                     <ul className="mt-6 space-y-3">
