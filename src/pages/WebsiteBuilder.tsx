@@ -154,7 +154,7 @@ const WebsiteBuilder = () => {
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-1.5 text-xs">
                     <ListChecks className="h-3 w-3" />
-                    Checklist
+                    {t("website.checklist", "Checklist")}
                     {publishReadiness.blockers.length > 0 && (
                       <span className="rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] text-destructive">
                         {publishReadiness.blockers.length}
