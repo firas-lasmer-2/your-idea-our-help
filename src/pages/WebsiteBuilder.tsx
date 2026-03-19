@@ -230,7 +230,7 @@ const WebsiteBuilder = () => {
                         />
                       </div>
                       <Button size="sm" onClick={handleSlugSave} className="w-full">
-                        Enregistrer
+                        {t("website.saveSlug", "Enregistrer")}
                       </Button>
                       {siteUrl && (
                         <p className="text-[11px] text-muted-foreground break-all">{siteUrl}</p>
