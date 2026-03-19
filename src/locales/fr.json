@@ -274,7 +274,10 @@
     "shareMessage": "Découvrez mon profil public",
     "publishSuccess": "Site publié avec succès !",
     "publishSuccessDesc": "Votre profil public est maintenant accessible. Partagez-le !",
-    "scanQr": "Scannez pour accéder au profil"
+    "scanQr": "Scannez pour accéder au profil",
+    "noResumeTip": "Astuce : créez d'abord un CV",
+    "noResumeDesc": "L'IA remplira automatiquement votre profil à partir de votre CV.",
+    "createCvFirst": "Créer un CV"
   },
   "websiteWizard": {
     "step1Title": "Quel profil public souhaitez-vous créer ?",
