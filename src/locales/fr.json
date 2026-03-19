@@ -348,7 +348,12 @@
     "doubleClickRename": "Double-cliquez pour renommer",
     "welcomeTitle": "Bienvenue sur Resume !",
     "welcomeDesc": "Vous n'avez pas encore de CV ni de profil public. Commencez par en créer un — notre IA vous accompagne à chaque étape !",
-    "createFirstCv": "Créer mon premier CV"
+    "createFirstCv": "Créer mon premier CV",
+    "noCvYet": "Pas encore de CV",
+    "noCvDesc": "Créez votre premier CV professionnel en quelques minutes avec l'aide de l'IA.",
+    "noSiteYet": "Pas encore de profil public",
+    "noSiteDesc": "Créez un profil public pour partager votre candidature en un seul lien. L'IA génère le contenu à partir de votre CV.",
+    "continueEditing": "Continuer"
   },
   "resume": {
     "personalInfo": "Informations personnelles",
