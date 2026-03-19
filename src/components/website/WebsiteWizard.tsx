@@ -42,6 +42,7 @@ interface WizardResult {
 interface Props {
   onComplete: (result: WizardResult) => void;
   resumes: { id: string; title: string }[];
+  preselectedResumeId?: string;
 }
 
 const TOTAL_STEPS = 4;
