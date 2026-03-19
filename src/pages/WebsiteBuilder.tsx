@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Globe, ArrowLeft, Loader2, Share2, ExternalLink, GlobeLock, Link2, CheckCircle2, AlertTriangle, ListChecks } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 import { useWebsite } from "@/hooks/use-website";
 import WebsiteWizard from "@/components/website/WebsiteWizard";
 import WebsiteEditor from "@/components/website/WebsiteEditor";
@@ -15,6 +16,7 @@ import type { WebsiteCandidateProfile, WebsiteGlobalSettings, WebsiteSection, We
 const auth = supabase.auth as any;
 
 const WebsiteBuilder = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const websiteId = searchParams.get("id") || undefined;
   const navigate = useNavigate();
@@ -99,16 +101,16 @@ const WebsiteBuilder = () => {
   const handleSlugSave = async () => {
     const clean = slugInput.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/--+/g, "-");
     if (clean.length < 2) {
-      toast({ title: "Slug trop court", description: "Minimum 2 caractères.", variant: "destructive" });
+      toast({ title: t("website.slugTooShort", "Slug trop court"), description: t("website.minChars", "Minimum 2 caractères."), variant: "destructive" });
       return;
     }
     const success = await setSlug(clean);
     if (!success) {
-      toast({ title: "Erreur", description: "Cette URL est deja prise ou n'a pas pu etre enregistree.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("website.slugTaken", "Cette URL est déjà prise ou n'a pas pu être enregistrée."), variant: "destructive" });
       return;
     }
     setSlugInput(clean);
-    toast({ title: "URL personnalisée enregistrée !" });
+    toast({ title: t("website.slugSaved", "URL personnalisée enregistrée !") });
   };
 
   const siteUrl = id
@@ -129,30 +131,30 @@ const WebsiteBuilder = () => {
               <div className="flex h-7 w-7 items-center justify-center rounded-md bg-accent">
                 <Globe className="h-4 w-4 text-accent-foreground" />
               </div>
-              <span className="font-bold text-foreground">{wizardDone ? title : "Nouveau site"}</span>
+              <span className="font-bold text-foreground">{wizardDone ? title : t("website.newSite", "Nouveau site")}</span>
             </Link>
           </div>
           {wizardDone && (
             <div className="flex items-center gap-2">
               {saving ? (
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Loader2 className="h-3 w-3 animate-spin" /> Sauvegarde...
+                  <Loader2 className="h-3 w-3 animate-spin" /> {t("website.saving", "Sauvegarde...")}
                 </span>
               ) : saveError ? (
-                <span className="text-xs text-destructive">Erreur de sauvegarde</span>
+                <span className="text-xs text-destructive">{t("website.saveError", "Erreur de sauvegarde")}</span>
               ) : lastSavedAt ? (
                 <span className="text-xs text-muted-foreground">
-                  Sauvegarde {new Date(lastSavedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                  {t("website.savedAt", "Sauvegarde")} {new Date(lastSavedAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
                 </span>
               ) : (
-                <span className="text-xs text-muted-foreground">Pret a sauvegarder</span>
+                <span className="text-xs text-muted-foreground">{t("website.readyToSave", "Prêt à sauvegarder")}</span>
               )}
 
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-1.5 text-xs">
                     <ListChecks className="h-3 w-3" />
-                    Checklist
+                    {t("website.checklist", "Checklist")}
                     {publishReadiness.blockers.length > 0 && (
                       <span className="rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] text-destructive">
                         {publishReadiness.blockers.length}
@@ -163,20 +165,20 @@ const WebsiteBuilder = () => {
                 <PopoverContent className="w-96">
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm font-semibold text-foreground">Checklist de publication</p>
+                      <p className="text-sm font-semibold text-foreground">{t("website.publishChecklist", "Checklist de publication")}</p>
                       <p className="text-xs text-muted-foreground">
                         {publishReadiness.ready
-                          ? "Le site est prêt à être publié."
-                          : "Corrigez les éléments bloquants avant publication."}
+                          ? t("website.readyToPublish", "Le site est prêt à être publié.")
+                          : t("website.fixBeforePublish", "Corrigez les éléments bloquants avant publication.")}
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Blocages</p>
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("website.blockages", "Blocages")}</p>
                       {publishReadiness.blockers.length === 0 ? (
                         <div className="flex items-center gap-2 rounded-lg bg-primary/5 p-3 text-sm text-primary">
                           <CheckCircle2 className="h-4 w-4" />
-                          <span>Aucun blocage détecté.</span>
+                          <span>{t("website.noBlockers", "Aucun blocage détecté.")}</span>
                         </div>
                       ) : (
                         <ul className="space-y-2 text-sm text-muted-foreground">
@@ -192,7 +194,7 @@ const WebsiteBuilder = () => {
 
                     {publishReadiness.warnings.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Améliorations conseillées</p>
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("website.improvements", "Améliorations conseillées")}</p>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                           {publishReadiness.warnings.map((warning) => (
                             <li key={warning} className="flex items-start gap-2">
@@ -217,7 +219,7 @@ const WebsiteBuilder = () => {
                   </PopoverTrigger>
                   <PopoverContent className="w-80">
                     <div className="space-y-3">
-                      <p className="text-sm font-medium">URL personnalisée</p>
+                      <p className="text-sm font-medium">{t("website.customUrl", "URL personnalisée")}</p>
                       <div className="flex gap-2">
                         <span className="text-xs text-muted-foreground self-center whitespace-nowrap">/site/</span>
                         <Input
@@ -228,7 +230,7 @@ const WebsiteBuilder = () => {
                         />
                       </div>
                       <Button size="sm" onClick={handleSlugSave} className="w-full">
-                        Enregistrer
+                        {t("website.saveSlug", "Enregistrer")}
                       </Button>
                       {siteUrl && (
                         <p className="text-[11px] text-muted-foreground break-all">{siteUrl}</p>
@@ -245,7 +247,7 @@ const WebsiteBuilder = () => {
                   className="gap-1.5 text-xs"
                   onClick={() => window.open(siteUrl, "_blank")}
                 >
-                  <ExternalLink className="h-3 w-3" /> Voir le site
+                  <ExternalLink className="h-3 w-3" /> {t("website.viewSite", "Voir le site")}
                 </Button>
               )}
               <Button
@@ -259,11 +261,11 @@ const WebsiteBuilder = () => {
               >
                 {isPublished ? (
                   <>
-                    <GlobeLock className="h-3.5 w-3.5" /> Dépublier
+                    <GlobeLock className="h-3.5 w-3.5" /> {t("website.unpublish", "Dépublier")}
                   </>
                 ) : (
                   <>
-                    <Share2 className="h-3.5 w-3.5" /> {publishReadiness.ready ? "Publier" : "Compléter avant publication"}
+                    <Share2 className="h-3.5 w-3.5" /> {publishReadiness.ready ? t("website.publish", "Publier") : t("website.completeBeforePublish", "Compléter avant publication")}
                   </>
                 )}
               </Button>
@@ -283,15 +285,15 @@ const WebsiteBuilder = () => {
               <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Publication bloquée tant que les éléments essentiels ne sont pas prêts</p>
-                    <p className="text-xs text-muted-foreground">
-                      {publishReadiness.enabledSectionCount} section{publishReadiness.enabledSectionCount > 1 ? "s" : ""} active{publishReadiness.enabledSectionCount > 1 ? "s" : ""}
-                      {" "}et {publishReadiness.blockers.length} blocage{publishReadiness.blockers.length > 1 ? "s" : ""} détecté{publishReadiness.blockers.length > 1 ? "s" : ""}.
-                    </p>
+                <p className="text-sm font-semibold text-foreground">{t("website.publishBlocked", "Publication bloquée tant que les éléments essentiels ne sont pas prêts")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {publishReadiness.enabledSectionCount} section{publishReadiness.enabledSectionCount > 1 ? "s" : ""} {t("website.active", "active")}{publishReadiness.enabledSectionCount > 1 ? "s" : ""}
+                  {" "}{t("website.and", "et")} {publishReadiness.blockers.length} {t("website.blockageDetected", "blocage")}{publishReadiness.blockers.length > 1 ? "s" : ""} {t("website.detected", "détecté")}{publishReadiness.blockers.length > 1 ? "s" : ""}.
+                </p>
                   </div>
                   <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-1 text-xs text-destructive">
                     <AlertTriangle className="h-3.5 w-3.5" />
-                    Checklist requise
+                    {t("website.checklistRequired", "Checklist requise")}
                   </span>
                 </div>
               </div>

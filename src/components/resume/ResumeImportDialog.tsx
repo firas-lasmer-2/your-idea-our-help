@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, Loader2, FileText, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   open: boolean;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const ResumeImportDialog = ({ open, onOpenChange, onImportSuccess }: Props) => {
+  const { t } = useTranslation();
   const [importing, setImporting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
@@ -22,11 +24,11 @@ const ResumeImportDialog = ({ open, onOpenChange, onImportSuccess }: Props) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.type !== "application/pdf") {
-      setError("Seuls les fichiers PDF sont acceptés.");
+      setError(t("import.pdfOnly", "Seuls les fichiers PDF sont acceptés."));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError("Le fichier ne doit pas dépasser 5 Mo.");
+      setError(t("import.maxSize", "Le fichier ne doit pas dépasser 5 Mo."));
       return;
     }
     setError("");
@@ -49,21 +51,21 @@ const ResumeImportDialog = ({ open, onOpenChange, onImportSuccess }: Props) => {
       });
 
       if (fnError || data?.error) {
-        setError(data?.error || "Erreur lors de l'import. Réessayez.");
+        setError(data?.error || t("import.retryError", "Erreur lors de l'import. Réessayez."));
         setImporting(false);
         return;
       }
 
       if (data?.resumeData) {
         onImportSuccess(data.resumeData);
-        toast({ title: "CV importé !", description: "Les informations ont été extraites avec succès." });
+        toast({ title: t("import.success", "CV importé !"), description: t("import.successDesc", "Les informations ont été extraites avec succès.") });
         onOpenChange(false);
         setSelectedFile(null);
       } else {
-        setError("Impossible d'extraire les données du CV.");
+        setError(t("import.extractError", "Impossible d'extraire les données du CV."));
       }
     } catch {
-      setError("Erreur de connexion. Vérifiez votre connexion internet.");
+      setError(t("import.connectionError", "Erreur de connexion. Vérifiez votre connexion internet."));
     } finally {
       setImporting(false);
     }
@@ -73,9 +75,9 @@ const ResumeImportDialog = ({ open, onOpenChange, onImportSuccess }: Props) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Importer un CV existant</DialogTitle>
+          <DialogTitle>{t("import.title", "Importer un CV existant")}</DialogTitle>
           <DialogDescription>
-            Importez un CV au format PDF. L'IA extraira automatiquement vos informations.
+            {t("import.description", "Importez un CV au format PDF. L'IA extraira automatiquement vos informations.")}
           </DialogDescription>
         </DialogHeader>
 
@@ -89,9 +91,9 @@ const ResumeImportDialog = ({ open, onOpenChange, onImportSuccess }: Props) => {
             </div>
             <div className="text-center">
               <p className="text-sm font-medium text-foreground">
-                {selectedFile ? selectedFile.name : "Cliquez pour sélectionner un PDF"}
+                {selectedFile ? selectedFile.name : t("import.selectPdf", "Cliquez pour sélectionner un PDF")}
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">PDF uniquement, 5 Mo maximum</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t("import.pdfMax", "PDF uniquement, 5 Mo maximum")}</p>
             </div>
             <input
               ref={fileInputRef}
@@ -117,12 +119,12 @@ const ResumeImportDialog = ({ open, onOpenChange, onImportSuccess }: Props) => {
             {importing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Extraction en cours...
+                {t("import.extracting", "Extraction en cours...")}
               </>
             ) : (
               <>
                 <FileText className="h-4 w-4" />
-                Importer et extraire
+                {t("import.importButton", "Importer et extraire")}
               </>
             )}
           </Button>

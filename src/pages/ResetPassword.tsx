@@ -8,8 +8,11 @@ import { FileText, Lock, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 const auth = supabase.auth as any;
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const ResetPassword = () => {
+  const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -17,7 +20,6 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for recovery token in URL hash
     const hash = window.location.hash;
     if (hash && hash.includes("type=recovery")) {
       // Supabase handles the session automatically
@@ -27,22 +29,25 @@ const ResetPassword = () => {
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 6) {
-      toast({ title: "Mot de passe trop court", description: "Minimum 6 caractères.", variant: "destructive" });
+      toast({ title: t("auth.passwordTooShort"), description: t("auth.minChars"), variant: "destructive" });
       return;
     }
     setLoading(true);
     const { error } = await auth.updateUser({ password });
     setLoading(false);
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Mot de passe mis à jour ! 🎉", description: "Vous pouvez maintenant vous connecter." });
+      toast({ title: t("resetPassword.success", "Mot de passe mis à jour ! 🎉"), description: t("resetPassword.canLogin", "Vous pouvez maintenant vous connecter.") });
       navigate("/login");
     }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="fixed top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md border">
         <CardHeader className="text-center">
           <Link to="/" className="mx-auto mb-4 flex items-center gap-2">
@@ -51,19 +56,19 @@ const ResetPassword = () => {
             </div>
             <span className="text-xl font-bold text-foreground">Resume</span>
           </Link>
-          <CardTitle className="text-2xl">Nouveau mot de passe</CardTitle>
-          <CardDescription>Choisissez un nouveau mot de passe sécurisé.</CardDescription>
+          <CardTitle className="text-2xl">{t("resetPassword.title", "Nouveau mot de passe")}</CardTitle>
+          <CardDescription>{t("resetPassword.description", "Choisissez un nouveau mot de passe sécurisé.")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleReset} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">Nouveau mot de passe</Label>
+              <Label htmlFor="password">{t("resetPassword.newPassword", "Nouveau mot de passe")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Minimum 6 caractères"
+                  placeholder={t("auth.minPassword")}
                   className="pl-10 pr-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -80,7 +85,7 @@ const ResetPassword = () => {
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Mise à jour..." : "Mettre à jour le mot de passe"}
+              {loading ? t("resetPassword.updating", "Mise à jour...") : t("resetPassword.updateButton", "Mettre à jour le mot de passe")}
             </Button>
           </form>
         </CardContent>

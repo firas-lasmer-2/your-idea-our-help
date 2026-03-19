@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, ArrowRight, Briefcase, Code, Globe2, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import TemplateGallery from "./TemplateGallery";
 import {
   CATEGORY_WIZARD_FIELDS,
@@ -129,6 +130,7 @@ function mapProjectItems(resumeData: ResumeData) {
 }
 
 const WebsiteWizard = ({ onComplete, resumes }: Props) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [purpose, setPurpose] = useState<WebsiteMode | "">("");
   const [selectedTemplate, setSelectedTemplate] = useState<WebsiteTemplate | null>(null);
@@ -249,7 +251,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       });
 
       if (error || result?.error) {
-        toast({ title: "Erreur IA", description: result?.error || "Impossible de générer le contenu.", variant: "destructive" });
+        toast({ title: t("website.aiError", "Erreur IA"), description: result?.error || t("website.generateError", "Impossible de générer le contenu."), variant: "destructive" });
         setGenerating(false);
         return;
       }
@@ -350,7 +352,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
         profile,
       });
     } catch (error) {
-      toast({ title: "Erreur", description: "Échec de la génération du profil public.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("website.generateFailed", "Échec de la génération du profil public."), variant: "destructive" });
     }
 
     setGenerating(false);
@@ -377,8 +379,8 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 1 && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Quel profil public souhaitez-vous créer ?</h2>
-            <p className="mt-1 text-muted-foreground">Choisissez le format qui aide le mieux votre candidature.</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step1Title", "Quel profil public souhaitez-vous créer ?")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step1Subtitle", "Choisissez le format qui aide le mieux votre candidature.")}</p>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {WEBSITE_MODE_CARDS.map((modeCard) => {
@@ -411,7 +413,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
           </div>
           <div className="flex justify-end">
             <Button onClick={() => setStep(2)} disabled={!purpose} className="gap-2">
-              Suivant <ArrowRight className="h-4 w-4" />
+              {t("websiteWizard.next", "Suivant")} <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -420,21 +422,21 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 2 && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Parlez-nous de votre candidature</h2>
-            <p className="mt-1 text-muted-foreground">Le système adaptera la structure à votre métier et à votre pays cible.</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step2Title", "Parlez-nous de votre candidature")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step2Subtitle", "Le système adaptera la structure à votre métier et à votre pays cible.")}</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
-              <Label>Nom du profil public</Label>
-              <Input value={siteName} onChange={(event) => setSiteName(event.target.value)} placeholder="Ahmed Ben Ali, Profil Chauffeur, Mon Portfolio..." />
+              <Label>{t("websiteWizard.profileName", "Nom du profil public")}</Label>
+              <Input value={siteName} onChange={(event) => setSiteName(event.target.value)} placeholder={t("websiteWizard.profileNamePlaceholder", "Ahmed Ben Ali, Profil Chauffeur, Mon Portfolio...")} />
             </div>
             <div className="space-y-2">
-              <Label>Poste ciblé</Label>
-              <Input value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder="Chauffeur poids lourd, Développeur frontend..." />
+              <Label>{t("websiteWizard.targetJob", "Poste ciblé")}</Label>
+              <Input value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder={t("websiteWizard.targetJobPlaceholder", "Chauffeur poids lourd, Développeur frontend...")} />
             </div>
             <div className="space-y-2">
-              <Label>Secteur</Label>
+              <Label>{t("websiteWizard.sector", "Secteur")}</Label>
               <Select value={candidateTrack} onValueChange={(value) => setCandidateTrack(value as JobField)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -447,7 +449,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Pays cible</Label>
+              <Label>{t("websiteWizard.targetCountry", "Pays cible")}</Label>
               <Select value={targetCountry} onValueChange={(value) => setTargetCountry(value as TargetCountry)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -460,7 +462,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Niveau d'expérience</Label>
+              <Label>{t("websiteWizard.experienceLevel", "Niveau d'expérience")}</Label>
               <Select value={experienceLevel} onValueChange={(value) => setExperienceLevel(value as ExperienceLevel)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -474,21 +476,21 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
               <div className="space-y-2 md:col-span-2 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4">
                 <Label className="flex items-center gap-2">
                   <Globe2 className="h-4 w-4 text-primary" />
-                  Importer les données d'un CV existant
+                  {t("websiteWizard.importFromCv", "Importer les données d'un CV existant")}
                 </Label>
                 <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Optionnel : choisissez un CV..." />
+                    <SelectValue placeholder={t("websiteWizard.optionalCv", "Optionnel : choisissez un CV...")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Aucun CV</SelectItem>
+                    <SelectItem value="none">{t("websiteWizard.noCv", "Aucun CV")}</SelectItem>
                     {resumes.map((resume) => (
                       <SelectItem key={resume.id} value={resume.id}>{resume.title}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Recommandé pour préremplir expériences, compétences, langues et coordonnées.
+                  {t("websiteWizard.importRecommended", "Recommandé pour préremplir expériences, compétences, langues et coordonnées.")}
                 </p>
               </div>
             )}
@@ -501,10 +503,10 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
 
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep(1)} className="gap-2">
-              <ArrowLeft className="h-4 w-4" /> Retour
+              <ArrowLeft className="h-4 w-4" /> {t("common.back")}
             </Button>
             <Button onClick={() => setStep(3)} disabled={!canContinueCandidateStep} className="gap-2">
-              Suivant <ArrowRight className="h-4 w-4" />
+              {t("websiteWizard.next", "Suivant")} <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -513,8 +515,8 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 3 && purpose && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Choisissez un template et ajoutez vos repères</h2>
-            <p className="mt-1 text-muted-foreground">Le contenu sera généré selon votre métier, votre pays cible et votre niveau.</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step3Title", "Choisissez un template et ajoutez vos repères")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step3Subtitle", "Le contenu sera généré selon votre métier, votre pays cible et votre niveau.")}</p>
           </div>
 
           <TemplateGallery
@@ -552,10 +554,10 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
 
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep(2)} className="gap-2">
-              <ArrowLeft className="h-4 w-4" /> Retour
+              <ArrowLeft className="h-4 w-4" /> {t("common.back")}
             </Button>
             <Button onClick={() => setStep(4)} disabled={!selectedTemplate || !canContinueDetailsStep} className="gap-2">
-              Suivant <ArrowRight className="h-4 w-4" />
+              {t("websiteWizard.next", "Suivant")} <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -564,26 +566,26 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 4 && purpose && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Prêt à générer votre profil public ?</h2>
-            <p className="mt-1 text-muted-foreground">Le site sera adapté à votre métier et facile à éditer ensuite.</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step4Title", "Prêt à générer votre profil public ?")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step4Subtitle", "Le site sera adapté à votre métier et facile à éditer ensuite.")}</p>
           </div>
 
           <Card className="border">
             <CardContent className="space-y-3 p-5 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Mode</span>
+                <span className="text-muted-foreground">{t("websiteWizard.mode", "Mode")}</span>
                 <span className="font-medium text-foreground">{selectedPurpose?.label}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Secteur</span>
+                <span className="text-muted-foreground">{t("websiteWizard.sector", "Secteur")}</span>
                 <span className="font-medium text-foreground">{trackPitch.label}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Pays cible</span>
+                <span className="text-muted-foreground">{t("websiteWizard.targetCountry", "Pays cible")}</span>
                 <span className="font-medium text-foreground">{COUNTRY_STANDARDS[targetCountry].label}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Poste</span>
+                <span className="text-muted-foreground">{t("websiteWizard.position", "Poste")}</span>
                 <span className="font-medium text-foreground">{jobTitle}</span>
               </div>
               {selectedTemplate && (
@@ -598,17 +600,17 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
           {generating && (
             <div className="flex flex-col items-center gap-3 py-8">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">L'IA prépare votre profil public...</p>
+              <p className="text-sm text-muted-foreground">{t("websiteWizard.aiPreparing", "L'IA prépare votre profil public...")}</p>
             </div>
           )}
 
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep(3)} disabled={generating} className="gap-2">
-              <ArrowLeft className="h-4 w-4" /> Retour
+              <ArrowLeft className="h-4 w-4" /> {t("common.back")}
             </Button>
             <Button onClick={handleGenerate} disabled={generating || !selectedTemplate} className="gap-2">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {generating ? "Génération..." : "Générer mon profil"}
+              {generating ? t("websiteWizard.generating", "Génération...") : t("websiteWizard.generateProfile", "Générer mon profil")}
             </Button>
           </div>
         </div>
