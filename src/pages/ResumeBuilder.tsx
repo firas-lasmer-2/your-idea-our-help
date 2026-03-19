@@ -17,6 +17,8 @@ import StepPreview from "@/components/resume/steps/StepPreview";
 import OnboardingTour from "@/components/resume/OnboardingTour";
 import SmartWizard from "@/components/resume/SmartWizard";
 import ResumePreview from "@/components/resume/ResumePreview";
+import AiChatAssistant from "@/components/resume/AiChatAssistant";
+import SectionSuggestions from "@/components/resume/SectionSuggestions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { trackProductEvent } from "@/lib/product-events";
 import { getResumeReadiness } from "@/lib/resume-readiness";
@@ -33,6 +35,7 @@ const ResumeBuilder = () => {
   const [showWizard, setShowWizard] = useState(!resumeId);
   const [prefilling, setPrefilling] = useState(false);
   const [showLivePreview, setShowLivePreview] = useState(true);
+  const [showSectionSuggestions, setShowSectionSuggestions] = useState(false);
   const completionTrackedRef = useRef(false);
 
   const {
@@ -101,6 +104,7 @@ const ResumeBuilder = () => {
     updateCustomization({ showPhoto: countryStd.showPhoto });
 
     setShowWizard(false);
+    setShowSectionSuggestions(true);
 
     // AI pre-fill
     if (expressMode || result.jobTitle) {
@@ -343,6 +347,20 @@ const ResumeBuilder = () => {
           )}
         </div>
 
+        {/* Section Suggestions (after wizard) */}
+        {showSectionSuggestions && (
+          <div className="mb-6">
+            <SectionSuggestions
+              data={data}
+              visible={showSectionSuggestions}
+              onDismiss={() => setShowSectionSuggestions(false)}
+              onEnableSections={(sections) => {
+                updateData({ additionalSections: sections });
+              }}
+            />
+          </div>
+        )}
+
         {/* Split-screen layout for desktop */}
         <div className={`${!isMobile && showLivePreview && currentStep !== 9 ? "grid grid-cols-2 gap-6" : ""}`}>
           <div>
@@ -386,6 +404,9 @@ const ResumeBuilder = () => {
           )}
         </div>
       </main>
+
+      {/* AI Chat Assistant */}
+      <AiChatAssistant data={data} currentStep={currentStep} template={template} />
     </div>
   );
 };
