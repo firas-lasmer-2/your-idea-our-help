@@ -6,18 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, FileText, Globe, TrendingUp, Sparkles, MessageSquareHeart } from "lucide-react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell,
 } from "recharts";
 import { getFunnelConversionRate, getPlanLabel } from "@/lib/growth";
+import { useTranslation } from "react-i18next";
 
 const COLORS = ["hsl(174, 62%, 40%)", "hsl(24, 90%, 55%)", "hsl(220, 25%, 50%)", "hsl(340, 75%, 55%)"];
 
@@ -52,6 +45,7 @@ interface GrowthStats {
 }
 
 export default function AdminAnalytics() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [growth, setGrowth] = useState<GrowthStats | null>(null);
   const [templateData, setTemplateData] = useState<any[]>([]);
@@ -81,7 +75,7 @@ export default function AdminAnalytics() {
       if (profilesRes.data) {
         const monthly: Record<string, number> = {};
         profilesRes.data.forEach((profile) => {
-          const month = new Date(profile.created_at).toLocaleDateString("fr-FR", { month: "short", year: "2-digit" });
+          const month = new Date(profile.created_at).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
           monthly[month] = (monthly[month] || 0) + 1;
         });
         setMonthlyData(Object.entries(monthly).slice(-6).map(([name, value]) => ({ name, value })));
@@ -95,16 +89,15 @@ export default function AdminAnalytics() {
 
   const funnelChartData = useMemo(() => {
     if (!growth) return [];
-
     return [
-      { name: "Signup", value: growth.funnel.signup_completed },
-      { name: "CV demarre", value: growth.funnel.resume_started },
-      { name: "CV termine", value: growth.funnel.resume_completed },
-      { name: "Site publie", value: growth.funnel.website_published },
+      { name: t("admin.funnelSignup"), value: growth.funnel.signup_completed },
+      { name: t("admin.funnelResumeStarted"), value: growth.funnel.resume_started },
+      { name: t("admin.funnelResumeCompleted"), value: growth.funnel.resume_completed },
+      { name: t("admin.funnelSitePublished"), value: growth.funnel.website_published },
       { name: "ATS", value: growth.funnel.ats_scored },
       { name: "Upgrade", value: growth.funnel.upgrade_clicked },
     ];
-  }, [growth]);
+  }, [growth, t]);
 
   const resumeCompletionRate = getFunnelConversionRate(
     growth?.funnel.signup_completed || 0,
@@ -118,25 +111,25 @@ export default function AdminAnalytics() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-foreground">Analytiques</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("admin.analytics")}</h1>
 
         {loading ? (
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-muted-foreground">{t("common.loading")}</p>
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-              <StatCard title="Utilisateurs" value={stats?.total_users || 0} icon={Users} />
-              <StatCard title="CV créés" value={stats?.total_resumes || 0} icon={FileText} />
-              <StatCard title="Sites web" value={stats?.total_websites || 0} icon={Globe} />
-              <StatCard title="Sites publiés" value={stats?.published_websites || 0} icon={TrendingUp} />
-              <StatCard title="Taux CV fini" value={`${resumeCompletionRate}%`} icon={Sparkles} />
-              <StatCard title="Taux site publié" value={`${publishRate}%`} icon={TrendingUp} />
+              <StatCard title={t("admin.users")} value={stats?.total_users || 0} icon={Users} />
+              <StatCard title={t("admin.resumesCreated")} value={stats?.total_resumes || 0} icon={FileText} />
+              <StatCard title={t("admin.websites")} value={stats?.total_websites || 0} icon={Globe} />
+              <StatCard title={t("admin.publishedSites")} value={stats?.published_websites || 0} icon={TrendingUp} />
+              <StatCard title={t("admin.cvCompletionRate")} value={`${resumeCompletionRate}%`} icon={Sparkles} />
+              <StatCard title={t("admin.sitePublishRate")} value={`${publishRate}%`} icon={TrendingUp} />
             </div>
 
             <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Funnel d'activation ({growth?.window_days || 30} jours)</CardTitle>
+                  <CardTitle className="text-base">{t("admin.activationFunnel", { days: growth?.window_days || 30 })}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {funnelChartData.length > 0 ? (
@@ -150,14 +143,14 @@ export default function AdminAnalytics() {
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <p className="py-12 text-center text-sm text-muted-foreground">Pas encore de donnees produit.</p>
+                    <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noProductData")}</p>
                   )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Mix des plans</CardTitle>
+                  <CardTitle className="text-base">{t("admin.planMix")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {growth?.plan_distribution?.length ? (
@@ -168,10 +161,7 @@ export default function AdminAnalytics() {
                             name: getPlanLabel(row.plan_key),
                             value: row.users,
                           }))}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={88}
-                          dataKey="value"
+                          cx="50%" cy="50%" outerRadius={88} dataKey="value"
                           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                         >
                           {growth.plan_distribution.map((_, index) => (
@@ -182,7 +172,7 @@ export default function AdminAnalytics() {
                       </PieChart>
                     </ResponsiveContainer>
                   ) : (
-                    <p className="py-12 text-center text-sm text-muted-foreground">Aucun plan suivi pour l'instant.</p>
+                    <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noPlanData")}</p>
                   )}
                 </CardContent>
               </Card>
@@ -191,7 +181,7 @@ export default function AdminAnalytics() {
             <div className="grid gap-6 xl:grid-cols-3">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Statuts d'onboarding</CardTitle>
+                  <CardTitle className="text-base">{t("admin.onboardingStatuses")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {(growth?.onboarding_distribution || []).map((row) => (
@@ -201,14 +191,14 @@ export default function AdminAnalytics() {
                     </div>
                   ))}
                   {(!growth?.onboarding_distribution || growth.onboarding_distribution.length === 0) && (
-                    <p className="text-sm text-muted-foreground">Aucune donnee d'onboarding.</p>
+                    <p className="text-sm text-muted-foreground">{t("admin.noOnboardingData")}</p>
                   )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Inscriptions par mois</CardTitle>
+                  <CardTitle className="text-base">{t("admin.monthlySignups")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {monthlyData.length > 0 ? (
@@ -222,14 +212,14 @@ export default function AdminAnalytics() {
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <p className="py-12 text-center text-sm text-muted-foreground">Pas encore de donnees.</p>
+                    <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noData")}</p>
                   )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Templates utilisés</CardTitle>
+                  <CardTitle className="text-base">{t("admin.templatesUsed")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {templateData.length > 0 ? (
@@ -244,7 +234,7 @@ export default function AdminAnalytics() {
                       </PieChart>
                     </ResponsiveContainer>
                   ) : (
-                    <p className="py-12 text-center text-sm text-muted-foreground">Pas encore de données</p>
+                    <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noData")}</p>
                   )}
                 </CardContent>
               </Card>
@@ -254,7 +244,7 @@ export default function AdminAnalytics() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <MessageSquareHeart className="h-4 w-4 text-primary" />
-                  Feedback récent
+                  {t("admin.recentFeedback")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -263,20 +253,20 @@ export default function AdminAnalytics() {
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-2">
                         <Badge variant="secondary">{entry.category}</Badge>
-                        <span className="text-sm text-foreground">Note {entry.score}/5</span>
+                        <span className="text-sm text-foreground">{t("admin.score")} {entry.score}/5</span>
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {new Date(entry.created_at).toLocaleDateString("fr-FR")}
+                        {new Date(entry.created_at).toLocaleDateString()}
                       </span>
                     </div>
                     {entry.message && <p className="mt-2 text-sm text-muted-foreground">{entry.message}</p>}
                     <p className="mt-2 text-xs text-muted-foreground">
-                      {entry.page_path || "page inconnue"} • statut: {entry.status}
+                      {entry.page_path || t("admin.unknownPage")} • {t("admin.status")}: {entry.status}
                     </p>
                   </div>
                 ))}
                 {(!growth?.recent_feedback || growth.recent_feedback.length === 0) && (
-                  <p className="text-sm text-muted-foreground">Aucun feedback utilisateur pour l'instant.</p>
+                  <p className="text-sm text-muted-foreground">{t("admin.noFeedback")}</p>
                 )}
               </CardContent>
             </Card>

@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Shield, ShieldCheck, User } from "lucide-react";
+import { Search, Shield, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface UserProfile {
   id: string;
@@ -19,6 +20,7 @@ interface UserProfile {
 }
 
 export default function AdminUsers() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -51,9 +53,9 @@ export default function AdminUsers() {
       { onConflict: "user_id,role" }
     );
     if (error) {
-      toast.error("Erreur: " + error.message);
+      toast.error(t("common.error") + ": " + error.message);
     } else {
-      toast.success("Rôle attribué");
+      toast.success(t("admin.roleAssigned"));
       loadUsers();
     }
   };
@@ -61,9 +63,9 @@ export default function AdminUsers() {
   const removeRole = async (userId: string, role: string) => {
     const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role as any);
     if (error) {
-      toast.error("Erreur: " + error.message);
+      toast.error(t("common.error") + ": " + error.message);
     } else {
-      toast.success("Rôle retiré");
+      toast.success(t("admin.roleRemoved"));
       loadUsers();
     }
   };
@@ -76,30 +78,30 @@ export default function AdminUsers() {
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-foreground">Utilisateurs</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("admin.users")}</h1>
           <Badge variant="secondary">{users.length} total</Badge>
         </div>
 
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Rechercher..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          <Input placeholder={t("admin.search")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
 
         <div className="rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Utilisateur</TableHead>
-                <TableHead>Inscrit le</TableHead>
-                <TableHead>Rôles</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("admin.user")}</TableHead>
+                <TableHead>{t("admin.registeredOn")}</TableHead>
+                <TableHead>{t("admin.roles")}</TableHead>
+                <TableHead>{t("admin.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Chargement...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">{t("common.loading")}</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Aucun utilisateur</TableCell></TableRow>
+                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">{t("admin.noUsers")}</TableCell></TableRow>
               ) : (
                 filtered.map((u) => (
                   <TableRow key={u.id}>
@@ -110,13 +112,13 @@ export default function AdminUsers() {
                           <AvatarFallback>{(u.full_name || "?")[0]}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="text-sm font-medium text-foreground">{u.full_name || "Sans nom"}</p>
+                          <p className="text-sm font-medium text-foreground">{u.full_name || t("admin.noName")}</p>
                           <p className="text-xs text-muted-foreground font-mono">{u.id.slice(0, 8)}...</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {new Date(u.created_at).toLocaleDateString("fr-FR")}
+                      {new Date(u.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
@@ -137,11 +139,11 @@ export default function AdminUsers() {
                     <TableCell>
                       <Select onValueChange={(v) => assignRole(u.id, v)}>
                         <SelectTrigger className="w-[140px] h-8 text-xs">
-                          <SelectValue placeholder="Ajouter rôle" />
+                          <SelectValue placeholder={t("admin.addRole")} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="moderator">Modérateur</SelectItem>
+                          <SelectItem value="moderator">{t("admin.moderator")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
