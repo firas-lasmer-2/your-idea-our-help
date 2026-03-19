@@ -43,10 +43,15 @@ interface Props {
 const StepPreview = ({ data, customization, template, saving, completionPercent, exportBlockers, onSave, onUpdateData }: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const resumeId = searchParams.get("id");
   const { generateSummary } = useResumeAi();
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [npsScore, setNpsScore] = useState<number | null>(null);
+  const [npsSent, setNpsSent] = useState(false);
   const celebratedRef = useRef(false);
   const resumeRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
