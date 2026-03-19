@@ -347,6 +347,20 @@ const ResumeBuilder = () => {
           )}
         </div>
 
+        {/* Section Suggestions (after wizard) */}
+        {showSectionSuggestions && (
+          <div className="mb-6">
+            <SectionSuggestions
+              data={data}
+              visible={showSectionSuggestions}
+              onDismiss={() => setShowSectionSuggestions(false)}
+              onEnableSections={(sections) => {
+                updateData({ additionalSections: sections });
+              }}
+            />
+          </div>
+        )}
+
         {/* Split-screen layout for desktop */}
         <div className={`${!isMobile && showLivePreview && currentStep !== 9 ? "grid grid-cols-2 gap-6" : ""}`}>
           <div>
@@ -390,6 +404,9 @@ const ResumeBuilder = () => {
           )}
         </div>
       </main>
+
+      {/* AI Chat Assistant */}
+      <AiChatAssistant data={data} currentStep={currentStep} template={template} />
     </div>
   );
 };
