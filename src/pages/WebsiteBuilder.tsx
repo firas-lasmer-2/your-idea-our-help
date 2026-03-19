@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useWebsite } from "@/hooks/use-website";
 import WebsiteWizard from "@/components/website/WebsiteWizard";
 import WebsiteEditor from "@/components/website/WebsiteEditor";
+import PublishSuccessDialog from "@/components/website/PublishSuccessDialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { getWebsitePublishReadiness } from "@/lib/website-readiness";
