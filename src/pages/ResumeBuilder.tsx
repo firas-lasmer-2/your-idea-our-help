@@ -35,6 +35,7 @@ const ResumeBuilder = () => {
   const [showWizard, setShowWizard] = useState(!resumeId);
   const [prefilling, setPrefilling] = useState(false);
   const [showLivePreview, setShowLivePreview] = useState(true);
+  const [showSectionSuggestions, setShowSectionSuggestions] = useState(false);
   const completionTrackedRef = useRef(false);
 
   const {
