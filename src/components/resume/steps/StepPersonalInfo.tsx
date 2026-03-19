@@ -19,6 +19,7 @@ const StepPersonalInfo = ({ data, updateData }: Props) => {
   const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
   const experienceOptions = [
     { value: "none", label: "Pas d'expérience" },
     { value: "1-3", label: "1 à 3 ans" },
