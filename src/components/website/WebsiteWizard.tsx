@@ -573,19 +573,19 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
           <Card className="border">
             <CardContent className="space-y-3 p-5 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Mode</span>
+                <span className="text-muted-foreground">{t("websiteWizard.mode", "Mode")}</span>
                 <span className="font-medium text-foreground">{selectedPurpose?.label}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Secteur</span>
+                <span className="text-muted-foreground">{t("websiteWizard.sector", "Secteur")}</span>
                 <span className="font-medium text-foreground">{trackPitch.label}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Pays cible</span>
+                <span className="text-muted-foreground">{t("websiteWizard.targetCountry", "Pays cible")}</span>
                 <span className="font-medium text-foreground">{COUNTRY_STANDARDS[targetCountry].label}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Poste</span>
+                <span className="text-muted-foreground">{t("websiteWizard.position", "Poste")}</span>
                 <span className="font-medium text-foreground">{jobTitle}</span>
               </div>
               {selectedTemplate && (
