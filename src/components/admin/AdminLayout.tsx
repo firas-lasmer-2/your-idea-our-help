@@ -1,8 +1,11 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "./AdminSidebar";
 import AdminGuard from "./AdminGuard";
+import { useTranslation } from "react-i18next";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
+
   return (
     <AdminGuard>
       <SidebarProvider>
@@ -11,7 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex-1 flex flex-col">
             <header className="h-14 flex items-center border-b bg-background/80 backdrop-blur-md px-4">
               <SidebarTrigger className="mr-4" />
-              <span className="text-sm font-semibold text-foreground">Admin Panel</span>
+              <span className="text-sm font-semibold text-foreground">{t("admin.panelTitle")}</span>
             </header>
             <main className="flex-1 p-6 overflow-auto">{children}</main>
           </div>
