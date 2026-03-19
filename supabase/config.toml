@@ -1,0 +1,19 @@
+project_id = "clvbryhprndqjockytgh"
+
+[functions.resume-ai]
+verify_jwt = false
+
+[functions.website-ai]
+verify_jwt = false
+
+[functions.resume-score]
+verify_jwt = false
+
+[functions.cover-letter]
+verify_jwt = false
+
+[functions.resume-import]
+verify_jwt = false
+
+[functions.website-contact]
+verify_jwt = false

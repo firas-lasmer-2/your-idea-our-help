@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# CV Builder
 
-TODO: Document your project here
+A resume and portfolio website builder built with React + TypeScript + Supabase.
