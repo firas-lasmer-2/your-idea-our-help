@@ -256,8 +256,13 @@ const WebsiteBuilder = () => {
                 variant={isPublished ? "outline" : "default"}
                 size="sm"
                 className="gap-1.5"
-                onClick={() => {
-                  void (isPublished ? unpublish() : publish());
+                onClick={async () => {
+                  if (isPublished) {
+                    await unpublish();
+                  } else {
+                    await publish();
+                    setShowPublishSuccess(true);
+                  }
                 }}
                 disabled={saving || (!isPublished && !publishReadiness.ready)}
               >
