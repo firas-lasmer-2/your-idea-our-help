@@ -452,7 +452,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
               <Select value={candidateTrack} onValueChange={(v) => setCandidateTrack(v as JobField)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {JOB_CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                  {JOB_CATEGORIES.map((c) => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
