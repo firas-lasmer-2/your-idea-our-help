@@ -476,14 +476,14 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
               <div className="space-y-2 md:col-span-2 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4">
                 <Label className="flex items-center gap-2">
                   <Globe2 className="h-4 w-4 text-primary" />
-                  Importer les données d'un CV existant
+                  {t("websiteWizard.importFromCv", "Importer les données d'un CV existant")}
                 </Label>
                 <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Optionnel : choisissez un CV..." />
+                    <SelectValue placeholder={t("websiteWizard.optionalCv", "Optionnel : choisissez un CV...")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">Aucun CV</SelectItem>
+                    <SelectItem value="none">{t("websiteWizard.noCv", "Aucun CV")}</SelectItem>
                     {resumes.map((resume) => (
                       <SelectItem key={resume.id} value={resume.id}>{resume.title}</SelectItem>
                     ))}
