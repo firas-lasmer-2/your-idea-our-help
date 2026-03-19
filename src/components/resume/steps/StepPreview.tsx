@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Download, Save, Sparkles, Loader2, FileText, Target, CheckCircle, AlertCircle, ChevronDown, MessageCircle, Globe, Linkedin, ArrowRight } from "lucide-react";
+import { Download, Save, Sparkles, Loader2, FileText, Target, CheckCircle, AlertCircle, ChevronDown, MessageCircle, Globe, Linkedin, ArrowRight, Star } from "lucide-react";
+import ShareDialog from "@/components/ShareDialog";
 import { ResumeData, ResumeCustomization } from "@/types/resume";
 import ResumePreview from "@/components/resume/ResumePreview";
 import ATSScoreGauge from "@/components/resume/ATSScoreGauge";
@@ -42,10 +43,15 @@ interface Props {
 const StepPreview = ({ data, customization, template, saving, completionPercent, exportBlockers, onSave, onUpdateData }: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const resumeId = searchParams.get("id");
   const { generateSummary } = useResumeAi();
   const [generatingSummary, setGeneratingSummary] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [npsScore, setNpsScore] = useState<number | null>(null);
+  const [npsSent, setNpsSent] = useState(false);
   const celebratedRef = useRef(false);
   const resumeRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -247,7 +253,7 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
 
       {/* Post-download: What's next? */}
       {downloaded && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <Card className="border-primary/20 bg-primary/5 p-5">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
@@ -256,7 +262,9 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
               </div>
               <p className="text-sm text-muted-foreground">{t("preview.whatsNext", "Et maintenant ?")}</p>
               <div className="grid gap-2 sm:grid-cols-3">
-                <Button variant="outline" className="gap-2 justify-start h-auto py-3" onClick={() => navigate("/website/new")}>
+                <Button variant="outline" className="gap-2 justify-start h-auto py-3" onClick={() => {
+                  navigate(resumeId ? `/website/new?fromResume=${resumeId}` : "/website/new");
+                }}>
                   <Globe className="h-4 w-4 text-accent shrink-0" />
                   <div className="text-left">
                     <p className="text-xs font-medium">{t("preview.createProfile", "Créer un profil public")}</p>
@@ -270,21 +278,60 @@ const StepPreview = ({ data, customization, template, saving, completionPercent,
                     <p className="text-[10px] text-muted-foreground">{t("preview.matchJobDesc", "Comparez avec une description de poste")}</p>
                   </div>
                 </Button>
-                <Button variant="outline" className="gap-2 justify-start h-auto py-3" onClick={() => {
-                  const url = encodeURIComponent(shareUrl);
-                  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, "_blank");
-                }}>
-                  <Linkedin className="h-4 w-4 text-[#0A66C2] shrink-0" />
+                <Button variant="outline" className="gap-2 justify-start h-auto py-3" onClick={() => setShowShareDialog(true)}>
+                  <MessageCircle className="h-4 w-4 text-primary shrink-0" />
                   <div className="text-left">
-                    <p className="text-xs font-medium">{t("preview.shareLinkedin", "Partager sur LinkedIn")}</p>
-                    <p className="text-[10px] text-muted-foreground">{t("preview.shareLinkedinDesc", "Montrez votre nouveau CV")}</p>
+                    <p className="text-xs font-medium">{t("preview.shareCv", "Partager mon CV")}</p>
+                    <p className="text-[10px] text-muted-foreground">{t("preview.shareCvDesc", "WhatsApp, LinkedIn, QR code")}</p>
                   </div>
                 </Button>
               </div>
             </div>
           </Card>
+
+          {/* NPS quick rating */}
+          {!npsSent && (
+            <Card className="border p-5">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-semibold text-foreground">{t("preview.npsQuestion", "Comment évaluez-vous votre expérience ?")}</p>
+                </div>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <Button
+                      key={value}
+                      variant={npsScore === value ? "default" : "outline"}
+                      size="sm"
+                      className="h-9 w-9 px-0"
+                      onClick={async () => {
+                        setNpsScore(value);
+                        setNpsSent(true);
+                        await trackProductEvent("nps_after_download", {
+                          data: { score: value, template },
+                        });
+                        toast({ title: t("preview.thanksFeedback", "Merci pour votre retour !") });
+                      }}
+                    >
+                      {value}
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground">{t("preview.npsHint", "1 = pas satisfait, 5 = très satisfait")}</p>
+              </div>
+            </Card>
+          )}
         </motion.div>
       )}
+
+      <ShareDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        url={shareUrl}
+        title={t("preview.shareCvTitle", "Partagez votre CV")}
+        description={t("preview.shareCvDescription", "Envoyez votre CV par WhatsApp, LinkedIn ou QR code.")}
+        shareMessage={t("preview.whatsappMsg", "Découvrez mon CV créé avec Resume Builder !")}
+      />
 
       {/* Job Matching — Optional Collapsible */}
       <Collapsible open={matchOpen} onOpenChange={setMatchOpen}>

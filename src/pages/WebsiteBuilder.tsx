@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Globe, ArrowLeft, Loader2, Share2, ExternalLink, GlobeLock, Link2, CheckCircle2, AlertTriangle, ListChecks } from "lucide-react";
+import { Globe, ArrowLeft, Loader2, Share2, ExternalLink, GlobeLock, Link2, CheckCircle2, AlertTriangle, ListChecks, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useWebsite } from "@/hooks/use-website";
@@ -20,6 +20,7 @@ const WebsiteBuilder = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const websiteId = searchParams.get("id") || undefined;
+  const fromResumeId = searchParams.get("fromResume") || null;
   const navigate = useNavigate();
   const [authLoading, setAuthLoading] = useState(true);
   const [wizardDone, setWizardDone] = useState(!!websiteId);
@@ -283,7 +284,23 @@ const WebsiteBuilder = () => {
 
       {!wizardDone ? (
         <main className="container py-8">
-          <WebsiteWizard onComplete={handleWizardComplete} resumes={resumes} />
+          {resumes.length === 0 && (
+            <div className="mb-6 rounded-xl border border-accent/20 bg-accent/5 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-accent" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{t("website.noResumeTip", "Astuce : créez d'abord un CV")}</p>
+                    <p className="text-xs text-muted-foreground">{t("website.noResumeDesc", "L'IA remplira automatiquement votre profil à partir de votre CV.")}</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" className="gap-1.5 shrink-0" onClick={() => navigate("/resume/new")}>
+                  <FileText className="h-3.5 w-3.5" /> {t("website.createCvFirst", "Créer un CV")}
+                </Button>
+              </div>
+            </div>
+          )}
+          <WebsiteWizard onComplete={handleWizardComplete} resumes={resumes} preselectedResumeId={fromResumeId || undefined} />
         </main>
       ) : (
         <main className="space-y-4">

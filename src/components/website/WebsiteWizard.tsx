@@ -42,6 +42,7 @@ interface WizardResult {
 interface Props {
   onComplete: (result: WizardResult) => void;
   resumes: { id: string; title: string }[];
+  preselectedResumeId?: string;
 }
 
 const TOTAL_STEPS = 4;
@@ -102,7 +103,7 @@ function mapProjectItems(resumeData: ResumeData) {
     }));
 }
 
-const WebsiteWizard = ({ onComplete, resumes }: Props) => {
+const WebsiteWizard = ({ onComplete, resumes, preselectedResumeId }: Props) => {
   const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [purpose, setPurpose] = useState<WebsiteMode | "">("");
@@ -112,7 +113,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
   const [candidateTrack, setCandidateTrack] = useState<JobField>("other");
   const [targetCountry, setTargetCountry] = useState<TargetCountry>("canada");
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>("none");
-  const [selectedResumeId, setSelectedResumeId] = useState("");
+  const [selectedResumeId, setSelectedResumeId] = useState(preselectedResumeId || "");
   const [categoryFields, setCategoryFields] = useState<Record<string, string>>({});
   const [generating, setGenerating] = useState(false);
   const { toast } = useToast();

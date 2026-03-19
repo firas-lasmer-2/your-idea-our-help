@@ -11,7 +11,8 @@ export type ProductEventName =
   | "contact_submitted"
   | "ats_scored"
   | "upgrade_clicked"
-  | "feedback_submitted";
+  | "feedback_submitted"
+  | "nps_after_download";
 
 export type PlanKey = "free" | "student" | "pro";
 
