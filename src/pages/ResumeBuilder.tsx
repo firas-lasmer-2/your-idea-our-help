@@ -28,9 +28,11 @@ const ResumeBuilder = () => {
   const resumeId = searchParams.get("id") || undefined;
   const expressMode = searchParams.get("express") === "1";
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [authLoading, setAuthLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(!resumeId);
   const [prefilling, setPrefilling] = useState(false);
+  const [showLivePreview, setShowLivePreview] = useState(true);
   const completionTrackedRef = useRef(false);
 
   const {
