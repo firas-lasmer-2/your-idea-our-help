@@ -25,6 +25,7 @@ const WebsiteBuilder = () => {
   const [wizardDone, setWizardDone] = useState(!!websiteId);
   const [resumes, setResumes] = useState<{ id: string; title: string }[]>([]);
   const [slugInput, setSlugInput] = useState("");
+  const [showPublishSuccess, setShowPublishSuccess] = useState(false);
   const { toast } = useToast();
 
   const {
