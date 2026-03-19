@@ -247,7 +247,7 @@ const WebsiteBuilder = () => {
                   className="gap-1.5 text-xs"
                   onClick={() => window.open(siteUrl, "_blank")}
                 >
-                  <ExternalLink className="h-3 w-3" /> Voir le site
+                  <ExternalLink className="h-3 w-3" /> {t("website.viewSite", "Voir le site")}
                 </Button>
               )}
               <Button
