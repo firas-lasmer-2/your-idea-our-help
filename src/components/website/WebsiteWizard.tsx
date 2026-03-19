@@ -515,8 +515,8 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
       {step === 3 && purpose && (
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">Choisissez un template et ajoutez vos repères</h2>
-            <p className="mt-1 text-muted-foreground">Le contenu sera généré selon votre métier, votre pays cible et votre niveau.</p>
+            <h2 className="text-2xl font-bold text-foreground">{t("websiteWizard.step3Title", "Choisissez un template et ajoutez vos repères")}</h2>
+            <p className="mt-1 text-muted-foreground">{t("websiteWizard.step3Subtitle", "Le contenu sera généré selon votre métier, votre pays cible et votre niveau.")}</p>
           </div>
 
           <TemplateGallery
