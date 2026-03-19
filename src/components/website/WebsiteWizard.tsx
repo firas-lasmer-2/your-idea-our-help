@@ -600,17 +600,17 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
           {generating && (
             <div className="flex flex-col items-center gap-3 py-8">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">L'IA prépare votre profil public...</p>
+              <p className="text-sm text-muted-foreground">{t("websiteWizard.aiPreparing", "L'IA prépare votre profil public...")}</p>
             </div>
           )}
 
           <div className="flex justify-between">
             <Button variant="outline" onClick={() => setStep(3)} disabled={generating} className="gap-2">
-              <ArrowLeft className="h-4 w-4" /> Retour
+              <ArrowLeft className="h-4 w-4" /> {t("common.back")}
             </Button>
             <Button onClick={handleGenerate} disabled={generating || !selectedTemplate} className="gap-2">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {generating ? "Génération..." : "Générer mon profil"}
+              {generating ? t("websiteWizard.generating", "Génération...") : t("websiteWizard.generateProfile", "Générer mon profil")}
             </Button>
           </div>
         </div>
