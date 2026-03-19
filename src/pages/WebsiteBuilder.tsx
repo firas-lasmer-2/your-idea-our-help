@@ -261,11 +261,11 @@ const WebsiteBuilder = () => {
               >
                 {isPublished ? (
                   <>
-                    <GlobeLock className="h-3.5 w-3.5" /> Dépublier
+                    <GlobeLock className="h-3.5 w-3.5" /> {t("website.unpublish", "Dépublier")}
                   </>
                 ) : (
                   <>
-                    <Share2 className="h-3.5 w-3.5" /> {publishReadiness.ready ? "Publier" : "Compléter avant publication"}
+                    <Share2 className="h-3.5 w-3.5" /> {publishReadiness.ready ? t("website.publish", "Publier") : t("website.completeBeforePublish", "Compléter avant publication")}
                   </>
                 )}
               </Button>
