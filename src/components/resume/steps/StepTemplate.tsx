@@ -32,12 +32,30 @@ const templates = [
     id: "direction",
     name: "Direction",
     description: "Plus premium et plus pose. Pense pour les profils seniors et corporate.",
-    badge: "Nouveau",
+    badge: null,
   },
   {
     id: "signature",
     name: "Signature",
     description: "Ajoute de la personnalite sans tomber dans un style trop risque.",
+    badge: null,
+  },
+  {
+    id: "academique",
+    name: "Académique",
+    description: "Formation et publications en priorité. Idéal pour les candidatures universitaires et la recherche.",
+    badge: "Nouveau",
+  },
+  {
+    id: "medical",
+    name: "Médical",
+    description: "Certifications et expérience clinique mises en avant pour les professionnels de santé.",
+    badge: "Nouveau",
+  },
+  {
+    id: "technique",
+    name: "Technique",
+    description: "Permis, licences et compétences terrain en priorité pour les métiers manuels.",
     badge: "Nouveau",
   },
 ];
@@ -81,7 +99,9 @@ const sampleData: ResumeData = {
   projects: [
     { id: "1", name: "E-commerce App", description: "Plateforme de vente en ligne", url: "", technologies: ["React", "Node.js"] },
   ],
-  certifications: [],
+  certifications: [
+    { id: "1", name: "AWS Solutions Architect", issuer: "Amazon", date: "2023", url: "" },
+  ],
   languages: [
     { name: "Français", level: "Natif" },
     { name: "Anglais", level: "Courant" },
@@ -267,7 +287,7 @@ const StepTemplate = ({ data, template, setTemplate }: Props) => {
             <div>
               <h3 className="text-sm font-semibold text-foreground">Plus de modèles</h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                Styles specialises pour profils seniors ou plus differenciants.
+                Styles specialises pour profils seniors, academiques, medicaux ou techniques.
               </p>
             </div>
             <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", showAdvanced && "rotate-180")} />

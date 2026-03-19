@@ -130,3 +130,26 @@
     animation-delay: 4s;
   }
 }
+
+/* A4 PDF page-break support */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .resume-page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .resume-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}

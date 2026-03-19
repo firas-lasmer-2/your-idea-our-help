@@ -5,7 +5,7 @@ import { defaultCustomization, type ResumeCustomization, type ResumeData } from 
 import { defaultGlobalSettings, type WebsiteGlobalSettings } from "@/types/website";
 import type { ResumeTemplateId, WebsiteTemplateId } from "@/lib/template-recommendations";
 
-export const RESUME_TEMPLATE_IDS: ResumeTemplateId[] = ["essentiel", "horizon", "trajectoire", "direction", "signature"];
+export const RESUME_TEMPLATE_IDS: ResumeTemplateId[] = ["essentiel", "horizon", "trajectoire", "direction", "signature", "academique", "medical", "technique"];
 export const WEBSITE_TEMPLATE_IDS: WebsiteTemplateId[] = ["profile-clean", "route-pro", "executive-profile", "casefile", "showcase"];
 
 const resumeFixtures: Record<ResumeTemplateId, { title: string; data: ResumeData; customization: ResumeCustomization }> = {
@@ -207,6 +207,128 @@ const resumeFixtures: Record<ResumeTemplateId, { title: string; data: ResumeData
       additionalSections: [],
     },
     customization: { ...defaultCustomization, accentColor: "#7c3aed", fontPair: "inter", spacing: "normal" },
+  },
+  academique: {
+    title: "Resume Académique",
+    data: {
+      jobTarget: "job",
+      targetCountry: "tunisia",
+      jobField: "education",
+      jobTitle: "Enseignant-Chercheur en Informatique",
+      experienceLevel: "3-10",
+      simplifiedMode: false,
+      personalInfo: {
+        firstName: "Sami",
+        lastName: "Trabelsi",
+        email: "sami.trabelsi@univ.tn",
+        phone: "+216 71 123 456",
+        city: "Tunis",
+        linkedIn: "linkedin.com/in/samitrabelsi",
+        github: "",
+        photoUrl: "",
+      },
+      education: [
+        { id: "edu-1", institution: "Université de Tunis El Manar", degree: "Doctorat", field: "Informatique", startDate: "2015", endDate: "2019", current: false, description: "These sur l'apprentissage profond applique a la vision par ordinateur." },
+        { id: "edu-2", institution: "ENIT", degree: "Ingénieur", field: "Informatique", startDate: "2010", endDate: "2013", current: false, description: "" },
+      ],
+      experience: [
+        { id: "exp-1", company: "Université de Carthage", position: "Maitre assistant", startDate: "2019", endDate: "", current: true, bullets: ["Enseignement IA et Machine Learning", "Encadrement de 8 PFE et 2 theses de mastere"] },
+      ],
+      skillCategories: [
+        { id: "tech", name: "Recherche", skills: ["Deep Learning", "Computer Vision", "NLP", "Python", "PyTorch"] },
+      ],
+      projects: [
+        { id: "proj-1", name: "Detection d'anomalies par CNN", description: "Publication acceptee a ICPR 2023.", url: "", technologies: ["Deep Learning", "CNN", "Medical Imaging"] },
+      ],
+      certifications: [{ id: "cert-1", name: "HDR en preparation", issuer: "Univ. Tunis El Manar", date: "2025", url: "" }],
+      languages: [{ name: "Français", level: "Courant" }, { name: "Anglais", level: "Professionnel" }, { name: "Arabe", level: "Natif" }],
+      interests: ["Recherche", "Conferences"],
+      summary: "Enseignant-chercheur en informatique specialise en IA et vision par ordinateur, avec des publications internationales et une experience d'encadrement academique.",
+      additionalSections: [],
+    },
+    customization: { ...defaultCustomization, accentColor: "#1e40af", fontPair: "inter", spacing: "normal" },
+  },
+  medical: {
+    title: "Resume Médical",
+    data: {
+      jobTarget: "job",
+      targetCountry: "tunisia",
+      jobField: "healthcare",
+      jobTitle: "Infirmier diplômé d'État",
+      experienceLevel: "3-10",
+      simplifiedMode: false,
+      personalInfo: {
+        firstName: "Fatma",
+        lastName: "Bouazizi",
+        email: "fatma.b@email.com",
+        phone: "+216 98 765 432",
+        city: "Sfax",
+        linkedIn: "",
+        github: "",
+        photoUrl: "",
+      },
+      education: [
+        { id: "edu-1", institution: "ESSTHS", degree: "Licence appliquée", field: "Sciences Infirmières", startDate: "2016", endDate: "2019", current: false, description: "" },
+      ],
+      experience: [
+        { id: "exp-1", company: "CHU Habib Bourguiba", position: "Infirmière en réanimation", startDate: "2020", endDate: "", current: true, bullets: ["Soins intensifs et surveillance post-operatoire", "Gestion des urgences et protocoles de reanimation"] },
+        { id: "exp-2", company: "Clinique Les Oliviers", position: "Infirmière polyvalente", startDate: "2019", endDate: "2020", current: false, bullets: ["Soins pre et post-operatoires", "Administration des traitements"] },
+      ],
+      skillCategories: [
+        { id: "clin", name: "Compétences cliniques", skills: ["Réanimation", "Soins intensifs", "Urgences", "Perfusion", "Pansements"] },
+      ],
+      projects: [],
+      certifications: [
+        { id: "cert-1", name: "BLS/ACLS", issuer: "AHA", date: "2023", url: "" },
+        { id: "cert-2", name: "Diplôme d'État Infirmier", issuer: "Ministère de la Santé", date: "2019", url: "" },
+      ],
+      languages: [{ name: "Arabe", level: "Natif" }, { name: "Français", level: "Courant" }],
+      interests: ["Volontariat médical"],
+      summary: "Infirmière diplômée avec 5 ans d'expérience en réanimation et soins intensifs, rigoureuse et réactive.",
+      additionalSections: [],
+    },
+    customization: { ...defaultCustomization, accentColor: "#0891b2", fontPair: "inter", spacing: "normal" },
+  },
+  technique: {
+    title: "Resume Technique",
+    data: {
+      jobTarget: "job",
+      targetCountry: "tunisia",
+      jobField: "construction",
+      jobTitle: "Électricien industriel",
+      experienceLevel: "3-10",
+      simplifiedMode: true,
+      personalInfo: {
+        firstName: "Mohamed",
+        lastName: "Chaabane",
+        email: "med.chaabane@email.com",
+        phone: "+216 55 111 222",
+        city: "Sousse",
+        linkedIn: "",
+        github: "",
+        photoUrl: "",
+      },
+      education: [
+        { id: "edu-1", institution: "Centre ATFP Sousse", degree: "BTP (Brevet de Technicien Professionnel)", field: "Électricité industrielle", startDate: "2016", endDate: "2018", current: false, description: "" },
+      ],
+      experience: [
+        { id: "exp-1", company: "Leoni Tunisie", position: "Électricien industriel", startDate: "2020", endDate: "", current: true, bullets: ["Installation et maintenance électrique industrielle", "Lecture de schemas et diagnostic de pannes", "Respect strict des normes de securite"] },
+        { id: "exp-2", company: "STEG Sous-traitance", position: "Aide-électricien", startDate: "2018", endDate: "2020", current: false, bullets: ["Tirage de cables et raccordements", "Travail en equipe sur chantiers"] },
+      ],
+      skillCategories: [
+        { id: "tech", name: "Compétences techniques", skills: ["Câblage industriel", "Lecture de schémas", "Automates", "Sécurité électrique", "Soudure"] },
+      ],
+      projects: [],
+      certifications: [
+        { id: "cert-1", name: "Habilitation électrique B2V", issuer: "Formation continue", date: "2022", url: "" },
+        { id: "cert-2", name: "Permis B", issuer: "Tunisie", date: "2017", url: "" },
+      ],
+      languages: [{ name: "Arabe", level: "Natif" }, { name: "Français", level: "Professionnel" }],
+      interests: ["Bricolage", "Électronique"],
+      summary: "Électricien industriel expérimenté, spécialisé en installation et maintenance, avec habilitation B2V et respect des normes de sécurité.",
+      additionalSections: [],
+    },
+    customization: { ...defaultCustomization, accentColor: "#d97706", fontPair: "inter", spacing: "normal" },
   },
 };
 

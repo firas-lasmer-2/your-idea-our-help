@@ -5,11 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { FileText, Globe, Plus, LogOut, Settings, User, Trash2, Edit, MoreHorizontal, Copy, ExternalLink, CheckCircle2, ArrowRight } from "lucide-react";
+import { FileText, Globe, Plus, LogOut, Settings, User, Trash2, Edit, MoreHorizontal, Copy, ExternalLink, CheckCircle2, ArrowRight, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import FeedbackCard from "@/components/dashboard/FeedbackCard";
+import ResumeImportDialog from "@/components/resume/ResumeImportDialog";
 import {
   buildOnboardingChecklist,
   getChecklistProgress,
@@ -43,6 +44,7 @@ const Dashboard = () => {
   const [usage, setUsage] = useState<any>(null);
   const [editingTitle, setEditingTitle] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -260,7 +262,7 @@ const Dashboard = () => {
         </div>
 
         {/* Quick actions */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => navigate("/resume/new")}>
             <CardContent className="flex items-center gap-4 p-6">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
@@ -283,6 +285,18 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">CV prêt en 2 minutes par l'IA</p>
               </div>
               <Plus className="h-5 w-5 text-muted-foreground group-hover:text-amber-500 transition-colors" />
+            </CardContent>
+          </Card>
+          <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-primary/30" onClick={() => setImportOpen(true)}>
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-secondary transition-colors group-hover:bg-secondary/80">
+                <Upload className="h-7 w-7 text-foreground" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground">Importer un CV</h3>
+                <p className="text-sm text-muted-foreground">PDF existant → extraction IA</p>
+              </div>
+              <Plus className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             </CardContent>
           </Card>
           <Card className="group cursor-pointer border transition-all hover:shadow-md hover:border-accent/30" onClick={() => navigate("/website/new")}>
@@ -475,6 +489,16 @@ const Dashboard = () => {
           </div>
         )}
       </main>
+
+      <ResumeImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImportSuccess={(resumeData) => {
+          // Store imported data in sessionStorage so resume builder can pick it up
+          sessionStorage.setItem("importedResumeData", JSON.stringify(resumeData));
+          navigate("/resume/new?imported=1");
+        }}
+      />
     </div>
   );
 };

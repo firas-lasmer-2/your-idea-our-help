@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Linkedin, Github } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Github, Award, BookOpen, Stethoscope, Wrench as WrenchIcon } from "lucide-react";
 import { ResumeCustomization, ResumeData } from "@/types/resume";
 import { normalizeResumeTemplateId, type ResumeTemplateId } from "@/lib/template-recommendations";
 
@@ -48,6 +48,12 @@ const ResumePreview = ({ data, customization, template }: Props) => {
       return <DirectionLayout {...layoutProps} />;
     case "signature":
       return <SignatureLayout {...layoutProps} />;
+    case "academique":
+      return <AcademiqueLayout {...layoutProps} />;
+    case "medical":
+      return <MedicalLayout {...layoutProps} />;
+    case "technique":
+      return <TechniqueLayout {...layoutProps} />;
     case "horizon":
     default:
       return <HorizonLayout {...layoutProps} />;
@@ -299,6 +305,7 @@ function BaseShell({
   );
 }
 
+// ─── Essentiel ───
 function EssentielLayout({ data, customization, color, fullName, spacing }: LayoutProps) {
   const photo = getPhoto(data.personalInfo, customization);
 
@@ -363,6 +370,7 @@ function EssentielLayout({ data, customization, color, fullName, spacing }: Layo
   );
 }
 
+// ─── Horizon ───
 function HorizonLayout({ data, customization, color, fullName, spacing }: LayoutProps) {
   const photo = getPhoto(data.personalInfo, customization);
 
@@ -430,6 +438,7 @@ function HorizonLayout({ data, customization, color, fullName, spacing }: Layout
   );
 }
 
+// ─── Trajectoire ───
 function TrajectoireLayout({ data, customization, color, fullName, spacing }: LayoutProps) {
   const photo = getPhoto(data.personalInfo, customization);
 
@@ -496,6 +505,7 @@ function TrajectoireLayout({ data, customization, color, fullName, spacing }: La
   );
 }
 
+// ─── Direction ───
 function DirectionLayout({ data, customization, color, fullName, spacing }: LayoutProps) {
   const photo = getPhoto(data.personalInfo, customization);
 
@@ -555,6 +565,7 @@ function DirectionLayout({ data, customization, color, fullName, spacing }: Layo
   );
 }
 
+// ─── Signature ───
 function SignatureLayout({ data, customization, color, fullName, spacing }: LayoutProps) {
   const photo = getPhoto(data.personalInfo, customization);
 
@@ -616,6 +627,241 @@ function SignatureLayout({ data, customization, color, fullName, spacing }: Layo
               ) : null}
               {data.languages.length > 0 ? <CompactList title="Langues" items={data.languages.map((item) => `${item.name} (${item.level})`)} /> : null}
             </div>
+          </div>
+        </div>
+      </div>
+    </BaseShell>
+  );
+}
+
+// ─── Académique (NEW) ───
+function AcademiqueLayout({ data, customization, color, fullName, spacing }: LayoutProps) {
+  const photo = getPhoto(data.personalInfo, customization);
+
+  return (
+    <BaseShell background="#fafbfd" border="1px solid #d4dae5" fontFamily="'Merriweather', 'Source Serif 4', Georgia, serif">
+      <div style={{ borderBottom: `2px solid ${color}`, paddingBottom: "16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px" }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 700, letterSpacing: "0.01em", color: "#1e293b" }}>{fullName || "Votre Nom"}</h1>
+            <p style={{ margin: "6px 0 0", fontSize: "12px", fontWeight: 600, color, letterSpacing: "0.04em" }}>
+              {data.jobTitle || "Profil académique"}
+            </p>
+          </div>
+          {photo ? <img src={photo} alt="" style={{ width: "76px", height: "76px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${color}33` }} /> : null}
+        </div>
+        <div style={{ marginTop: "10px" }}>
+          <ContactRow info={data.personalInfo} />
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: spacing, marginTop: "18px" }}>
+        <SummaryBlock text={data.summary} color={color} variant="quote" />
+
+        {/* Education first — key for academic CVs */}
+        {data.education.length > 0 ? (
+          <div>
+            <SectionTitle title="Formation & Diplômes" color={color} />
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {data.education.map((item) => (
+                <div key={item.id} style={{ paddingLeft: "14px", borderLeft: `3px solid ${color}22` }}>
+                  <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: "#0f172a" }}>
+                    {item.degree}{item.field ? ` — ${item.field}` : ""}
+                  </p>
+                  <p style={{ margin: "2px 0 0", fontSize: "11px", color }}>
+                    {item.institution}
+                  </p>
+                  <p style={{ margin: "2px 0 0", fontSize: "10px", color: "#94a3b8" }}>
+                    {[item.startDate, item.current ? "Present" : item.endDate].filter(Boolean).join(" — ")}
+                  </p>
+                  {item.description ? <p style={{ margin: "4px 0 0", fontSize: "11px", color: "#475569", lineHeight: 1.6 }}>{item.description}</p> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Projects as "Publications / Recherche" */}
+        {data.projects.length > 0 ? (
+          <div>
+            <SectionTitle title="Publications & Recherche" color={color} />
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {data.projects.map((item) => (
+                <div key={item.id}>
+                  <p style={{ margin: 0, fontSize: "12px", fontWeight: 700, color: "#0f172a", fontStyle: "italic" }}>{item.name}</p>
+                  {item.description ? <p style={{ margin: "3px 0 0", fontSize: "11px", color: "#475569", lineHeight: 1.6 }}>{item.description}</p> : null}
+                  {item.technologies.length > 0 ? (
+                    <p style={{ margin: "4px 0 0", fontSize: "10px", color: "#64748b" }}>Mots-clés : {item.technologies.join(", ")}</p>
+                  ) : null}
+                  {item.url ? <p style={{ margin: "2px 0 0", fontSize: "10px", color }}>{item.url}</p> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {data.experience.length > 0 ? (
+          <div>
+            <SectionTitle title="Expérience professionnelle" color={color} />
+            <ExperienceList items={data.experience} color={color} bulletStyle="dot" />
+          </div>
+        ) : null}
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px" }}>
+          {data.skillCategories.some((c) => c.skills.length > 0) ? (
+            <div>
+              <SectionTitle title="Compétences" color={color} />
+              <SkillBlocks categories={data.skillCategories} color={color} mode="lines" />
+            </div>
+          ) : null}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {data.certifications.length > 0 ? (
+              <div>
+                <SectionTitle title="Certifications & Prix" color={color} />
+                <CertificationsList items={data.certifications} color={color} />
+              </div>
+            ) : null}
+            {data.languages.length > 0 ? <CompactList title="Langues" items={data.languages.map((l) => `${l.name} (${l.level})`)} /> : null}
+            {data.interests.length > 0 ? <CompactList title="Centres d'intérêt" items={data.interests} /> : null}
+          </div>
+        </div>
+      </div>
+    </BaseShell>
+  );
+}
+
+// ─── Médical (NEW) ───
+function MedicalLayout({ data, customization, color, fullName, spacing }: LayoutProps) {
+  const photo = getPhoto(data.personalInfo, customization);
+
+  return (
+    <BaseShell background="#ffffff" border="1px solid #d0dce8" fontFamily="'Inter', system-ui, sans-serif">
+      <div style={{ display: "flex", gap: "18px", alignItems: "flex-start", borderBottom: `3px solid ${color}`, paddingBottom: "16px" }}>
+        {photo ? <img src={photo} alt="" style={{ width: "80px", height: "80px", borderRadius: "14px", objectFit: "cover", border: `2px solid ${color}33` }} /> : null}
+        <div style={{ flex: 1 }}>
+          <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 900, letterSpacing: "-0.02em" }}>{fullName || "Votre Nom"}</h1>
+          <p style={{ margin: "4px 0 0", fontSize: "12px", fontWeight: 700, color, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            {data.jobTitle || "Professionnel de santé"}
+          </p>
+          <div style={{ marginTop: "10px" }}>
+            <ContactRow info={data.personalInfo} />
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 0.75fr", gap: "22px", marginTop: "18px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: spacing }}>
+          <SummaryBlock text={data.summary} color={color} variant="plain" />
+
+          {data.experience.length > 0 ? (
+            <div>
+              <SectionTitle title="Expérience clinique" color={color} />
+              <ExperienceList items={data.experience} color={color} bulletStyle="dot" />
+            </div>
+          ) : null}
+
+          {data.projects.length > 0 ? (
+            <div>
+              <SectionTitle title="Cas cliniques & Projets" color={color} />
+              <ProjectsList items={data.projects} color={color} />
+            </div>
+          ) : null}
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          {/* Certifications prominent for medical */}
+          {data.certifications.length > 0 ? (
+            <div style={{ background: `${color}08`, border: `1px solid ${color}20`, borderRadius: "14px", padding: "14px" }}>
+              <SectionTitle title="Diplômes & Certifications" color={color} />
+              <CertificationsList items={data.certifications} color={color} />
+            </div>
+          ) : null}
+
+          {data.education.length > 0 ? (
+            <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "14px" }}>
+              <SectionTitle title="Formation" color={color} />
+              <EducationList items={data.education} />
+            </div>
+          ) : null}
+
+          {data.skillCategories.some((c) => c.skills.length > 0) ? (
+            <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "14px", padding: "14px" }}>
+              <SectionTitle title="Compétences cliniques" color={color} />
+              <SkillBlocks categories={data.skillCategories} color={color} mode="chips" />
+            </div>
+          ) : null}
+
+          {data.languages.length > 0 ? <CompactList title="Langues" items={data.languages.map((l) => `${l.name} (${l.level})`)} /> : null}
+        </div>
+      </div>
+    </BaseShell>
+  );
+}
+
+// ─── Technique (NEW) ───
+function TechniqueLayout({ data, customization, color, fullName, spacing }: LayoutProps) {
+  const photo = getPhoto(data.personalInfo, customization);
+
+  return (
+    <BaseShell background="#fefefe" border="1px solid #d5dce3" fontFamily="'Inter', system-ui, sans-serif">
+      <div style={{ background: `linear-gradient(135deg, ${color}12, ${color}05)`, margin: "-26px -26px 0", padding: "22px 26px 18px", borderBottom: `3px solid ${color}` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "16px", alignItems: "flex-start" }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: "30px", fontWeight: 900, letterSpacing: "-0.02em" }}>{fullName || "Votre Nom"}</h1>
+            <p style={{ margin: "6px 0 0", fontSize: "12px", fontWeight: 800, color, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              {data.jobTitle || "Profil technique"}
+            </p>
+          </div>
+          {photo ? <img src={photo} alt="" style={{ width: "68px", height: "68px", borderRadius: "10px", objectFit: "cover" }} /> : null}
+        </div>
+        <div style={{ marginTop: "10px" }}>
+          <ContactRow info={data.personalInfo} />
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: spacing, marginTop: "18px" }}>
+        <SummaryBlock text={data.summary} color={color} variant="plain" />
+
+        {/* Certifications/Permits first — critical for trades */}
+        {data.certifications.length > 0 ? (
+          <div style={{ background: `${color}08`, border: `1px solid ${color}20`, borderRadius: "12px", padding: "14px" }}>
+            <SectionTitle title="Permis, Licences & Certifications" color={color} />
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              {data.certifications.map((item) => (
+                <div key={item.id} style={{ padding: "8px 12px", border: `1px solid ${color}30`, borderRadius: "10px", background: "#fff" }}>
+                  <p style={{ margin: 0, fontSize: "11px", fontWeight: 700, color: "#0f172a" }}>{item.name}</p>
+                  <p style={{ margin: "2px 0 0", fontSize: "10px", color: "#64748b" }}>
+                    {[item.issuer, item.date].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {data.experience.length > 0 ? (
+          <div>
+            <SectionTitle title="Expérience terrain" color={color} />
+            <ExperienceList items={data.experience} color={color} bulletStyle="dot" />
+          </div>
+        ) : null}
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px" }}>
+          {data.skillCategories.some((c) => c.skills.length > 0) ? (
+            <div>
+              <SectionTitle title="Compétences techniques" color={color} />
+              <SkillBlocks categories={data.skillCategories} color={color} mode="chips" />
+            </div>
+          ) : null}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {data.education.length > 0 ? (
+              <div>
+                <SectionTitle title="Formation" color={color} />
+                <EducationList items={data.education} />
+              </div>
+            ) : null}
+            {data.languages.length > 0 ? <CompactList title="Langues" items={data.languages.map((l) => `${l.name} (${l.level})`)} /> : null}
+            {data.interests.length > 0 ? <CompactList title="Centres d'intérêt" items={data.interests} /> : null}
           </div>
         </div>
       </div>
