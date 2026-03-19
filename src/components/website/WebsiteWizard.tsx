@@ -579,7 +579,7 @@ const WebsiteWizard = ({ onComplete, resumes }: Props) => {
                 </div>
                 <div>
                   <span className="text-muted-foreground">{t("websiteWizard.sector")}</span>
-                  <p className="font-semibold text-foreground">{JOB_CATEGORIES.find((c) => c.value === candidateTrack)?.label}</p>
+                  <p className="font-semibold text-foreground">{JOB_CATEGORIES.find((c) => c.id === candidateTrack)?.label}</p>
                 </div>
                 <div>
                   <span className="text-muted-foreground">{t("websiteWizard.targetCountry")}</span>
