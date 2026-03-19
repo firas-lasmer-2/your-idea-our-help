@@ -131,6 +131,18 @@ const Dashboard = () => {
     toast({ title: t("dashboard.siteDeleted") });
   };
 
+  const quickDownloadPdf = useCallback(async (resumeId: string, resumeTitle: string) => {
+    setDownloadingId(resumeId);
+    try {
+      // Navigate to the resume edit page in a hidden iframe to render the preview, then use html2pdf
+      // Simpler approach: open resume in new tab with ?download=1 param
+      window.open(`/resume/edit?id=${resumeId}&download=1`, "_blank");
+      toast({ title: t("dashboard.downloadStarted", "Téléchargement lancé"), description: t("dashboard.downloadDesc", "Le PDF s'ouvrira dans un nouvel onglet.") });
+    } finally {
+      setTimeout(() => setDownloadingId(null), 1500);
+    }
+  }, [toast, t]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
