@@ -254,6 +254,7 @@ const WebsiteBuilder = () => {
                 </Button>
               )}
               <Button
+                data-tour="publish"
                 variant={isPublished ? "outline" : "default"}
                 size="sm"
                 className="gap-1.5"
