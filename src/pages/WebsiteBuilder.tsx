@@ -219,7 +219,7 @@ const WebsiteBuilder = () => {
                   </PopoverTrigger>
                   <PopoverContent className="w-80">
                     <div className="space-y-3">
-                      <p className="text-sm font-medium">URL personnalisée</p>
+                      <p className="text-sm font-medium">{t("website.customUrl", "URL personnalisée")}</p>
                       <div className="flex gap-2">
                         <span className="text-xs text-muted-foreground self-center whitespace-nowrap">/site/</span>
                         <Input
