@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,8 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  ChevronRight,
   Eye,
   EyeOff,
+  LayoutGrid,
   Loader2,
   Monitor,
   Paintbrush,
@@ -22,6 +25,7 @@ import {
   Upload,
   Wand2,
 } from "lucide-react";
+import TemplateGallery from "./TemplateGallery";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
@@ -68,15 +72,23 @@ interface Props {
   canRedo?: boolean;
   onUndo?: () => void;
   onRedo?: () => void;
+  onChangeTemplate?: (newTemplateId: string) => void;
 }
 
-const accentColors = [
-  { value: "#0f766e", label: "Teal" },
-  { value: "#2563eb", label: "Blue" },
-  { value: "#b45309", label: "Amber" },
-  { value: "#7c3aed", label: "Purple" },
-  { value: "#7c2d12", label: "Earth" },
-  { value: "#1e293b", label: "Slate" },
+const TEMPLATE_PALETTE_MAP: Record<string, { value: string; label: string }[]> = {
+  "profile-clean":     [{ value: "#0f766e", label: "Teal" },    { value: "#2563eb", label: "Bleu" },    { value: "#7c3aed", label: "Violet" }, { value: "#be185d", label: "Rose" },   { value: "#b45309", label: "Ambre" }, { value: "#1e293b", label: "Ardoise" }],
+  "route-pro":         [{ value: "#b45309", label: "Ambre" },   { value: "#dc2626", label: "Rouge" },   { value: "#16a34a", label: "Vert" },   { value: "#0369a1", label: "Bleu" },   { value: "#7c3aed", label: "Violet" },{ value: "#1e293b", label: "Ardoise" }],
+  "executive-profile": [{ value: "#7c2d12", label: "Brique" },  { value: "#1e293b", label: "Ardoise" }, { value: "#374151", label: "Gris" },   { value: "#78350f", label: "Brun" },   { value: "#4c1d95", label: "Indigo" },{ value: "#0c4a6e", label: "Marine" }],
+  "dossier":           [{ value: "#0369a1", label: "Bleu" },    { value: "#0f766e", label: "Teal" },    { value: "#7c3aed", label: "Violet" }, { value: "#1e293b", label: "Ardoise" }, { value: "#be185d", label: "Rose" },  { value: "#b45309", label: "Ambre" }],
+  "signal":            [{ value: "#0d9488", label: "Teal" },    { value: "#2563eb", label: "Bleu" },    { value: "#7c3aed", label: "Violet" }, { value: "#dc2626", label: "Rouge" },  { value: "#16a34a", label: "Vert" },  { value: "#1e293b", label: "Ardoise" }],
+  "casefile":          [{ value: "#2563eb", label: "Bleu" },    { value: "#0f766e", label: "Teal" },    { value: "#7c3aed", label: "Violet" }, { value: "#be185d", label: "Rose" },   { value: "#b45309", label: "Ambre" }, { value: "#1e293b", label: "Ardoise" }],
+  "showcase":          [{ value: "#7c3aed", label: "Violet" },  { value: "#2563eb", label: "Bleu" },    { value: "#be185d", label: "Rose" },   { value: "#0f766e", label: "Teal" },   { value: "#dc2626", label: "Rouge" }, { value: "#16a34a", label: "Vert" }],
+  "spotlight":         [{ value: "#3b82f6", label: "Bleu" },    { value: "#7c3aed", label: "Violet" },  { value: "#be185d", label: "Rose" },   { value: "#0f766e", label: "Teal" },   { value: "#f59e0b", label: "Or" },    { value: "#10b981", label: "Émeraude" }],
+};
+
+const fallbackColors = [
+  { value: "#0f766e", label: "Teal" }, { value: "#2563eb", label: "Blue" }, { value: "#b45309", label: "Amber" },
+  { value: "#7c3aed", label: "Purple" }, { value: "#7c2d12", label: "Earth" }, { value: "#1e293b", label: "Slate" },
 ];
 
 export default function WebsiteEditor({
@@ -99,6 +111,7 @@ export default function WebsiteEditor({
   canRedo,
   onUndo,
   onRedo,
+  onChangeTemplate,
 }: Props) {
   const { t } = useTranslation();
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(sections[0]?.id || null);
@@ -107,6 +120,7 @@ export default function WebsiteEditor({
   const [showPreview, setShowPreview] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+  const [showTemplateSwitcher, setShowTemplateSwitcher] = useState(false);
   const { toast } = useToast();
 
   const websiteMode = normalizeWebsiteMode(profile?.mode || purpose);
@@ -342,7 +356,7 @@ export default function WebsiteEditor({
               <div className="space-y-3">
                 <Label className="text-sm font-semibold">{t("editor.primaryColor", "Couleur principale")}</Label>
                 <div className="flex flex-wrap gap-2">
-                  {accentColors.map((colorOption) => (
+                  {(TEMPLATE_PALETTE_MAP[template] || fallbackColors).map((colorOption) => (
                     <button
                       key={colorOption.value}
                       type="button"
@@ -354,17 +368,14 @@ export default function WebsiteEditor({
                       onClick={() => onUpdateGlobalSettings({ primaryColor: colorOption.value })}
                     />
                   ))}
-                </div>
-                {editorMode === "advanced" ? (
                   <input
                     type="color"
                     value={globalSettings.primaryColor}
                     onChange={(event) => onUpdateGlobalSettings({ primaryColor: event.target.value })}
                     className="h-8 w-8 cursor-pointer rounded-full border border-dashed border-border bg-transparent"
+                    title="Couleur personnalisée"
                   />
-                ) : (
-                  <p className="text-xs text-muted-foreground">{t("editor.colorHint", "Palette guidée par défaut. La couleur libre reste disponible en mode avancé.")}</p>
-                )}
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -413,6 +424,40 @@ export default function WebsiteEditor({
                   placeholder={t("editor.metaPlaceholder", "Décrivez votre profil professionnel pour Google et le partage social.")}
                 />
               </div>
+
+              {onChangeTemplate && (
+                <div className="border-t pt-4">
+                  <button
+                    onClick={() => setShowTemplateSwitcher(true)}
+                    className="flex w-full items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                  >
+                    <LayoutGrid className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">Changer de modèle</span>
+                    <ChevronRight className="h-4 w-4 shrink-0" />
+                  </button>
+                </div>
+              )}
+
+              <Dialog open={showTemplateSwitcher} onOpenChange={setShowTemplateSwitcher}>
+                <DialogContent className="max-w-5xl">
+                  <DialogHeader>
+                    <DialogTitle>Changer de modèle</DialogTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Le contenu de vos sections communes sera conservé.
+                    </p>
+                  </DialogHeader>
+                  <div className="max-h-[70vh] overflow-y-auto">
+                    <TemplateGallery
+                      category={websiteMode}
+                      selectedTemplateId={template}
+                      onSelect={(tpl) => {
+                        onChangeTemplate!(tpl.id);
+                        setShowTemplateSwitcher(false);
+                      }}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           )}
         </ScrollArea>
@@ -850,6 +895,31 @@ function ItemEditor({
           </div>
         </div>
       );
+    case "testimonials":
+      return (
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label className="text-xs">{t("editor.name", "Nom")}</Label>
+              <Input value={item.name || ""} onChange={(event) => onUpdate({ name: event.target.value })} placeholder="Sarah L." />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">{t("editor.role", "Rôle / Entreprise")}</Label>
+              <Input value={item.role || ""} onChange={(event) => onUpdate({ role: event.target.value })} placeholder="Directrice RH, Groupe XYZ" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs">{t("editor.testimonialText", "Témoignage")}</Label>
+            <textarea
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              rows={3}
+              value={item.text || ""}
+              onChange={(event) => onUpdate({ text: event.target.value })}
+              placeholder="Un profil remarquable, autonome et toujours force de proposition..."
+            />
+          </div>
+        </div>
+      );
     default:
       return (
         <div className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
@@ -919,6 +989,8 @@ function getEmptyItem(type: SectionType) {
       return { degree: "", institution: "", period: "" };
     case "stats":
       return { number: "", label: "" };
+    case "testimonials":
+      return { name: "", role: "", text: "" };
     default:
       return {};
   }

@@ -24,7 +24,8 @@ export type SectionType =
   | "education"
   | "contact"
   | "social-links"
-  | "stats";
+  | "stats"
+  | "testimonials";
 
 export interface WebsiteSection {
   id: string;
@@ -101,6 +102,7 @@ export const ACTIVE_SECTION_TYPES: SectionType[] = [
   "social-links",
   "contact",
   "stats",
+  "testimonials",
 ];
 
 export const SECTION_LABELS: Record<SectionType, string> = {
@@ -117,6 +119,7 @@ export const SECTION_LABELS: Record<SectionType, string> = {
   contact: "Contact",
   "social-links": "Liens publics",
   stats: "Points forts",
+  testimonials: "Temoignages",
 };
 
 export const ALL_SECTION_TYPES: SectionType[] = Object.keys(SECTION_LABELS) as SectionType[];
@@ -224,6 +227,14 @@ function getDefaultContent(type: SectionType): Record<string, any> {
           { number: "5+", label: "Annees d'experience" },
           { number: "3", label: "Langues" },
           { number: "100%", label: "Pret a demarrer" },
+        ],
+      };
+    case "testimonials":
+      return {
+        title: "Temoignages",
+        items: [
+          { name: "Sarah L.", role: "Directrice RH, Groupe Industriel", text: "Un profil remarquable, autonome et toujours force de proposition. Je recommande sans hesiter." },
+          { name: "Mohamed K.", role: "Chef de projet, Startup SaaS", text: "Travail de qualite, livraisons dans les delais, communication exemplaire. Un vrai atout pour l'equipe." },
         ],
       };
     default:

@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, Eye, Sparkles, Target, Zap, Activity, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Check, Eye, Palette, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { WebsiteTemplate, getTemplatesForCategory, buildSectionsFromTemplate } from "@/data/website-templates";
-import { FONT_OPTIONS } from "@/types/website";
 import WebsitePreview from "./WebsitePreview";
 import { cn } from "@/lib/utils";
 import { getWebsiteTemplateMeta } from "@/lib/template-recommendations";
@@ -18,148 +16,190 @@ interface Props {
   onSelect: (template: WebsiteTemplate) => void;
 }
 
+function MetaRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string }) {
+  if (!value) return null;
+  return (
+    <div className="flex items-start gap-2">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+      <span>
+        <span className="font-medium text-foreground">{label} : </span>
+        <span className="text-muted-foreground">{value}</span>
+      </span>
+    </div>
+  );
+}
+
 const TemplateGallery = ({ category, selectedTemplateId, recommendedTemplateId, recommendedReason, onSelect }: Props) => {
   const templates = getTemplatesForCategory(category);
   const [previewTemplate, setPreviewTemplate] = useState<WebsiteTemplate | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const recommendedTemplate = templates.find((template) => template.id === recommendedTemplateId) || null;
+  const previewMeta = previewTemplate ? getWebsiteTemplateMeta(previewTemplate.id) : null;
 
   if (templates.length === 0) return null;
 
   return (
     <>
       {recommendedTemplate && recommendedReason && (
-        <Card className="mb-6 border-primary/20 bg-primary/5">
-          <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <p className="text-sm font-semibold text-foreground">Template recommandé</p>
-              </div>
-              <p className="mt-1 text-sm text-foreground">{recommendedTemplate.name}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{recommendedReason}</p>
-            </div>
-            {selectedTemplateId !== recommendedTemplate.id && (
-              <Button size="sm" onClick={() => onSelect(recommendedTemplate)}>
-                Utiliser le recommandé
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+        <div className="mb-5 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm">
+          <Sparkles className="h-3.5 w-3.5 shrink-0 text-primary" />
+          <span className="text-muted-foreground">
+            Recommandé : <span className="font-semibold text-foreground">{recommendedTemplate.name}</span>
+            {" — "}{recommendedReason}
+          </span>
+          {selectedTemplateId !== recommendedTemplate.id && (
+            <button
+              onClick={() => onSelect(recommendedTemplate)}
+              className="ml-auto shrink-0 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+            >
+              l'utiliser
+            </button>
+          )}
+        </div>
       )}
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        {templates.map((tpl) => {
-          const isSelected = selectedTemplateId === tpl.id;
-          const isRecommended = recommendedTemplateId === tpl.id;
-          const fontLabel = FONT_OPTIONS.find(f => f.value === tpl.globalSettings.fontPair)?.label || tpl.globalSettings.fontPair;
-          const meta = getWebsiteTemplateMeta(tpl.id);
+      <AnimatePresence mode="popLayout">
+        <div className="grid grid-cols-2 gap-5 lg:grid-cols-3">
+          {templates.map((tpl) => {
+            const isSelected = selectedTemplateId === tpl.id;
+            const meta = getWebsiteTemplateMeta(tpl.id);
 
-          return (
-            <Card
-              key={tpl.id}
-              className={cn(
-                "cursor-pointer border-2 transition-all overflow-hidden group",
-                isSelected
-                  ? "border-primary ring-2 ring-primary/20"
-                  : "border-border hover:border-primary/40 hover:shadow-lg"
-              )}
-              onClick={() => onSelect(tpl)}
-            >
-              {/* Mini preview */}
-              <div className="relative h-[250px] overflow-hidden bg-muted">
-                <div
-                  className="absolute inset-0 origin-top-left pointer-events-none"
-                  style={{
-                    width: "1200px",
-                    height: "2400px",
-                    transform: "scale(0.19)",
-                    transformOrigin: "top left",
-                  }}
-                >
-                  <WebsitePreview
-                    sections={buildSectionsFromTemplate(tpl)}
-                    globalSettings={tpl.globalSettings}
-                    title={tpl.sampleContent.navbar?.logoText || tpl.name}
-                    template={tpl.id}
-                  />
-                </div>
-
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPreviewTemplate(tpl);
-                    }}
+            return (
+              <motion.div
+                key={tpl.id}
+                layout
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 8 }}
+                onMouseEnter={() => setHoveredId(tpl.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                onClick={() => onSelect(tpl)}
+                className={cn(
+                  "group relative cursor-pointer overflow-hidden rounded-xl border-2 transition-shadow",
+                  isSelected
+                    ? "border-primary shadow-lg shadow-primary/20"
+                    : "border-border hover:border-primary/40 hover:shadow-md",
+                )}
+              >
+                {/* Preview area */}
+                <div className="relative overflow-hidden bg-white" style={{ height: 360 }}>
+                  <div
+                    className="pointer-events-none absolute inset-0 origin-top-left"
+                    style={{ width: "1200px", transform: "scale(0.28)", transformOrigin: "top left" }}
                   >
-                    <Eye className="h-4 w-4" /> Aperçu
-                  </Button>
-                </div>
-
-                {/* Selected check */}
-                {isSelected && (
-                  <div className="absolute top-3 right-3 h-7 w-7 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="h-4 w-4 text-primary-foreground" />
-                  </div>
-                )}
-
-                {isRecommended && (
-                  <Badge className="absolute left-3 top-3 text-[10px]">
-                    Recommandé
-                  </Badge>
-                )}
-              </div>
-
-              <CardContent className="space-y-3 p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-foreground">{tpl.name}</h3>
-                  <Badge variant="outline" className="text-xs">{tpl.globalSettings.layout}</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">{tpl.description}</p>
-                <div className="flex items-center gap-3 pt-1">
-                  <div className="flex items-center gap-1.5">
-                    <div
-                      className="h-4 w-4 rounded-full border border-border"
-                      style={{ backgroundColor: tpl.globalSettings.primaryColor }}
+                    <WebsitePreview
+                      sections={buildSectionsFromTemplate(tpl)}
+                      globalSettings={tpl.globalSettings}
+                      title={tpl.sampleContent.navbar?.logoText || tpl.name}
+                      template={tpl.id}
                     />
-                    <span className="text-xs text-muted-foreground">{fontLabel}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    <Palette className="h-3 w-3 inline mr-0.5" />
-                    {tpl.sectionTypes.length} sections
-                  </span>
-                </div>
-                {meta && (
-                  <div className="space-y-1.5 text-xs text-muted-foreground">
-                    <p><span className="font-medium text-foreground">Style:</span> {meta.styleLabel}</p>
-                    <p><span className="font-medium text-foreground">Idéal pour:</span> {meta.bestFor}</p>
-                    <p><span className="font-medium text-foreground">Met l'accent sur:</span> {meta.emphasis}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
 
-      {/* Full preview modal */}
+                  {/* Hover overlay */}
+                  {hoveredId === tpl.id && !isSelected && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 backdrop-blur-[1px]">
+                      <Button
+                        size="sm"
+                        className="gap-1.5 shadow-lg"
+                        onClick={(e) => { e.stopPropagation(); onSelect(tpl); }}
+                      >
+                        <Check className="h-3.5 w-3.5" /> Sélectionner
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="gap-1.5 shadow-lg"
+                        onClick={(e) => { e.stopPropagation(); setPreviewTemplate(tpl); }}
+                      >
+                        <Eye className="h-3.5 w-3.5" /> Aperçu complet
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Animated selected state */}
+                  <AnimatePresence>
+                    {isSelected && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.7 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.7 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        className="pointer-events-none absolute inset-0 flex flex-col items-center justify-end pb-3"
+                      >
+                        <div className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
+                          <Check className="h-3.5 w-3.5" />
+                        </div>
+                        <span className="rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground shadow">
+                          Sélectionné
+                        </span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Card footer */}
+                <div className="flex items-center gap-2 border-t bg-background px-3 py-2.5">
+                  <span className="flex-1 truncate text-sm font-semibold text-foreground">{tpl.name}</span>
+                  {meta && (
+                    <>
+                      <span className="shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        {meta.styleLabel}
+                      </span>
+                      <span className="shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        {meta.motionLabel}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </AnimatePresence>
+
+      {/* Full preview modal — two-column */}
       <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle>{previewTemplate?.name} — Aperçu</DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto rounded-lg border border-border">
-            {previewTemplate && (
-              <WebsitePreview
-                sections={buildSectionsFromTemplate(previewTemplate)}
-                globalSettings={previewTemplate.globalSettings}
-                title={previewTemplate.sampleContent.navbar?.logoText || previewTemplate.name}
-                template={previewTemplate.id}
-              />
-            )}
+        <DialogContent className="max-w-6xl overflow-hidden p-0">
+          <div className="flex h-[80vh]">
+            {/* Left: scrollable live preview */}
+            <div className="flex-1 overflow-y-auto bg-gray-50">
+              {previewTemplate && (
+                <WebsitePreview
+                  sections={buildSectionsFromTemplate(previewTemplate)}
+                  globalSettings={previewTemplate.globalSettings}
+                  title={previewTemplate.sampleContent.navbar?.logoText || previewTemplate.name}
+                  template={previewTemplate.id}
+                />
+              )}
+            </div>
+
+            {/* Right: metadata panel */}
+            <div className="flex w-72 shrink-0 flex-col border-l bg-background">
+              <div className="flex-1 space-y-4 overflow-y-auto p-5">
+                <div>
+                  <h3 className="text-lg font-bold">{previewTemplate?.name}</h3>
+                  <p className="text-sm text-muted-foreground">{previewMeta?.styleLabel}</p>
+                </div>
+                <div className="space-y-3 text-sm">
+                  <MetaRow icon={Target} label="Idéal pour" value={previewMeta?.bestFor} />
+                  <MetaRow icon={Zap} label="Emphase" value={previewMeta?.emphasis} />
+                  <MetaRow icon={Activity} label="Animations" value={previewMeta?.motionLabel} />
+                  <MetaRow icon={LayoutGrid} label="Sections" value={previewTemplate ? `${previewTemplate.sectionTypes.length} sections` : undefined} />
+                </div>
+              </div>
+              {/* Pinned CTA */}
+              <div className="space-y-2 border-t p-4">
+                <Button
+                  className="w-full"
+                  onClick={() => { onSelect(previewTemplate!); setPreviewTemplate(null); }}
+                >
+                  Utiliser ce modèle
+                </Button>
+                <DialogClose asChild>
+                  <Button variant="ghost" className="w-full text-xs text-muted-foreground">Annuler</Button>
+                </DialogClose>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

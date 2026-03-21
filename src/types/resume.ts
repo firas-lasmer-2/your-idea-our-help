@@ -36,6 +36,7 @@ export interface SkillCategory {
   id: string;
   name: string;
   skills: string[];
+  skillLevels?: Record<string, number>; // skill name → 0–100, optional
 }
 
 export interface Project {

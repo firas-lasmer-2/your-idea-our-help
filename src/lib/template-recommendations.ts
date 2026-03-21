@@ -9,14 +9,23 @@ export type ResumeTemplateId =
   | "signature"
   | "academique"
   | "medical"
-  | "technique";
+  | "technique"
+  | "impact"
+  | "minimal"
+  | "mosaic"
+  | "prestige"
+  | "atlas"
+  | "studio";
 
 export type WebsiteTemplateId =
   | "profile-clean"
   | "route-pro"
   | "executive-profile"
   | "casefile"
-  | "showcase";
+  | "showcase"
+  | "spotlight"
+  | "dossier"
+  | "signal";
 
 export interface ResumeTemplateMeta {
   id: ResumeTemplateId;
@@ -137,6 +146,66 @@ const RESUME_TEMPLATE_META: Record<ResumeTemplateId, ResumeTemplateMeta> = {
     density: "compact",
     photoLabel: "photo optionnelle",
   },
+  impact: {
+    id: "impact",
+    label: "Impact",
+    styleLabel: "Tech audacieux, barres de compétences",
+    bestFor: "tech, product, ingenierie, startups, profils digitaux",
+    emphasis: "competences visuelles, projets quantifies, header couleur fort",
+    atsLabel: "ATS bon",
+    density: "equilibre",
+    photoLabel: "photo optionnelle",
+  },
+  minimal: {
+    id: "minimal",
+    label: "Minimal",
+    styleLabel: "Typographie pure, ultra-aere",
+    bestFor: "designers, directeurs artistiques, profils seniors creatifs",
+    emphasis: "lisibilite, gout, identite forte sans decoration",
+    atsLabel: "ATS bon",
+    density: "aere",
+    photoLabel: "sans photo par defaut",
+  },
+  mosaic: {
+    id: "mosaic",
+    label: "Mosaic",
+    styleLabel: "Grille bento, vue d'ensemble",
+    bestFor: "profils polyvalents, reconversions, consultants, chefs de projet",
+    emphasis: "polyvalence, competences larges, projets multiples",
+    atsLabel: "ATS bon",
+    density: "equilibre",
+    photoLabel: "photo optionnelle",
+  },
+  prestige: {
+    id: "prestige",
+    label: "Prestige",
+    styleLabel: "Premium sombre, gold accent",
+    bestFor: "finance, juridique, conseil, audit, banque, direction generale",
+    emphasis: "credibilite executive, formation premium, certifications",
+    atsLabel: "ATS fort",
+    density: "aere",
+    photoLabel: "photo optionnelle",
+  },
+  atlas: {
+    id: "atlas",
+    label: "Atlas",
+    styleLabel: "International, langues en avant",
+    bestFor: "candidats bilingues, profils internationaux, mobilite Canada USA Europe",
+    emphasis: "langues, mobilite, parcours international, adaptabilite",
+    atsLabel: "ATS fort",
+    density: "equilibre",
+    photoLabel: "photo recommandee",
+  },
+  studio: {
+    id: "studio",
+    label: "Studio",
+    styleLabel: "Portfolio-first, réalisations en vedette",
+    bestFor: "freelances, developpeurs independants, designers, profils projet-forts",
+    emphasis: "projets, realisations, competences visuelles, liens portfolio",
+    atsLabel: "ATS bon",
+    density: "equilibre",
+    photoLabel: "photo optionnelle",
+  },
 };
 
 const WEBSITE_TEMPLATE_META: Record<WebsiteTemplateId, WebsiteTemplateMeta> = {
@@ -179,6 +248,30 @@ const WEBSITE_TEMPLATE_META: Record<WebsiteTemplateId, WebsiteTemplateMeta> = {
     bestFor: "frontend, design, branding, profils projet forts",
     emphasis: "hero, projets, preuve visuelle, personnalite",
     motionLabel: "dynamique",
+  },
+  spotlight: {
+    id: "spotlight",
+    label: "Spotlight",
+    styleLabel: "Dark portfolio dramatique",
+    bestFor: "tech senior, frontend, fullstack, profils creatifs confirmes",
+    emphasis: "projets, performance, presence forte, tech stack",
+    motionLabel: "dynamique",
+  },
+  dossier: {
+    id: "dossier",
+    label: "Dossier",
+    styleLabel: "Profil structuré avec données",
+    bestFor: "profils experimentes, RH, management, finance, conseil",
+    emphasis: "statistiques, credibilite, timeline, lisibilite maximale",
+    motionLabel: "calme",
+  },
+  signal: {
+    id: "signal",
+    label: "Signal",
+    styleLabel: "Page lien minimaliste",
+    bestFor: "freelances, createurs de contenu, profils en mobilite",
+    emphasis: "photo, bio courte, liens, contact rapide",
+    motionLabel: "quasi statique",
   },
 };
 
@@ -225,6 +318,9 @@ export function getRecommendedResumeTemplate(input: {
   const isAcademicRole = /professeur|chercheur|enseignant|doctorant|research|university|universite|teacher|lecturer/i.test(title);
   const isMedicalRole = /medecin|docteur|infirmier|pharmacien|dentiste|kinesitherapeut|sage.femme|nurse|physician|doctor/i.test(title);
   const isTradeRole = /electricien|plombier|mecanicien|soudeur|charpentier|macon|technicien|ouvrier|installateur/i.test(title);
+  const isFinanceOrLaw = /financ|banqu|audit|consult|juridique|avocat|comptabl|notaire|assur|tresor|conform/i.test(title);
+  const isFreelance = /freelance|independant|auto-entr|entrepreneur|fondateur|founder/i.test(title);
+  const isInternational = country === "canada" || country === "usa" || country === "germany";
 
   let id: ResumeTemplateId = "horizon";
   let reason = "Le meilleur equilibre entre lisibilite, professionnalisme et modernite.";
@@ -238,12 +334,27 @@ export function getRecommendedResumeTemplate(input: {
   } else if (isTradeRole || field === "construction") {
     id = "technique";
     reason = "Recommande pour un metier technique ou les permis, licences et competences terrain sont prioritaires.";
+  } else if (isFinanceOrLaw && (level === "3-10" || level === "10+")) {
+    id = "prestige";
+    reason = "Recommande pour un profil finance ou juridique qui doit inspirer confiance et credibilite immediate.";
+  } else if (isFreelance) {
+    id = "studio";
+    reason = "Recommande pour un freelance ou independant qui veut mettre ses realisations et projets en avant.";
+  } else if (isInternational && level !== "none" && field !== "transport" && field !== "hospitality" && field !== "construction") {
+    id = "atlas";
+    reason = "Recommande pour une candidature internationale avec competences linguistiques et mobilite a valoriser.";
   } else if (level === "10+" || isExecutiveRole) {
     id = "direction";
     reason = "Recommande pour une posture senior, plus premium et plus strategique.";
+  } else if (isCreativeRole && (level === "3-10" || level === "10+")) {
+    id = "minimal";
+    reason = "Recommande pour un profil creatif senior qui valorise le gout et la lisibilite plutot que la decoration.";
   } else if (isCreativeRole || isSalesOrMarketing) {
     id = "signature";
     reason = "Recommande pour mieux differencier un profil creatif, produit ou marketing.";
+  } else if (field === "tech" && level === "1-3") {
+    id = "impact";
+    reason = "Recommande pour un profil tech debut de carriere qui veut montrer ses competences avec impact visuel.";
   } else if (field === "tech" && (level === "3-10" || /architect|senior|engineer/i.test(title))) {
     id = "trajectoire";
     reason = "Recommande pour montrer clairement la progression, les promotions et les projets.";
@@ -287,6 +398,13 @@ export function getRecommendedWebsiteTemplate(input: {
         meta: WEBSITE_TEMPLATE_META["executive-profile"],
       };
     }
+    if (experienceLevel === "3-10" && track !== "transport" && track !== "healthcare" && track !== "construction" && track !== "hospitality") {
+      return {
+        id: "dossier" as WebsiteTemplateId,
+        reason: "Recommande pour un profil experimente qui veut presenter son parcours de facon structuree et credible.",
+        meta: WEBSITE_TEMPLATE_META["dossier"],
+      };
+    }
     return {
       id: "profile-clean" as WebsiteTemplateId,
       reason: "Recommande pour un profil professionnel simple, clair et partageable.",
@@ -294,7 +412,10 @@ export function getRecommendedWebsiteTemplate(input: {
     };
   }
 
+  const isCreativeTechSenior = (track === "tech" || /designer|frontend|brand|creative/i.test(title)) && (experienceLevel === "3-10" || experienceLevel === "10+");
+
   const portfolioId: WebsiteTemplateId =
+    isCreativeTechSenior ? "spotlight" :
     track === "tech" || /designer|frontend|brand|creative|product/i.test(title) || experienceLevel === "3-10" || experienceLevel === "10+"
       ? "showcase"
       : "casefile";

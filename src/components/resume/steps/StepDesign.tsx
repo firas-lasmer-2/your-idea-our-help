@@ -119,7 +119,7 @@ const StepDesign = ({ data, updateData, template, setTemplate, customization, up
         </TabsList>
 
         <TabsContent value="template" className="mt-4">
-          <StepTemplate data={data} template={template} setTemplate={setTemplate} />
+          <StepTemplate data={data} template={template} setTemplate={setTemplate} customization={customization} />
         </TabsContent>
 
         <TabsContent value="style" className="mt-4">

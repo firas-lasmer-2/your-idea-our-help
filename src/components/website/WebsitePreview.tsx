@@ -52,8 +52,11 @@ const WebsitePreview = ({ sections, globalSettings, title, template, websiteId, 
 
 function getPalette(template: string, color: string) {
   if (template === "showcase") return { page: "#0f172a", surface: "#111c33", alt: "#16223d", text: "#f8fafc", muted: "#b8c3d9", border: "#233252", footer: "#0b1222", card: "rgba(255,255,255,0.04)", accentSurface: `${color}14` };
+  if (template === "spotlight") return { page: "#0a0a0f", surface: "#0d0d14", alt: "#11111c", text: "#f1f5f9", muted: "#94a3b8", border: "#1e2030", footer: "#060609", card: "rgba(255,255,255,0.03)", accentSurface: `${color}18` };
   if (template === "executive-profile") return { page: "#f8f4ef", surface: "#fffdfa", alt: "#f4eee6", text: "#1f2937", muted: "#6b7280", border: "#e7ddd0", footer: "#efe7dc", card: "#fffaf4", accentSurface: `${color}10` };
+  if (template === "dossier") return { page: "#f0f4f8", surface: "#ffffff", alt: "#e8edf3", text: "#0f172a", muted: "#475569", border: "#cbd5e1", footer: "#dde4ec", card: "#ffffff", accentSurface: `${color}08` };
   if (template === "route-pro") return { page: "#fffaf2", surface: "#ffffff", alt: "#fff3df", text: "#1f2937", muted: "#6b7280", border: "#f3dfbf", footer: "#fff1d6", card: "#ffffff", accentSurface: `${color}12` };
+  if (template === "signal") return { page: "#ffffff", surface: "#ffffff", alt: "#f8fafc", text: "#0f172a", muted: "#64748b", border: "#e2e8f0", footer: "#f1f5f9", card: "#ffffff", accentSurface: `${color}08` };
   return { page: "#f8fafc", surface: "#ffffff", alt: "#f1f5f9", text: "#0f172a", muted: "#64748b", border: "#e2e8f0", footer: "#eef2f7", card: "#ffffff", accentSurface: `${color}10` };
 }
 
@@ -173,6 +176,7 @@ function SectionRenderer({ section, allSections, title, template, color, palette
           {type === "experience" ? <ExperienceCards items={content.items || []} palette={palette} color={color} /> : null}
           {type === "education" ? <SimpleCards items={content.items || []} palette={palette} color={color} fields={["degree", "institution", "period"]} /> : null}
           {type === "stats" ? <StatCards items={content.items || []} palette={palette} color={color} /> : null}
+          {type === "testimonials" ? <TestimonialCards items={content.items || []} palette={palette} color={color} /> : null}
         </div>
       </div>
     </section>
@@ -191,6 +195,15 @@ function renderHero(content: Record<string, any>, title: string, template: strin
   }
   if (template === "casefile") {
     return <section id="hero" className="px-6 py-24 md:py-28" style={{ background: palette.surface }}><div className="mx-auto max-w-5xl"><p className="text-xs font-black uppercase tracking-[0.24em]" style={{ color }}>Case studies</p><div className="mt-6 grid gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-end"><div><h1 className="text-4xl font-black leading-tight md:text-6xl" style={{ color: palette.text }}>{content.title || title}</h1>{content.subtitle ? <p className="mt-6 max-w-2xl text-lg leading-8" style={{ color: palette.muted }}>{content.subtitle}</p> : null}{content.cta ? <a href={content.ctaLink || "#projects"} className="mt-10 inline-flex rounded-full border px-7 py-3 text-sm font-bold" style={{ borderColor: `${color}45`, color }}>{content.cta}</a> : null}</div><div className="rounded-[28px] border p-6 shadow-sm" style={{ borderColor: palette.border, background: palette.card }}><p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: palette.muted }}>Focus</p><p className="mt-4 text-base leading-8" style={{ color: palette.text }}>Une presentation claire des projets, du contexte et des resultats.</p></div></div></div></section>;
+  }
+  if (template === "spotlight") {
+    return <section id="hero" className="relative overflow-hidden px-6 py-32 md:py-40" style={{ background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${color}22, transparent 70%), ${palette.page}` }}><div className="mx-auto max-w-5xl"><div className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em]" style={{ borderColor: `${color}40`, color, background: `${color}10` }}>Portfolio</div><h1 className="mt-8 text-5xl font-black leading-none md:text-8xl" style={{ color: palette.text }}>{content.title || title}</h1>{content.subtitle ? <p className="mt-8 max-w-3xl text-xl leading-9" style={{ color: palette.muted }}>{content.subtitle}</p> : null}<div className="mt-12 flex flex-wrap gap-4">{content.cta ? <a href={content.ctaLink || "#projects"} className="inline-flex rounded-full px-8 py-4 text-sm font-black text-white" style={{ background: color }}>{content.cta}</a> : null}<a href="#contact" className="inline-flex rounded-full border px-8 py-4 text-sm font-semibold" style={{ borderColor: `${color}40`, color: palette.muted }}>Me contacter</a></div></div></section>;
+  }
+  if (template === "dossier") {
+    return <section id="hero" className="px-6 py-20 md:py-24" style={{ background: palette.surface, borderBottom: `1px solid ${palette.border}` }}><div className="mx-auto max-w-5xl"><div className="grid gap-8 md:grid-cols-[1.3fr_0.7fr] md:items-center"><div><p className="text-xs font-extrabold uppercase tracking-[0.24em]" style={{ color }}>Dossier Professionnel</p><h1 className="mt-5 text-4xl font-black leading-tight md:text-5xl" style={{ color: palette.text }}>{content.title || title}</h1>{content.subtitle ? <p className="mt-5 max-w-2xl text-lg leading-8" style={{ color: palette.muted }}>{content.subtitle}</p> : null}{content.cta ? <a href={content.ctaLink || "#contact"} className="mt-8 inline-flex rounded-full px-7 py-3 text-sm font-black text-white" style={{ background: color }}>{content.cta}</a> : null}</div><div className="rounded-2xl border p-6" style={{ borderColor: palette.border, background: palette.alt }}><p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: palette.muted }}>Disponibilité</p><p className="mt-3 text-2xl font-black" style={{ color }}>Ouvert aux opportunités</p><p className="mt-2 text-sm" style={{ color: palette.muted }}>Profil complet avec parcours, compétences et formations</p></div></div></div></section>;
+  }
+  if (template === "signal") {
+    return <section id="hero" className="flex min-h-[80vh] flex-col items-center justify-center px-6 py-20 text-center" style={{ background: palette.surface }}><div className="mx-auto max-w-sm"><div className="mx-auto h-28 w-28 rounded-full" style={{ background: `${color}18`, border: `3px solid ${color}30` }} /><h1 className="mt-8 text-3xl font-black" style={{ color: palette.text }}>{content.title || title}</h1>{content.subtitle ? <p className="mt-4 text-base leading-7" style={{ color: palette.muted }}>{content.subtitle}</p> : null}{content.cta ? <a href={content.ctaLink || "#contact"} className="mt-8 inline-flex rounded-full px-8 py-3.5 text-sm font-black text-white" style={{ background: color }}>{content.cta}</a> : null}</div></section>;
   }
   return <section id="hero" className="px-6 py-24 md:py-28" style={{ background: palette.surface }}><div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[1.2fr_0.8fr] md:items-center"><div><p className="text-xs font-extrabold uppercase tracking-[0.24em]" style={{ color }}>Profil Pro</p><h1 className="mt-5 text-4xl font-black leading-tight md:text-6xl" style={{ color: palette.text }}>{content.title || title}</h1>{content.subtitle ? <p className="mt-6 max-w-2xl text-lg leading-8" style={{ color: palette.muted }}>{content.subtitle}</p> : null}{content.cta ? <a href={content.ctaLink || "#contact"} className="mt-10 inline-flex rounded-full px-7 py-3 text-sm font-black text-white" style={{ background: color }}>{content.cta}</a> : null}</div><div className="rounded-[28px] border p-6 shadow-sm" style={{ borderColor: palette.border, background: palette.card }}><p className="text-xs font-extrabold uppercase tracking-[0.24em]" style={{ color: palette.muted }}>Pourquoi ce format</p><p className="mt-4 text-base leading-8" style={{ color: palette.text }}>Une page claire, partageable et facile a lire sur mobile.</p></div></div></section>;
 }
@@ -217,6 +230,26 @@ function ExperienceCards({ items, palette, color }: { items: any[]; palette: Ret
 
 function StatCards({ items, palette, color }: { items: any[]; palette: ReturnType<typeof getPalette>; color: string }) {
   return <div className="grid gap-4 md:grid-cols-3">{items.map((item, index) => <div key={index} className="rounded-[28px] border p-6 text-center shadow-sm" style={{ borderColor: palette.border, background: palette.card }}><p className="text-4xl font-black" style={{ color }}>{item.number}</p><p className="mt-3 text-sm font-medium" style={{ color: palette.muted }}>{item.label}</p></div>)}</div>;
+}
+
+function TestimonialCards({ items, palette, color }: { items: any[]; palette: ReturnType<typeof getPalette>; color: string }) {
+  return (
+    <div className="grid gap-5 md:grid-cols-2">
+      {items.map((item, index) => (
+        <div key={index} className="relative rounded-[24px] border p-6 shadow-sm" style={{ borderColor: palette.border, background: palette.card }}>
+          <p className="text-3xl font-black leading-none" style={{ color: `${color}40` }}>"</p>
+          <p className="mt-2 text-base leading-8 italic" style={{ color: palette.muted }}>{item.text}</p>
+          <div className="mt-5 flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: color }}>{(item.name || "?")[0]}</div>
+            <div>
+              <p className="text-sm font-extrabold" style={{ color: palette.text }}>{item.name}</p>
+              {item.role ? <p className="text-xs" style={{ color: palette.muted }}>{item.role}</p> : null}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function ContactSection({ title, content, color, palette, websiteId, isPublic }: { title: string; content: Record<string, any>; color: string; palette: ReturnType<typeof getPalette>; websiteId?: string; isPublic?: boolean }) {

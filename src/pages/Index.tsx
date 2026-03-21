@@ -88,24 +88,12 @@ const Index = () => {
       {/* Templates */}
       <section id="templates" className="border-t bg-secondary/30 py-20 md:py-28">
         <div className="container">
-          <div className="mx-auto max-w-2xl text-center">
+          <motion.div className="mx-auto max-w-2xl text-center" initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <h2 className="font-display text-3xl font-bold text-foreground md:text-4xl">{t("templates.sectionTitle")}</h2>
             <p className="mt-4 text-muted-foreground">{t("templates.sectionSubtitle")}</p>
-          </div>
-          <div className="mx-auto mt-16 grid max-w-4xl gap-8 md:grid-cols-3">
-            {[
-              { template: "essentiel" as const, name: "Essentiel", tag: "CV", description: t("templates.essentielDesc") },
-              { template: "horizon" as const, name: "Horizon", tag: "CV", description: t("templates.horizonDesc") },
-              { template: "signature" as const, name: "Signature", tag: "CV", description: t("templates.signatureDesc") },
-            ].map((tmpl, i) => (
-              <motion.div key={tmpl.template} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-                <Link to="/signup" className="group block">
-                  <div className="transition-transform group-hover:-translate-y-2 group-hover:shadow-xl rounded-lg">
-                    <TemplateMiniPreview template={tmpl.template} name={tmpl.name} tag={tmpl.tag} description={tmpl.description} />
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+          </motion.div>
+          <div className="mt-12">
+            <TemplateMiniPreview />
           </div>
         </div>
       </section>

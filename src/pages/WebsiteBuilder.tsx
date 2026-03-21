@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useToast } from "@/hooks/use-toast";
 import { getWebsitePublishReadiness } from "@/lib/website-readiness";
 import type { WebsiteCandidateProfile, WebsiteGlobalSettings, WebsiteSection, WebsiteMode } from "@/types/website";
+import { getTemplateById, buildSectionsFromTemplate } from "@/data/website-templates";
 
 const auth = supabase.auth as any;
 
@@ -68,6 +69,28 @@ const WebsiteBuilder = () => {
     data,
     globalSettings,
   });
+
+  const handleChangeTemplate = useCallback((newTemplateId: string) => {
+    const newTemplate = getTemplateById(newTemplateId);
+    if (!newTemplate) return;
+
+    const newDefaultSections = buildSectionsFromTemplate(newTemplate);
+    const currentSections: WebsiteSection[] = data.sections;
+    const migratedSections = newDefaultSections.map((newSec) => {
+      const existing = currentSections.find((s) => s.type === newSec.type);
+      return existing
+        ? { ...newSec, id: existing.id, content: existing.content, enabled: existing.enabled }
+        : newSec;
+    });
+
+    setTemplate(newTemplateId);
+    setFullData({ sections: migratedSections, profile: data.profile });
+    updateGlobalSettings({
+      primaryColor: newTemplate.globalSettings.primaryColor,
+      fontPair: newTemplate.globalSettings.fontPair,
+      layout: newTemplate.globalSettings.layout,
+    });
+  }, [data.sections, data.profile, setTemplate, setFullData, updateGlobalSettings]);
 
   if (authLoading || (websiteId && loading)) {
     return (
@@ -347,6 +370,7 @@ const WebsiteBuilder = () => {
             canRedo={canRedo}
             onUndo={undo}
             onRedo={redo}
+            onChangeTemplate={handleChangeTemplate}
           />
           <WebsiteOnboarding />
         </main>

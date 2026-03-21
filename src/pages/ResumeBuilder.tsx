@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, ArrowLeft, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { FileText, ArrowLeft, ArrowRight, Loader2, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getResumeFixture } from "@/lib/template-preview-fixtures";
 import { useResume } from "@/hooks/use-resume";
 import { getCountryStandard, getJobCategory, isSimplifiedMode, getVisibleSteps, type TargetCountry, type JobField, type ExperienceLevel } from "@/lib/country-standards";
 import StepProgress from "@/components/resume/StepProgress";
@@ -37,7 +39,7 @@ const ResumeBuilder = () => {
   const [authLoading, setAuthLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(!resumeId);
   const [prefilling, setPrefilling] = useState(false);
-  const [showLivePreview, setShowLivePreview] = useState(true);
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
   const [showSectionSuggestions, setShowSectionSuggestions] = useState(false);
   const completionTrackedRef = useRef(false);
   const importHandledRef = useRef(false);
@@ -258,6 +260,12 @@ const ResumeBuilder = () => {
 
   const countryTip = data.targetCountry ? getCountryStandard(data.targetCountry as TargetCountry) : null;
 
+  // Use fixture data as ghosted placeholder when resume is empty
+  const hasContent = !!(data.personalInfo.firstName || data.personalInfo.lastName || data.summary || data.experience.length > 0);
+  const placeholderFixture = !hasContent ? getResumeFixture("horizon") : null;
+  const previewData = hasContent ? data : (placeholderFixture?.data ?? data);
+  const previewCustomization = hasContent ? customization : (placeholderFixture?.customization ?? customization);
+
   return (
     <div className="min-h-screen bg-background">
       <OnboardingTour />
@@ -328,7 +336,7 @@ const ResumeBuilder = () => {
       )}
 
       {/* Content */}
-      <main className={`container py-8 ${!isMobile && showLivePreview && currentStep !== 9 ? "max-w-7xl" : "max-w-3xl"}`}>
+      <main className={`container py-8 ${!isMobile && currentStep !== 9 ? "max-w-7xl" : "max-w-3xl"}`}>
         {/* Section Suggestions (after wizard) - compact banner */}
         {showSectionSuggestions && (
           <div className="mb-6">
@@ -344,7 +352,7 @@ const ResumeBuilder = () => {
         )}
 
         {/* Split-screen layout for desktop */}
-        <div className={`${!isMobile && showLivePreview && currentStep !== 9 ? "grid grid-cols-2 gap-6" : ""}`}>
+        <div className={`${!isMobile && currentStep !== 9 ? "grid grid-cols-2 gap-6" : ""}`}>
           <div>
             {renderStep()}
 
@@ -359,38 +367,28 @@ const ResumeBuilder = () => {
                 >
                   <ArrowLeft className="h-4 w-4" /> {t("resume.previous")}
                 </Button>
-                <div className="flex items-center gap-2">
-                  {!isMobile && currentStep !== 9 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-1.5 text-xs"
-                      onClick={() => setShowLivePreview(!showLivePreview)}
-                    >
-                      {showLivePreview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      {showLivePreview ? t("resume.hidePreview") : t("resume.livePreview")}
-                    </Button>
-                  )}
-                  <Button onClick={() => nextStep && goToStep(nextStep)} disabled={!nextStep || currentStepBlocked} className="gap-2">
-                    {t("resume.next")} <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button onClick={() => nextStep && goToStep(nextStep)} disabled={!nextStep || currentStepBlocked} className="gap-2">
+                  {t("resume.next")} <ArrowRight className="h-4 w-4" />
+                </Button>
               </div>
             )}
           </div>
 
-          {/* Live Preview Panel - improved scaling */}
-          {!isMobile && showLivePreview && currentStep !== 9 && (
+          {/* Live Preview Panel — always visible on desktop */}
+          {!isMobile && currentStep !== 9 && (
             <div className="sticky top-32 h-fit">
-              <div className="rounded-xl border bg-card overflow-hidden">
+              <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
                 <div className="border-b px-4 py-2 flex items-center gap-2">
                   <Eye className="h-4 w-4 text-muted-foreground" />
                   <span className="text-xs font-medium text-muted-foreground">{t("resume.livePreview")}</span>
+                  {!hasContent && (
+                    <span className="ml-auto text-[10px] text-muted-foreground italic">{t("resume.previewPlaceholder", "Aperçu exemple")}</span>
+                  )}
                 </div>
                 <div className="overflow-hidden" style={{ aspectRatio: "210/297", maxHeight: "calc(100vh - 220px)" }}>
-                  <div className="origin-top-left" style={{ transform: "scale(0.48)", width: "208.33%", transformOrigin: "top left" }}>
+                  <div style={{ transform: "scale(0.48)", width: "208.33%", transformOrigin: "top left", opacity: hasContent ? 1 : 0.45 }}>
                     <div className="bg-white p-8">
-                      <ResumePreview data={data} customization={customization} template={template} />
+                      <ResumePreview data={previewData} customization={previewCustomization} template={template} />
                     </div>
                   </div>
                 </div>
@@ -399,6 +397,40 @@ const ResumeBuilder = () => {
           )}
         </div>
       </main>
+
+      {/* Mobile floating preview button */}
+      {isMobile && currentStep !== 9 && (
+        <Button
+          onClick={() => setMobilePreviewOpen(true)}
+          className="fixed bottom-20 right-4 z-40 h-12 w-12 rounded-full shadow-lg p-0"
+        >
+          <Eye className="h-5 w-5" />
+        </Button>
+      )}
+
+      {/* Mobile preview drawer */}
+      <Drawer open={mobilePreviewOpen} onOpenChange={setMobilePreviewOpen}>
+        <DrawerContent className="h-[88vh]">
+          <DrawerHeader className="border-b pb-3">
+            <DrawerTitle className="flex items-center gap-2 text-sm">
+              <Eye className="h-4 w-4 text-muted-foreground" />
+              {t("resume.livePreview")}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="flex-1 overflow-auto p-4 bg-muted/30">
+            {!hasContent && (
+              <p className="mb-3 text-center text-xs text-muted-foreground italic">{t("resume.previewPlaceholder", "Aperçu exemple")}</p>
+            )}
+            <div className="mx-auto overflow-hidden rounded-lg border bg-white shadow" style={{ maxWidth: "360px" }}>
+              <div style={{ transform: "scale(0.38)", width: "263%", transformOrigin: "top left", opacity: hasContent ? 1 : 0.45 }}>
+                <div className="p-8">
+                  <ResumePreview data={previewData} customization={previewCustomization} template={template} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {/* AI Chat Assistant */}
       <AiChatAssistant data={data} currentStep={currentStep} template={template} />
